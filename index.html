@@ -3,1134 +3,366 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>90 Day Lock-In | PCB + IP</title>
-    
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
-    
-    <script>
-        MathJax = { tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] } };
-    </script>
-    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
-    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-
+    <title>Ragdoll Life Simulation</title>
     <style>
-        :root {
-            --bg-base: #050a10;
-            --bg-card: #0b131e;
-            --text-main: #e0f2fe;
-            --text-muted: #7dd3fc;
-            --primary: #00e5ff; 
-            --accent: #f97316; 
-            --danger: #ef4444;
-            --success: #10b981;
-            --border: #00e5ff55;
-            --glow: 0 0 10px rgba(0, 229, 255, 0.4);
-            --glow-accent: 0 0 15px rgba(249, 115, 22, 0.6);
-            --glow-danger: 0 0 15px rgba(239, 68, 68, 0.6);
-            --glow-success: 0 0 15px rgba(16, 185, 129, 0.6);
+        body {
+            margin: 0; padding: 0;
+            background-color: #121212;
+            color: #FFFFFF; font-family: Arial, sans-serif;
+            display: flex; justify-content: center; align-items: center;
+            height: 100vh; user-select: none;
         }
-
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: "Segoe UI", Roboto, Helvetica, sans-serif; }
-        body { background-color: var(--bg-base); color: var(--text-main); line-height: 1.6; padding-bottom: 100px; overflow-x: hidden; }
-
-        h1, h2, h3, h4 { text-transform: uppercase; letter-spacing: 1.5px; }
-        .neon-text { color: var(--primary); text-shadow: var(--glow); }
-
-        header { 
-            background: linear-gradient(180deg, #020617 0%, var(--bg-card) 100%);
-            padding: 20px; text-align: center; border-bottom: 2px solid var(--primary); 
-            box-shadow: var(--glow); position: sticky; top: 0; z-index: 100;
+        #game-container {
+            width: 100%; max-width: 400px; height: 100vh; max-height: 800px;
+            background-color: #000000; position: relative;
+            overflow: hidden; border: 1px solid #333;
         }
-        .header-top { display: flex; justify-content: space-between; align-items: center; max-width: 1000px; margin: 0 auto; }
-        .digital-clock { font-size: 1.8rem; font-family: monospace; font-weight: bold; color: var(--primary); text-shadow: var(--glow); }
-        .stats-hud { display: flex; gap: 15px; font-size: 0.85rem; font-weight: bold; }
-        .hud-item { background: rgba(0, 229, 255, 0.1); padding: 5px 12px; border-radius: 20px; border: 1px solid var(--border); display: flex; align-items: center; gap: 5px;}
-        
-        main { max-width: 1000px; margin: 20px auto; padding: 0 15px; }
-        .section { display: none; animation: fadeIn 0.4s ease-in-out; }
-        .section.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
-
-        .card { 
-            background: var(--bg-card); border-radius: 12px; padding: 20px; margin-bottom: 20px; 
-            box-shadow: 0 8px 32px rgba(0,0,0,0.5); border: 1px solid var(--border); position: relative; overflow: hidden; width: 100%;
+        #bg-layer {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background-image: url('my_room.jpg'); 
+            background-size: cover; background-position: center; z-index: 1;
         }
-        .card::before { content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: var(--primary); box-shadow: var(--glow); }
-        .card h2 { border-bottom: 1px solid var(--border); padding-bottom: 10px; margin-bottom: 20px; font-size: 1.1rem; color: var(--primary); display: flex; align-items: center; gap: 8px;}
-
-        /* Guardian Roadmap Panel */
-        .dragon-panel {
-            display: flex; flex-direction: column; gap: 15px; align-items: center; text-align: center;
-            background: linear-gradient(45deg, #000000, #0a1118); border: 2px solid var(--accent);
-            border-radius: 12px; padding: 15px; margin-bottom: 25px; position: relative; box-shadow: var(--glow-accent); width: 100%; overflow: hidden;
+        #sprite-layer {
+            position: absolute; top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 250px; height: 250px; z-index: 2;
         }
-        .dragon-image { width: 100%; max-height: 220px; object-fit: contain; border-radius: 8px; border: 1px solid var(--accent); background: #000; }
-        .dragon-dialogue { background: rgba(0, 229, 255, 0.1); border: 1px solid var(--primary); padding: 15px; border-radius: 8px; color: var(--text-main); font-size: 0.95rem; box-shadow: var(--glow); width: 100%; }
-
-        /* Focus Rules & Reflection */
-        .reflection-box textarea { width: 100%; background: rgba(0,0,0,0.5); border: 1px solid var(--border); color: var(--text-main); padding: 15px; border-radius: 8px; min-height: 80px; margin-bottom: 10px; font-family: inherit;}
-        .btn-action { background: var(--bg-card); border: 1px solid var(--primary); color: var(--primary); padding: 8px 16px; border-radius: 5px; cursor: pointer; font-weight: bold; transition: all 0.2s; text-transform: uppercase; display: inline-flex; align-items: center; justify-content: center; gap: 5px;}
-        .btn-action:hover { background: rgba(0, 229, 255, 0.2); box-shadow: var(--glow); color: #fff; }
-
-        #toast {
-            visibility: hidden; min-width: 250px; background-color: var(--bg-card); border: 1px solid var(--primary);
-            color: var(--primary); text-align: center; border-radius: 8px; padding: 15px; position: fixed; z-index: 2000;
-            left: 50%; bottom: 30px; transform: translateX(-50%); box-shadow: var(--glow); font-weight: bold;
-            opacity: 0; transition: opacity 0.3s, bottom 0.3s;
+        #cat-sprite {
+            width: 100%; height: 100%; object-fit: contain;
+            image-rendering: pixelated;
         }
-        #toast.show { visibility: visible; opacity: 1; bottom: 50px; }
-
-        /* Monthly Interactive Calendar */
-        .cal-controls { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; color: var(--primary); }
-        .cal-controls button { background: transparent; border: 1px solid var(--primary); color: var(--primary); padding: 5px 15px; border-radius: 5px; cursor: pointer; transition: 0.2s; display: flex; align-items: center;}
-        .cal-controls button:hover { background: rgba(0,229,255,0.2); box-shadow: var(--glow); color: #fff; }
-        
-        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; margin-top: 5px; width: 100%;}
-        .cal-header { font-weight: bold; color: var(--text-muted); text-align: center; font-size: 0.75rem; padding-bottom: 8px; }
-        .cal-day { background: rgba(255,255,255,0.02); border: 1px solid var(--border); padding: 12px 2px; text-align: center; border-radius: 5px; font-size: 0.85rem; position: relative; transition: all 0.2s; }
-        .cal-day.plan-active { cursor: pointer; border-color: rgba(0,229,255,0.4); }
-        .cal-day.plan-active:hover { background: rgba(0, 229, 255, 0.1); border-color: var(--primary); transform: scale(1.05); z-index: 2;}
-        .cal-day.active { background: rgba(0, 229, 255, 0.3); border-color: var(--primary); box-shadow: var(--glow); font-weight: bold; color: #fff;}
-        .cal-day.past { color: var(--text-muted); border-color: #333; }
-        .plan-day-badge { position: absolute; top: 2px; right: 2px; font-size: 0.55rem; color: var(--accent); font-weight: bold;}
-
-        /* Modal */
-        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; backdrop-filter: blur(5px); }
-        .modal-content { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: var(--bg-card); border: 1px solid var(--primary); width: 90%; max-width: 450px; padding: 25px; border-radius: 12px; box-shadow: var(--glow); text-align: center; max-height: 90vh; overflow-y: auto;}
-        .modal-close { position: absolute; top: 10px; right: 15px; font-size: 1.5rem; color: var(--danger); cursor: pointer; }
-        .modal-task-list { text-align: left; margin-top: 15px; padding: 10px; background: rgba(0,0,0,0.5); border-radius: 8px; border: 1px solid #1e293b;}
-        .modal-task-list p { margin-bottom: 10px; font-size: 0.9rem; border-bottom: 1px solid #1e293b; padding-bottom: 5px;}
-
-        /* Analytics & Progress Bars */
-        .progress-wrapper { width: 100%; background: #000; border-radius: 10px; height: 14px; margin: 10px 0; border: 1px solid var(--border); overflow: hidden;}
-        .progress-fill { height: 100%; background: var(--primary); width: 0%; transition: width 0.5s ease; box-shadow: var(--glow); }
-        .progress-text { font-size: 0.8rem; font-weight: bold; color: var(--text-main); margin-bottom: 2px;}
-        
-        .heatmap-container { margin-top: 20px; overflow-x: auto; padding-bottom: 10px; width: 100%; }
-        .heatmap-grid { display: flex; flex-wrap: wrap; gap: 4px; min-width: 250px;}
-        .heat-cell { width: 14px; height: 14px; border-radius: 2px; background: #161b22; outline: 1px solid rgba(255,255,255,0.02); transition: transform 0.2s; }
-        .heat-cell:hover { transform: scale(1.5); z-index: 2; border-color: var(--primary); outline: 1px solid var(--primary); }
-        .heat-lvl-1 { background: #0e4429; }
-        .heat-lvl-2 { background: #006d32; }
-        .heat-lvl-3 { background: #26a641; }
-        .heat-lvl-4 { background: #39d353; box-shadow: 0 0 5px rgba(57, 211, 83, 0.4); }
-
-        .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
-        .data-box { background: rgba(0,0,0,0.4); padding: 20px; border-radius: 8px; border: 1px solid #1e293b; }
-        .data-box h3 { font-size: 1rem; margin-bottom: 15px; color: var(--primary); border-bottom: 1px dashed var(--border); padding-bottom: 5px;}
-
-        /* Task Items */
-        .task-item { display: flex; align-items: center; padding: 12px; border: 1px solid #1e293b; border-radius: 8px; margin-bottom: 12px; background: rgba(0,0,0,0.3); transition: all 0.2s; cursor: pointer;}
-        .task-item:hover { border-color: var(--primary); background: rgba(0, 229, 255, 0.05);}
-        .task-item input[type="checkbox"] { margin-right: 15px; width: 22px; height: 22px; accent-color: var(--primary); flex-shrink: 0; cursor: pointer;}
-        .tag { font-size: 0.75rem; padding: 4px 8px; border-radius: 4px; margin-right: 10px; font-weight: bold; flex-shrink: 0;}
-        .tag-bio { background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid #34d399;}
-        .tag-chem { background: rgba(56, 189, 248, 0.2); color: #7dd3fc; border: 1px solid #7dd3fc;}
-        .tag-phy { background: rgba(244, 63, 94, 0.2); color: #fb7185; border: 1px solid #fb7185;}
-        .tag-ip { background: rgba(251, 146, 60, 0.2); color: #fdba74; border: 1px solid #fdba74;}
-        .tag-num { background: rgba(167, 139, 250, 0.2); color: #a78bfa; border: 1px solid #a78bfa;}
-        .tag-diag { background: rgba(252, 211, 77, 0.2); color: #fcd34d; border: 1px solid #fcd34d;}
-
-        /* Databases & Diagrams */
-        .db-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-top: 15px;}
-        .db-box { background: rgba(0,0,0,0.4); border: 1px solid #1e293b; border-radius: 8px; height: 400px; overflow-y: auto; overflow-x: hidden; position: relative;}
-        .db-box h3 { 
-            color: var(--primary); border-bottom: 1px solid var(--border); 
-            padding: 15px; margin: 0; position: sticky; top: 0; 
-            background: #0b131e; z-index: 10; font-size: 1.1rem;
+        #hud-top {
+            position: absolute; top: 0; left: 0; width: 100%;
+            background: rgba(0, 0, 0, 0.7); padding: 15px; box-sizing: border-box;
+            display: flex; justify-content: space-between; z-index: 3; font-weight: bold;
         }
-        .db-category { color: var(--accent); font-size: 0.95rem; padding: 15px 15px 5px 15px; border-bottom: 1px dashed #1e293b; display: inline-block; font-weight: bold;}
-        .db-list { list-style: none; font-size: 0.9rem; padding: 0 15px; margin: 0 0 15px 0; }
-        .db-list li { padding: 12px 0; border-bottom: 1px dashed #1e293b; line-height: 1.6; color: #e2e8f0; }
-        .db-list li:last-child { border-bottom: none; }
-        
-        .diagram-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; overflow-y: auto; height: 350px; padding: 15px;}
-        .diagram-item { background: #000; border: 1px solid var(--border); padding: 10px; text-align: center; border-radius: 6px; font-size: 0.75rem; color: var(--text-muted); display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 80px;}
-        .diagram-item span.icon { font-size: 1.5rem; color: var(--primary); margin-bottom: 5px;}
-
-        /* Flashcards (Spaced Repetition) */
-        .flashcard-area { display: flex; flex-direction: column; align-items: center; gap: 20px; margin-top: 20px; }
-        .fc-container { width: 100%; max-width: 450px; height: 280px; perspective: 1000px; cursor: pointer; }
-        .fc-inner { width: 100%; height: 100%; transition: transform 0.6s; transform-style: preserve-3d; position: relative; }
-        .fc-inner.is-flipped { transform: rotateY(180deg); }
-        .fc-face { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; text-align: center; border: 1px solid var(--border); box-shadow: 0 4px 15px rgba(0,0,0,0.5);}
-        .fc-front { background: rgba(0, 229, 255, 0.05); color: var(--primary); font-size: 1.15rem; }
-        .fc-back { background: rgba(249, 115, 22, 0.05); color: #fff; transform: rotateY(180deg); border-color: var(--accent); font-size: 1.05rem; line-height: 1.6;}
-        .fc-category { position: absolute; top: 15px; left: 15px; font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; font-weight: bold;}
-        .fc-controls { display: flex; gap: 15px; width: 100%; max-width: 450px;}
-        .fc-btn { flex: 1; padding: 15px; border-radius: 8px; border: 1px solid; font-weight: bold; cursor: pointer; text-transform: uppercase; transition: all 0.2s; background: var(--bg-card);}
-        .btn-forgot { border-color: var(--danger); color: var(--danger); }
-        .btn-forgot:hover { background: rgba(239, 68, 68, 0.2); box-shadow: var(--glow-danger); color: #fff;}
-        .btn-remembered { border-color: var(--success); color: var(--success); }
-        .btn-remembered:hover { background: rgba(16, 185, 129, 0.2); box-shadow: var(--glow-success); color: #fff;}
-
-        /* Mock Test Simulator (Multiple Choice) */
-        .test-header { display: flex; justify-content: space-between; align-items: center; padding: 15px; background: #000; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 20px;}
-        .timer-display { font-family: monospace; font-size: 1.5rem; color: var(--accent); text-shadow: var(--glow-accent); font-weight: bold;}
-        .q-card { background: rgba(0,0,0,0.3); border: 1px solid #1e293b; padding: 25px; border-radius: 8px; margin-bottom: 20px;}
-        .q-title { font-weight: bold; color: var(--primary); margin-bottom: 15px; font-size: 1.15rem; line-height: 1.5;}
-        .q-meta { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 15px; text-transform: uppercase; font-weight: bold;}
-        
-        /* Multiple Choice Options */
-        .q-option-label { display: block; margin: 12px 0; cursor: pointer; background: rgba(0,0,0,0.4); padding: 12px 15px; border-radius: 6px; border: 1px solid var(--border); transition: all 0.2s; font-size: 1rem;}
-        .q-option-label:hover { background: rgba(0, 229, 255, 0.1); border-color: var(--primary); }
-        .q-option-label input[type="radio"] { accent-color: var(--primary); transform: scale(1.3); margin-right: 12px; cursor: pointer; }
-        
-        .q-feedback { margin-top: 15px; padding: 15px; border-radius: 6px; font-weight: bold; display: none; font-size: 1rem;}
-        .feed-correct { background: rgba(16, 185, 129, 0.1); border: 1px solid var(--success); color: var(--success); }
-        .feed-wrong { background: rgba(239, 68, 68, 0.1); border: 1px solid var(--danger); color: var(--danger); }
-
-        .test-report { background: rgba(16, 185, 129, 0.1); border: 1px solid var(--success); padding: 25px; border-radius: 8px; margin-top: 20px; display: none;}
-        .test-report h3 { color: var(--success); margin-bottom: 15px;}
-
-        /* Floating Menu */
-        .fab-container { position: fixed; bottom: 30px; right: 30px; z-index: 500; display: flex; flex-direction: column; align-items: flex-end; }
-        .fab-menu { display: none; flex-direction: column; gap: 10px; margin-bottom: 15px; }
-        .fab-menu.show { display: flex; animation: fadeIn 0.2s ease-in-out; }
-        .fab-btn { background: var(--bg-card); border: 1px solid var(--primary); color: var(--text-main); padding: 12px 20px; border-radius: 25px; cursor: pointer; font-weight: 600; display: flex; align-items: center; gap: 8px; }
-        .proton { width: 60px; height: 60px; background: transparent; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; border: none; }
-        .atom-core { fill: var(--primary); filter: drop-shadow(0 0 8px var(--primary)); }
-        .atom-ring { stroke: var(--primary); stroke-width: 2; fill: none; opacity: 0.7; }
-        .ring1 { transform-origin: center; transform: rotate(0deg) rotateX(60deg); }
-        .ring2 { transform-origin: center; transform: rotate(120deg) rotateX(60deg); }
-        .ring3 { transform-origin: center; transform: rotate(240deg) rotateX(60deg); }
+        #reaction-text {
+            position: absolute; bottom: 220px; left: 50%;
+            transform: translateX(-50%); background: rgba(0, 0, 0, 0.6);
+            padding: 10px 15px; border-radius: 8px; text-align: center;
+            width: 80%; z-index: 3;
+        }
+        #controls {
+            position: absolute; bottom: 0; left: 0; width: 100%;
+            background: rgba(0, 0, 0, 0.8); padding: 10px; box-sizing: border-box; z-index: 3;
+        }
+        .btn-row { display: flex; gap: 8px; margin-bottom: 8px; }
+        button {
+            flex: 1; padding: 15px 5px; border: none; border-radius: 5px;
+            font-weight: bold; color: #FFF; cursor: pointer; font-size: 14px;
+        }
+        button:active { filter: brightness(0.8); }
+        .btn-feed { background-color: #4CAF50; }
+        .btn-play { background-color: #2196F3; }
+        .btn-sleep { background-color: #9C27B0; }
+        .btn-cuddle { background-color: #E91E63; }
+        .btn-skip { background-color: #607D8B; }
+        .modal {
+            display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.85); z-index: 10;
+            justify-content: center; align-items: center;
+        }
+        .modal-content {
+            background: #212121; padding: 20px; border-radius: 10px;
+            width: 80%; text-align: center;
+        }
+        .food-item {
+            background: #333; padding: 15px; margin: 5px 0;
+            border-radius: 5px; cursor: pointer;
+        }
+        input {
+            width: 90%; padding: 10px; margin: 5px 0;
+            border-radius: 5px; border: none; box-sizing: border-box;
+        }
     </style>
 </head>
 <body>
 
-    <header>
-        <div class="header-top">
-            <h1 class="neon-text" style="font-size: 1.3rem;">
-                <span class="material-symbols-outlined" style="vertical-align: middle;">track_changes</span> TARGET: 87%
-            </h1>
-            <div class="digital-clock" id="liveClock">00:00:00</div>
-            <div class="stats-hud">
-                <div class="hud-item" title="Study Streak"><span class="material-symbols-outlined" style="color: var(--accent);">local_fire_department</span> <span id="streakCounter">0</span> Days</div>
-                <div class="hud-item"><span class="material-symbols-outlined" style="color: var(--success);">star</span> LVL <span id="xpLevel">1</span></div>
-            </div>
+<audio id="audio-bgm" src="bgm.mp3" loop></audio>
+<audio id="audio-meow" src="meow.mp3"></audio>
+<audio id="audio-eat" src="eat.mp3"></audio>
+<audio id="audio-purr" src="purr.mp3"></audio>
+
+<div id="game-container">
+    <div id="bg-layer"></div>
+    
+    <div id="sprite-layer">
+        <img id="cat-sprite" src="cat_idle.gif" alt="Cat Pixel Art">
+    </div>
+
+    <div id="hud-top">
+        <span id="stats-display">Hunger: 100 | Energy: 100</span>
+        <span id="age-display" style="color: #FFD700;">Day 1</span>
+    </div>
+
+    <div id="reaction-text">Waiting to start...</div>
+
+    <div id="controls">
+        <div class="btn-row">
+            <button class="btn-feed" onclick="openFoodMenu()">FEED 🍖</button>
+            <button class="btn-play" onclick="action('play')">PLAY 🧶</button>
+            <button class="btn-sleep" onclick="action('sleep')" id="btn-sleep">SLEEP 💤</button>
         </div>
-        <div style="color: var(--text-muted); font-size: 0.85rem; margin-top: 10px;" id="dateDisplay">PCB + IP Syncing...</div>
-    </header>
+        <div class="btn-row">
+            <button class="btn-cuddle" onclick="action('cuddle')">CUDDLE 🧡</button>
+            <button class="btn-skip" onclick="skipDay()">+1 DAY ⏳</button>
+        </div>
+    </div>
 
-    <div id="toast">Notification Message</div>
-
-    <div class="modal-overlay" id="calendarModal">
+    <div id="start-modal" class="modal" style="display: flex;">
         <div class="modal-content">
-            <span class="modal-close" onclick="closeModal()">×</span>
-            <h2 id="modalTitle" style="color: var(--primary); border-bottom: 1px solid var(--border); padding-bottom: 10px;">Day X Schedule</h2>
-            <div class="modal-task-list" id="modalTaskList"></div>
+            <h3>Name Your Cat 🐾</h3>
+            <input type="text" id="main-cat-name" placeholder="Enter name...">
+            <button style="background: #4CAF50; margin-top: 15px;" onclick="startGame()">Start Game</button>
         </div>
     </div>
 
-    <main>
-        <section id="overview" class="section active">
-            <div class="dragon-panel">
-                <img src="guardian.jpg" alt="Academic Guardian" class="dragon-image" onerror="this.src='https://images.unsplash.com/photo-1577493340887-b7bfff550145?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80'">
-                <div class="dragon-dialogue">
-                    <strong style="color: var(--accent);">[A.I. GUARDIAN]:</strong> 
-                    <span id="dragonText">Awaiting data sync... Keep pushing, Scholar.</span>
-                </div>
-            </div>
-
-            <div class="card" style="background: rgba(239, 68, 68, 0.1); border-color: var(--danger);">
-                <h2 style="color: #fca5a5; border-bottom: none; margin-bottom: 5px;"><span class="material-symbols-outlined">block</span> Focus Rules</h2>
-                <ul style="list-style: none; font-size: 0.9rem; line-height: 1.8;">
-                    <li>▹ Phone outside study desk</li>
-                    <li>▹ No social media during sessions</li>
-                    <li>▹ Screen time &le; 2 hours max</li>
-                    <li>▹ Review progress nightly</li>
-                </ul>
-            </div>
-
-            <div class="card">
-                <h2><span class="material-symbols-outlined">calendar_month</span> Protocol Calendar Map</h2>
-                <div class="cal-controls">
-                    <button onclick="changeMonth(-1)"><span class="material-symbols-outlined">arrow_back_ios</span></button>
-                    <h3 id="calMonthDisplay">March 2026</h3>
-                    <button onclick="changeMonth(1)"><span class="material-symbols-outlined">arrow_forward_ios</span></button>
-                </div>
-                <div class="calendar-grid" id="calendarGrid"></div>
-            </div>
-
-            <div class="card" style="border-color: var(--primary); box-shadow: 0 0 15px rgba(0, 229, 255, 0.15);">
-                <h2><span class="material-symbols-outlined">target</span> Mark Today's Topics (Active Protocol)</h2>
-                <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 15px;">Check off your tasks below to maintain your streak.</p>
-                <div class="progress-text" id="dailyProgressText" style="text-align: right; margin-bottom: 5px; color: var(--primary); font-weight: bold;">0% SECURED</div>
-                <div class="progress-wrapper"><div class="progress-fill" id="dailyProgress"></div></div>
-                
-                <div id="todayTaskList" style="margin-top: 15px;"></div>
-            </div>
-            
-            <div class="card reflection-box">
-                <h2><span class="material-symbols-outlined">edit_note</span> Telemetry Log</h2>
-                <textarea id="reflectionText" placeholder="Log anomalies, difficult concepts, or hours studied here..."></textarea>
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <span style="font-size: 0.8rem; color: var(--text-muted);">Hours: <input type="number" id="dailyHours" style="width: 50px; background: transparent; border: 1px solid var(--border); color: #fff; text-align: center; border-radius: 4px;" min="0" value="0"></span>
-                    <button class="btn-action" onclick="saveReflection()"><span class="material-symbols-outlined">save</span> Save Log</button>
-                </div>
-            </div>
-        </section>
-
-        <section id="analytics" class="section">
-            <div class="card">
-                <h2><span class="material-symbols-outlined">monitoring</span> System Analytics & Progress</h2>
-                
-                <h3 style="font-size: 0.9rem; color: var(--text-muted); margin-top: 10px;">Syllabus Completion Meter</h3>
-                <div class="progress-text" id="progTextBio" style="color: #34d399; margin-top: 10px;">BIO: 0%</div>
-                <div class="progress-wrapper"><div class="progress-fill" id="progBio" style="background: #34d399;"></div></div>
-                
-                <div class="progress-text" id="progTextChem" style="color: #7dd3fc; margin-top: 10px;">CHEM: 0%</div>
-                <div class="progress-wrapper"><div class="progress-fill" id="progChem" style="background: #7dd3fc;"></div></div>
-                
-                <div class="progress-text" id="progTextPhy" style="color: #fb7185; margin-top: 10px;">PHY: 0%</div>
-                <div class="progress-wrapper"><div class="progress-fill" id="progPhy" style="background: #fb7185;"></div></div>
-                
-                <div class="progress-text" id="progTextIp" style="color: #fdba74; margin-top: 10px;">I.P.: 0%</div>
-                <div class="progress-wrapper"><div class="progress-fill" id="progIp" style="background: #fdba74;"></div></div>
-
-                <div class="grid-2" style="margin-top: 25px;">
-                    <div class="data-box" style="text-align: center;">
-                        <h3>Chapters Completed</h3>
-                        <div class="digital-clock" style="justify-content: center; font-size: 2.5rem; color: var(--success);" id="chapCompleted">0</div>
-                        <p style="font-size: 0.8rem; color: var(--text-muted);">Out of 90 Protocol Days</p>
-                    </div>
-                    <div class="data-box">
-                        <h3>Study Statistics</h3>
-                        <ul style="list-style: none; color: var(--text-main); font-size: 0.9rem; line-height: 2;">
-                            <li>Tasks Secured: <strong id="statTasks" class="neon-text">0</strong></li>
-                            <li>Current XP: <strong id="statXp" style="color: var(--success);">0</strong></li>
-                            <li>Total Study Hours: <strong id="statHours" style="color: var(--accent);">0</strong> hrs</li>
-                            <li>Hours This Week: <strong id="statWeekHours" style="color: var(--primary);">0</strong> hrs</li>
-                        </ul>
-                    </div>
-                </div>
-                
-                <h3 style="font-size: 0.9rem; color: var(--text-muted); margin-top: 25px;">Intensity Heatmap (90 Days)</h3>
-                <div class="heatmap-container">
-                    <div class="heatmap-grid" id="heatmapGrid"></div>
-                </div>
-            </div>
-        </section>
-
-        <section id="importants" class="section">
-            <div class="card">
-                <h2><span class="material-symbols-outlined">memory</span> Auto-Categorized Data Core</h2>
-                <p style="font-size: 0.8rem; color: var(--text-muted);">Massive database of required formulas and definitions for 87% target.</p>
-                <div class="db-container">
-                    <div class="db-box">
-                        <h3>Physics DB (40+ Formulas)</h3>
-                        <div id="phyFormulasList"></div>
-                    </div>
-                    <div class="db-box">
-                        <h3>Chemistry DB (40+ Formulas)</h3>
-                        <div id="chemFormulasList"></div>
-                    </div>
-                    <div class="db-box">
-                        <h3>Biology Definitions (40+)</h3>
-                        <div id="bioDefList"></div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <section id="flashcards" class="section">
-            <div class="card">
-                <h2><span class="material-symbols-outlined">style</span> Spaced Repetition Flashcards</h2>
-                <p style="font-size: 0.8rem; color: var(--text-muted);">Weak cards (❌) are prioritized and shown more frequently.</p>
-                
-                <div class="flashcard-area">
-                    <div class="fc-container" onclick="document.getElementById('fc-inner').classList.toggle('is-flipped')">
-                        <div class="fc-inner" id="fc-inner">
-                            <div class="fc-face fc-front">
-                                <div class="fc-category" id="fc-cat">Physics</div>
-                                <div id="fc-q">Loading...</div>
-                                <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 25px;"><span class="material-symbols-outlined" style="font-size:1rem; vertical-align:middle;">touch_app</span> Tap to flip</div>
-                            </div>
-                            <div class="fc-face fc-back">
-                                <div id="fc-a">Loading...</div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="fc-controls">
-                        <button class="fc-btn btn-forgot" onclick="markFlashcard(false)"><span class="material-symbols-outlined" style="vertical-align: middle;">close</span> Forgot</button>
-                        <button class="fc-btn btn-remembered" onclick="markFlashcard(true)"><span class="material-symbols-outlined" style="vertical-align: middle;">check</span> Remembered</button>
-                    </div>
-                    <div style="font-size: 0.85rem; color: var(--text-muted); margin-top: 10px;">Weak Cards in Queue: <span id="fc-queue-count" style="color: var(--danger); font-weight: bold; font-size:1rem;">0</span></div>
-                </div>
-            </div>
-        </section>
-
-        <section id="mocktest" class="section">
-            <div class="card">
-                <h2><span class="material-symbols-outlined">quiz</span> MCQ Mock Test Simulator</h2>
-                <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 20px;">Generates random multiple-choice questions (3 options). Initiates a countdown timer.</p>
-                
-                <div id="testSetup" style="text-align: center; padding: 30px;">
-                    <button class="btn-action" onclick="startMockTest()" style="font-size: 1.2rem; padding: 15px 30px;"><span class="material-symbols-outlined">rocket_launch</span> Initiate Test Protocol</button>
-                </div>
-
-                <div id="testActive" style="display: none;">
-                    <div class="test-header">
-                        <div style="font-weight: bold; color: var(--danger);">EXAM IN PROGRESS</div>
-                        <div class="timer-display" id="testTimer">45:00</div>
-                    </div>
-                    <div id="testQuestionsArea"></div>
-                    <button class="btn-action" onclick="submitMockTest()" style="width: 100%; justify-content: center; margin-top: 20px; font-size:1.1rem; padding:15px;">Submit & Analyze</button>
-                </div>
-
-                <div id="testReport" class="test-report">
-                    <h3><span class="material-symbols-outlined" style="vertical-align: middle;">analytics</span> Simulator Analysis Complete</h3>
-                    <p style="font-size: 1.3rem; font-weight: bold; margin-bottom: 10px;">Final Score: <span id="reportScore">0</span> / 5</p>
-                    <p style="font-weight: bold; color: #fff; margin-top: 15px;">Weak Topics Identified for Revision:</p>
-                    <ul id="reportWeakTopics" style="list-style-type: none; margin-top: 10px; color: var(--danger); font-weight: bold; line-height: 1.8;"></ul>
-                    <button class="btn-action" onclick="resetMockTest()" style="margin-top: 25px;">Acknowledge & Reset</button>
-                </div>
-            </div>
-        </section>
-
-        <section id="diagrams" class="section">
-            <div class="card">
-                <h2><span class="material-symbols-outlined">account_tree</span> Schematics Vault (150+ Total)</h2>
-                <h3 style="font-size: 1rem; color: #34d399; margin-top: 15px;">Biology Diagrams</h3>
-                <div class="diagram-grid" id="bioDiagramsList"></div>
-                <h3 style="font-size: 1rem; color: #7dd3fc; margin-top: 25px;">Chemistry Diagrams</h3>
-                <div class="diagram-grid" id="chemDiagramsList"></div>
-                <h3 style="font-size: 1rem; color: #fb7185; margin-top: 25px;">Physics Diagrams</h3>
-                <div class="diagram-grid" id="phyDiagramsList"></div>
-            </div>
-        </section>
-
-        <section id="remaining" class="section">
-            <div class="card">
-                <h2><span class="material-symbols-outlined">hourglass_empty</span> Queue / Backlog</h2>
-                <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 15px;">Tasks missed from previous days.</p>
-                <div id="remainingTaskList"></div>
-            </div>
-        </section>
-    </main>
-
-    <div class="fab-container">
-        <div class="fab-menu" id="fabMenu">
-            <button class="fab-btn" onclick="switchTab('overview')"><span class="material-symbols-outlined">dashboard</span> Overview</button>
-            <button class="fab-btn" onclick="switchTab('analytics')"><span class="material-symbols-outlined">monitoring</span> Analytics</button>
-            <button class="fab-btn" onclick="switchTab('importants')"><span class="material-symbols-outlined">functions</span> Data Core</button>
-            <button class="fab-btn" onclick="switchTab('flashcards')"><span class="material-symbols-outlined">style</span> Flashcards</button>
-            <button class="fab-btn" onclick="switchTab('mocktest')"><span class="material-symbols-outlined">quiz</span> Simulator</button>
-            <button class="fab-btn" onclick="switchTab('diagrams')"><span class="material-symbols-outlined">schema</span> Schematics</button>
-            <button class="fab-btn" onclick="switchTab('remaining')"><span class="material-symbols-outlined">hourglass_empty</span> Queue</button>
+    <div id="food-modal" class="modal">
+        <div class="modal-content">
+            <h3>Choose Food</h3>
+            <div id="food-list"></div>
+            <button style="background: #D32F2F; margin-top: 15px;" onclick="closeModal('food-modal')">Cancel</button>
         </div>
+    </div>
+
+    <div id="kitten-modal" class="modal">
+        <div class="modal-content">
+            <h3>3 Kittens Born! 🐾</h3>
+            <input type="text" id="k1" placeholder="Kitten 1 Name">
+            <input type="text" id="k2" placeholder="Kitten 2 Name">
+            <input type="text" id="k3" placeholder="Kitten 3 Name">
+            <button style="background: #4CAF50; margin-top: 15px;" onclick="saveKittens()">Save Family</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    let gameState = {
+        mainCatName: "Kitty",
+        phase: 1, 
+        age: 1,
+        hunger: 100,
+        energy: 100,
+        isSleeping: false,
+        lastPlayed: Date.now(),
+        kittens: { k1: "Kit1", k2: "Kit2", k3: "Kit3" }
+    };
+
+    let animationTimeout;
+
+    function init() {
+        let savedData = localStorage.getItem('ragdoll_data');
+        if (savedData) {
+            gameState = JSON.parse(savedData);
+            document.getElementById('start-modal').style.display = 'none';
+            startAudio();
+            calculateOfflineDrain();
+            updateUI();
+            setIdleAnimation();
+        }
+    }
+
+    function startGame() {
+        let nameInput = document.getElementById('main-cat-name').value;
+        if (nameInput.trim() !== "") {
+            gameState.mainCatName = nameInput;
+        }
+        document.getElementById('start-modal').style.display = 'none';
+        startAudio();
+        saveData();
+        updateUI();
+        setIdleAnimation();
+        showReaction(`${gameState.mainCatName} is exploring the room.`);
+    }
+
+    function startAudio() {
+        let bgm = document.getElementById('audio-bgm');
+        bgm.volume = 0.3;
+        bgm.play().catch(() => console.log("Audio play blocked by browser until interaction."));
+    }
+
+    function playSound(id) {
+        let sound = document.getElementById(id);
+        if (sound) {
+            sound.currentTime = 0;
+            sound.play().catch(e => console.log(e));
+        }
+    }
+
+    function saveData() {
+        gameState.lastPlayed = Date.now();
+        localStorage.setItem('ragdoll_data', JSON.stringify(gameState));
+    }
+
+    function calculateOfflineDrain() {
+        let now = Date.now();
+        let hoursPassed = (now - gameState.lastPlayed) / (1000 * 60 * 60);
         
-        <button class="proton" onclick="document.getElementById('fabMenu').classList.toggle('show');">
-            <svg viewBox="0 0 100 100" width="100%" height="100%">
-                <circle class="atom-core" cx="50" cy="50" r="8" />
-                <ellipse class="atom-ring ring1" cx="50" cy="50" rx="35" ry="12" />
-                <ellipse class="atom-ring ring2" cx="50" cy="50" rx="35" ry="12" />
-                <ellipse class="atom-ring ring3" cx="50" cy="50" rx="35" ry="12" />
-            </svg>
-        </button>
-    </div>
-
-    <script>
-        const START_DATE = new Date(2026, 2, 25); 
-        let viewMonth = START_DATE.getMonth();
-        let viewYear = START_DATE.getFullYear();
-
-        // 90-Day Array
-        const timetable = [
-            { day: 1, bio: 'Cell structure', chem: 'Atomic structure', phy: 'Units & measurements', ip: 'Python intro', num: '10 basic unit conversions', diag: 'Animal cell' },
-            { day: 2, bio: 'Cell organelles', chem: 'Mole concept basics', phy: 'Vectors & Scalars', ip: 'Python variables', num: '15 mole concept problems', diag: 'Plant cell' },
-            { day: 3, bio: 'Biomolecules intro', chem: 'Chemical bonding', phy: 'Basic kinematics', ip: 'Input output', num: '10 kinematics equations', diag: 'DNA double helix' },
-            { day: 4, bio: 'Cell division (Mitosis)', chem: 'Periodic table trends', phy: 'Force & Newton laws', ip: 'Simple programs', num: '15 force and mass problems', diag: 'Mitosis stages' },
-            { day: 5, bio: 'Cell division (Meiosis)', chem: 'Basic organic concepts', phy: 'Work, energy, power', ip: 'Conditionals', num: '10 work & energy problems', diag: 'Meiosis stages' },
-            { day: 6, bio: 'Human physiology basics', chem: 'Organic nomenclature', phy: 'Electric charge basics', ip: 'Python practice', num: '15 coulomb force basics', diag: 'Neuron' },
-            { day: 7, bio: 'Weekly Revision (Bio)', chem: 'Weekly Revision (Chem)', phy: 'Weekly Revision (Phy)', ip: 'Weekly Test', num: 'Full week numerical test', diag: 'Draw all week 1 diagrams' },
-            { day: 8, bio: 'Digestion basics', chem: 'States of matter', phy: 'Kinematics 2D', ip: 'Loops (For/While)', num: '10 projectile motion problems', diag: 'Human digestive system' },
-            { day: 9, bio: 'Respiration basics', chem: 'Thermodynamics basics', phy: 'Friction', ip: 'Loop practice', num: '15 thermodynamics basics', diag: 'Human respiratory system' },
-            { day: 10, bio: 'Circulation basics', chem: 'Equilibrium basics', phy: 'Circular motion', ip: 'Functions', num: '10 circular motion problems', diag: 'Human heart' },
-            { day: 11, bio: 'Excretion basics', chem: 'Redox reactions', phy: 'Gravitation basics', ip: 'Function practice', num: '15 redox balancing problems', diag: 'Human kidney T.S.' },
-            { day: 12, bio: 'Nervous system basics', chem: 's-Block elements', phy: 'Properties of solids', ip: 'Python practice', num: '10 gravitation problems', diag: 'Brain cross-section' },
-            { day: 13, bio: 'Endocrine system basics', chem: 'p-Block basics', phy: 'Properties of fluids', ip: 'Revision', num: '15 fluid mechanics basics', diag: 'Endocrine glands map' },
-            { day: 14, bio: 'Weekly Revision (Bio)', chem: 'Weekly Revision (Chem)', phy: 'Weekly Revision (Phy)', ip: 'Weekly Test', num: 'Full week numerical test', diag: 'Draw all week 2 diagrams' },
-            { day: 15, bio: 'Plant physiology intro', chem: 'Hydrocarbons (Alkanes)', phy: 'Thermal properties', ip: 'Lists & Tuples', num: '10 thermal expansion questions', diag: 'Leaf cross section' },
-            { day: 16, bio: 'Photosynthesis basics', chem: 'Hydrocarbons (Alkenes)', phy: 'Kinetic theory of gases', ip: 'Dictionary basics', num: '15 kinetic theory numericals', diag: 'Chloroplast' },
-            { day: 17, bio: 'Plant respiration', chem: 'Hydrocarbons (Alkynes)', phy: 'Oscillations (SHM)', ip: 'Data structure practice', num: '10 SHM period calculations', diag: 'Mitochondria' },
-            { day: 18, bio: 'Plant growth', chem: 'Environmental chemistry', phy: 'Waves intro', ip: 'Python project', num: '15 wave speed problems', diag: 'Seed germination stages' },
-            { day: 19, bio: 'Foundation Wrap-Up Bio', chem: 'Foundation Wrap-Up Chem', phy: 'Foundation Wrap-Up Phy', ip: 'Python revision', num: 'Mixed 11th grade numericals', diag: 'Review all foundation diags' },
-            { day: 20, bio: 'Phase 1 Final Test', chem: 'Phase 1 Final Test', phy: 'Phase 1 Final Test', ip: 'Phase 1 Final Test', num: 'Phase 1 Mock Numericals', diag: 'Phase 1 Mock Diagrams' },
-            { day: 21, bio: 'Reproduction in organisms', chem: 'Solutions: Types & Conc', phy: 'Electrostatics: Charges', ip: 'SQL intro & commands', num: '15 concentration calculations', diag: 'Binary fission in amoeba' },
-            { day: 22, bio: 'Human reproduction (Male)', chem: 'Solutions: Raoult Law', phy: 'Electrostatics: Field', ip: 'SQL DDL commands', num: '10 Coulomb/Field problems', diag: 'Male reproductive system' },
-            { day: 23, bio: 'Human reproduction (Female)', chem: 'Solutions: Colligative prop', phy: 'Electrostatics: Gauss Law', ip: 'SQL DML commands', num: '15 Colligative properties', diag: 'Female reproductive system' },
-            { day: 24, bio: 'Gametogenesis', chem: 'Solutions: Vant Hoff factor', phy: 'Electric potential', ip: 'SQL queries basic', num: '10 Potential/Work problems', diag: 'Spermatogenesis/Oogenesis' },
-            { day: 25, bio: 'Menstrual cycle & Fert.', chem: 'Electrochemistry: Cells', phy: 'Capacitance & Dielectrics', ip: 'SQL queries advanced', num: '15 Nernst equation basics', diag: 'Electrochemical cell' },
-            { day: 26, bio: 'Reproductive health', chem: 'Electrochem: Nernst Eq', phy: 'Capacitors in series/par', ip: 'Database operations', num: '10 Capacitor circuit problems', diag: 'Standard Hydrogen Electrode' },
-            { day: 27, bio: 'Weekly Revision (Bio)', chem: 'Weekly Revision (Chem)', phy: 'Weekly Revision (Phy)', ip: 'Weekly Test', num: 'Full week numerical test', diag: 'Draw all week 4 diagrams' },
-            { day: 28, bio: 'Principles of Inheritance 1', chem: 'Electrochem: Conductance', phy: 'Current Electricity: Ohm', ip: 'Python-SQL connectivity', num: '15 Kohlrausch law problems', diag: 'Monohybrid cross Punnett' },
-            { day: 29, bio: 'Principles of Inheritance 2', chem: 'Electrochem: Batteries', phy: 'Drift velocity & Resistivity', ip: 'Connectivity practice', num: '10 Drift velocity problems', diag: 'Dihybrid cross Punnett' },
-            { day: 30, bio: 'Chromosomal theory', chem: 'Chem Kinetics: Rate', phy: 'Kirchhoff Laws', ip: 'Cursor operations', num: '15 Rate of reaction problems', diag: 'Wheatstone bridge circuit' },
-            { day: 31, bio: 'Genetic disorders', chem: 'Chem Kinetics: Order', phy: 'Potentiometer', ip: 'Fetching data in Python', num: '10 Kirchhoff circuit problems', diag: 'Potentiometer circuit' },
-            { day: 32, bio: 'Molecular basis: DNA', chem: 'Chem Kinetics: Arrhenius', phy: 'Moving charges & Mag field', ip: 'IP Revision', num: '15 Arrhenius/Activation E', diag: 'DNA double helix detailed' },
-            { day: 33, bio: 'DNA Replication', chem: 'Coordination Compounds 1', phy: 'Biot-Savart Law', ip: 'IP Mock Test', num: '10 Magnetic field problems', diag: 'Replication fork' },
-            { day: 34, bio: 'Weekly Revision (Bio)', chem: 'Weekly Revision (Chem)', phy: 'Weekly Revision (Phy)', ip: 'Weekly Test', num: 'Full week numerical test', diag: 'Draw all week 5 diagrams' },
-            { day: 35, bio: 'Transcription', chem: 'Coordination: Nomenclature', phy: 'Ampere Law', ip: 'Pandas intro', num: '15 Ampere law numericals', diag: 'Transcription unit' },
-            { day: 36, bio: 'Translation', chem: 'Coordination: Isomerism', phy: 'Force on moving charge', ip: 'Series in Pandas', num: '10 Magnetic force problems', diag: 'tRNA structure' },
-            { day: 37, bio: 'Lac Operon', chem: 'Coordination: CFT/VBT', phy: 'Moving coil galvanometer', ip: 'DataFrames basic', num: '15 Crystal field splitting (CFSE)', diag: 'Lac operon mechanism' },
-            { day: 38, bio: 'Evolution: Origin', chem: 'Haloalkanes preparation', phy: 'Electromagnetic Induction', ip: 'DataFrame operations', num: '10 Faraday law problems', diag: 'Miller Urey experiment' },
-            { day: 39, bio: 'Evolution: Evidences', chem: 'Haloalkanes reactions', phy: 'Lenz Law & Motional EMF', ip: 'Data filtering', num: '15 Motional EMF problems', diag: 'Homologous organs' },
-            { day: 40, bio: 'Hardy-Weinberg', chem: 'Haloarenes', phy: 'Self & Mutual Inductance', ip: 'Data visualization intro', num: '10 Inductance calculations', diag: 'Analogous organs' },
-            { day: 41, bio: 'Weekly Revision (Bio)', chem: 'Weekly Revision (Chem)', phy: 'Weekly Revision (Phy)', ip: 'Weekly Test', num: 'Full week numerical test', diag: 'Draw all week 6 diagrams' },
-            { day: 42, bio: 'Human health & disease 1', chem: 'Alcohols: Prep', phy: 'Alternating Current intro', ip: 'Matplotlib line charts', num: '15 RMS & Peak value problems', diag: 'Antibody structure' },
-            { day: 43, bio: 'Human health & disease 2', chem: 'Alcohols: Reactions', phy: 'AC circuits (L, C, R)', ip: 'Bar charts & Histograms', num: '10 Impedance calculations', diag: 'Life cycle of Plasmodium' },
-            { day: 44, bio: 'Immunity', chem: 'Phenols & Ethers', phy: 'LCR series & Resonance', ip: 'Data plotting practice', num: '15 Resonance frequency', diag: 'HIV replication cycle' },
-            { day: 45, bio: 'Biotech: Principles', chem: 'Aldehydes preparation', phy: 'Transformers', ip: 'IP Revision', num: '10 Transformer ratio problems', diag: 'pBR322 vector map' },
-            { day: 46, bio: 'Biotech: Processes', chem: 'Ketones & Carboxylics', phy: 'Electromagnetic waves', ip: 'Pandas Mock Test', num: '15 Organic conversion problems', diag: 'PCR process' },
-            { day: 47, bio: 'Biotech: Applications', chem: 'Aldol & Cannizzaro', phy: 'Ray optics: Reflection', ip: 'Societal Impacts intro', num: '10 Mirror formula problems', diag: 'Bioreactor' },
-            { day: 48, bio: 'Weekly Revision (Bio)', chem: 'Weekly Revision (Chem)', phy: 'Weekly Revision (Phy)', ip: 'Weekly Test', num: 'Full week numerical test', diag: 'Draw all week 7 diagrams' },
-            { day: 49, bio: 'Ecology: Organisms', chem: 'Amines preparation', phy: 'Ray optics: Refraction', ip: 'Cyber safety', num: '15 Refraction/Snell Law', diag: 'Age pyramids' },
-            { day: 50, bio: 'Ecology: Populations', chem: 'Amines basicity', phy: 'Total Internal Reflection', ip: 'E-waste management', num: '10 TIR and critical angle', diag: 'Population growth curves' },
-            { day: 51, bio: 'Ecosystem structure', chem: 'Diazonium salts', phy: 'Lenses & Lens Maker Eq', ip: 'IP full syllabus rev 1', num: '15 Lens maker problems', diag: 'Phosphorus cycle' },
-            { day: 52, bio: 'Energy flow', chem: 'Biomolecules: Carbs', phy: 'Prism & Dispersion', ip: 'IP full syllabus rev 2', num: '10 Prism minimum deviation', diag: 'Pyramid of energy' },
-            { day: 53, bio: 'Biodiversity', chem: 'Biomolecules: Proteins', phy: 'Optical instruments', ip: 'IP Sample Paper 1', num: '15 Microscope/Telescope mag', diag: 'Compound microscope ray' },
-            { day: 54, bio: 'Conservation', chem: 'Biomolecules: DNA/RNA', phy: 'Wave optics: Huygens', ip: 'IP Sample Paper 2', num: '10 Half-life calculations', diag: 'Astronomical telescope ray' },
-            { day: 55, bio: 'Weekly Revision (Bio)', chem: 'Weekly Revision (Chem)', phy: 'Weekly Revision (Phy)', ip: 'Weekly Test', num: 'Full week numerical test', diag: 'Draw all week 8 diagrams' },
-            { day: 56, bio: 'Environmental issues 1', chem: 'Polymers intro', phy: 'YDSE & Interference', ip: 'SQL strict revision', num: '15 YDSE fringe width problems', diag: 'YDSE setup' },
-            { day: 57, bio: 'Environmental issues 2', chem: 'Polymers types', phy: 'Diffraction', ip: 'Pandas strict revision', num: '10 Diffraction maxima/minima', diag: 'Single slit diffraction' },
-            { day: 58, bio: 'Phase 2 Buffer/Rev', chem: 'Phase 2 Buffer/Rev', phy: 'Dual nature of radiation', ip: 'IP doubts clearing', num: '15 Photoelectric effect probs', diag: 'Photoelectric setup' },
-            { day: 59, bio: 'Phase 2 Buffer/Rev', chem: 'Phase 2 Buffer/Rev', phy: 'Atoms (Bohr Model)', ip: 'IP Buffer day', num: '10 Bohr radius/energy probs', diag: 'Energy level diagram (H)' },
-            { day: 60, bio: 'Phase 2 Final Test', chem: 'Phase 2 Final Test', phy: 'Nuclei & Radioactivity', ip: 'IP Final Test', num: '15 Mass defect calculations', diag: 'Nuclear reactor core' },
-            { day: 61, bio: 'Full Rev: Reproduction', chem: 'Full Rev: Physical Chem 1', phy: 'Full Rev: Electrostatics', ip: 'Solve IP PYQ 2023', num: '30 Physical Chem Numericals', diag: 'Reproduction unit diag test' },
-            { day: 62, bio: 'Full Rev: Genetics 1', chem: 'Full Rev: Physical Chem 2', phy: 'Full Rev: Current Elec', ip: 'Solve IP PYQ 2022', num: '30 Current Elec Numericals', diag: 'Genetics crosses practice' },
-            { day: 63, bio: 'Full Rev: Genetics 2', chem: 'Full Rev: Inorganic Chem', phy: 'Full Rev: Magnetism', ip: 'Solve IP PYQ 2021', num: '30 Mag/EMI Numericals', diag: 'DNA & Replication diags' },
-            { day: 64, bio: 'Full Rev: Health & Disease', chem: 'Full Rev: Organic Chem 1', phy: 'Full Rev: EMI & AC', ip: 'Solve IP Sample Paper', num: '30 AC/Transformer Numericals', diag: 'Microbes/Health diags' },
-            { day: 65, bio: 'Full Rev: Biotechnology', chem: 'Full Rev: Organic Chem 2', phy: 'Full Rev: Optics', ip: 'Revise weak IP topics', num: '30 Optics Ray/Wave Numericals', diag: 'Biotech processes diags' },
-            { day: 66, bio: 'Full Rev: Ecology', chem: 'Full Rev: Biomolecules/Polymers', phy: 'Full Rev: Modern Phy', ip: 'Revise weak IP topics', num: '30 Modern Physics Numericals', diag: 'Ecology pyramids & cycles' },
-            { day: 67, bio: 'Weekly Revision (Bio)', chem: 'Weekly Revision (Chem)', phy: 'Weekly Revision (Phy)', ip: 'Weekly Test', num: 'Full Syllabus Numerical Test', diag: 'Draw 5 random weak diagrams' },
-            { day: 68, bio: 'Solve Biology Sample Paper 1', chem: 'Identify weak Chem chapters', phy: 'Identify weak Phy chapters', ip: 'IP Final Brushup', num: 'Target 50 weak formulas', diag: 'Target 10 weak diagrams' },
-            { day: 69, bio: 'Identify weak Bio chapters', chem: 'Solve Chem Sample Paper 1', phy: 'Revise weak Phy chapters', ip: 'IP Final Brushup', num: 'Target 50 weak formulas', diag: 'Target 10 weak diagrams' },
-            { day: 70, bio: 'Revise weak Bio chapters', chem: 'Revise weak Chem chapters', phy: 'Solve Phy Sample Paper 1', ip: 'IP Final Brushup', num: 'Solve Phy Sample Paper 1 Num', diag: 'Target 10 weak diagrams' },
-            { day: 71, bio: 'Solve Biology Sample Paper 2', chem: 'Solve Chem Sample Paper 2', phy: 'Solve Phy Sample Paper 2', ip: 'IP Full Mock', num: 'Analyze errors in mock tests', diag: 'Re-draw failed diagrams' },
-            { day: 72, bio: 'Biology PYQ 2023 Analysis', chem: 'Chem PYQ 2023 Analysis', phy: 'Phy PYQ 2023 Analysis', ip: 'IP Full Mock', num: 'Solve all PYQ 2023 Numericals', diag: 'Review PYQ diagrams' },
-            { day: 73, bio: 'Biology PYQ 2022 Analysis', chem: 'Chem PYQ 2022 Analysis', phy: 'Phy PYQ 2022 Analysis', ip: 'IP Full Mock', num: 'Solve all PYQ 2022 Numericals', diag: 'Review PYQ diagrams' },
-            { day: 74, bio: 'Weekly Revision (Bio)', chem: 'Weekly Revision (Chem)', phy: 'Weekly Revision (Phy)', ip: 'Weekly Test', num: 'Full Syllabus Numerical Test', diag: 'Draw 5 random weak diagrams' },
-            { day: 75, bio: 'Solve Biology Sample Paper 3', chem: 'Solve Chem Sample Paper 3', phy: 'Solve Phy Sample Paper 3', ip: 'IP Full Mock', num: 'Analyze errors in mock tests', diag: 'Re-draw failed diagrams' },
-            { day: 76, bio: 'Solve Biology Sample Paper 4', chem: 'Solve Chem Sample Paper 4', phy: 'Solve Phy Sample Paper 4', ip: 'IP Full Mock', num: 'Analyze errors in mock tests', diag: 'Re-draw failed diagrams' },
-            { day: 77, bio: 'Solve Biology Sample Paper 5', chem: 'Solve Chem Sample Paper 5', phy: 'Solve Phy Sample Paper 5', ip: 'IP Full Mock', num: 'Analyze errors in mock tests', diag: 'Re-draw failed diagrams' },
-            { day: 78, bio: 'Biology NCERT line-by-line 1', chem: 'Chem NCERT In-text Ques 1', phy: 'Phy NCERT Back Exc. 1', ip: 'IP Revision', num: 'Solve Phy NCERT Numericals', diag: 'Review NCERT Diagrams' },
-            { day: 79, bio: 'Biology NCERT line-by-line 2', chem: 'Chem NCERT In-text Ques 2', phy: 'Phy NCERT Back Exc. 2', ip: 'IP Revision', num: 'Solve Phy NCERT Numericals', diag: 'Review NCERT Diagrams' },
-            { day: 80, bio: 'Biology NCERT line-by-line 3', chem: 'Chem Organic Name Reactions', phy: 'Phy Derivations Practice 1', ip: 'IP Revision', num: 'Chem Physical NCERT Numericals', diag: 'Review NCERT Diagrams' },
-            { day: 81, bio: 'Weekly Revision (Bio)', chem: 'Weekly Revision (Chem)', phy: 'Weekly Revision (Phy)', ip: 'Weekly Test', num: 'Full Syllabus Numerical Test', diag: 'Draw 5 random weak diagrams' },
-            { day: 82, bio: 'Biology Final Mock Test A', chem: 'Chem Final Mock Test A', phy: 'Phy Derivations Practice 2', ip: 'IP Final Mock Test A', num: 'Review Mock A errors', diag: 'Review Mock A diagrams' },
-            { day: 83, bio: 'Biology Final Mock Test B', chem: 'Chem Final Mock Test B', phy: 'Phy Final Mock Test A', ip: 'IP Final Mock Test B', num: 'Review Mock B errors', diag: 'Review Mock B diagrams' },
-            { day: 84, bio: 'Biology Final Mock Test C', chem: 'Chem Final Mock Test C', phy: 'Phy Final Mock Test B', ip: 'IP Final Mock Test C', num: 'Review Mock C errors', diag: 'Review Mock C diagrams' },
-            { day: 85, bio: 'Biology Flashcard Rev', chem: 'Chem Flashcard Rev', phy: 'Phy Final Mock Test C', ip: 'IP Flashcard Rev', num: 'Review all formula flashcards', diag: 'Review all diagram flashcards' },
-            { day: 86, bio: 'Subject specific weak topics', chem: 'Subject specific weak topics', phy: 'Subject specific weak topics', ip: 'Subject specific weak topics', num: 'Solve 50 random mixed numericals', diag: 'Draw 10 random mixed diagrams' },
-            { day: 87, bio: 'Subject specific weak topics', chem: 'Subject specific weak topics', phy: 'Subject specific weak topics', ip: 'Subject specific weak topics', num: 'Solve 50 random mixed numericals', diag: 'Draw 10 random mixed diagrams' },
-            { day: 88, bio: 'Weekly Revision (Bio)', chem: 'Weekly Revision (Chem)', phy: 'Weekly Revision (Phy)', ip: 'Weekly Test', num: 'Full Syllabus Numerical Test', diag: 'Draw 5 random weak diagrams' },
-            { day: 89, bio: 'Relaxation & Light Reading', chem: 'Formula Sheet Review', phy: 'Formula Sheet Review', ip: 'Syntax Review', num: 'Zero new numericals. Review only.', diag: 'Zero new diagrams. Review only.' },
-            { day: 90, bio: 'Exam Strategy & Mindset', chem: 'Exam Strategy & Mindset', phy: 'Exam Strategy & Mindset', ip: 'Exam Strategy & Mindset', num: 'Mental prep for boards', diag: 'Target 87% Secured.' }
-        ];
-
-        // Advanced Flashcard Deck & Mock Test Bank (3 Options)
-        const flashcardDeck = [
-            { q: "Gauss's Law", a: "$\\Phi = \\frac{q_{\\text{enc}}}{\\varepsilon_0}$", cat: "Physics - Electromagnetism" },
-            { q: "Lens Maker's Equation", a: "$\\frac{1}{f} = (n-1)(\\frac{1}{R_1} - \\frac{1}{R_2})$", cat: "Physics - Optics" },
-            { q: "De Broglie Wavelength", a: "$\\lambda = \\frac{h}{p}$", cat: "Physics - Modern" },
-            { q: "Nernst Equation", a: "$E_{\\text{cell}} = E^\\circ - \\frac{0.0591}{n} \\log Q$", cat: "Chemistry - Physical" },
-            { q: "Arrhenius Equation", a: "$k = A e^{-E_a / RT}$", cat: "Chemistry - Physical" },
-            { q: "Transcription vs Translation", a: "Transcription: DNA to RNA. Translation: RNA to Protein.", cat: "Biology - Genetics" },
-            { q: "Hardy-Weinberg Principle", a: "$p^2 + 2pq + q^2 = 1$", cat: "Biology - Evolution" },
-            { q: "Faraday's Law of Induction", a: "$\\varepsilon = -N \\frac{d\\Phi}{dt}$", cat: "Physics - EMI" }
-        ];
-
-        const mockTestBank = [
-            { 
-                q: "Calculate the equivalent capacitance of three $2\\mu F$ capacitors in series.", 
-                opts: ["$6 \\mu F$", "$\\frac{2}{3} \\mu F$", "$1.5 \\mu F$"], 
-                ans: 1, 
-                topic: "Electrostatics" 
-            },
-            { 
-                q: "What is the primary product of the reaction between Phenol and conc. $HNO_3$?", 
-                opts: ["Benzoic Acid", "Picric Acid", "Salicylic Acid"], 
-                ans: 1, 
-                topic: "Organic Chemistry" 
-            },
-            { 
-                q: "Which vector is commonly used for cloning genes in plants?", 
-                opts: ["pBR322", "Bacteriophage", "Ti Plasmid"], 
-                ans: 2, 
-                topic: "Biotechnology" 
-            },
-            { 
-                q: "Write a SQL query to find distinct names from a table 'STUDENT'.", 
-                opts: ["SELECT UNIQUE name FROM STUDENT;", "SELECT DISTINCT name FROM STUDENT;", "SELECT name FROM STUDENT UNIQUE;"], 
-                ans: 1, 
-                topic: "IP - SQL" 
-            },
-            { 
-                q: "State the mathematical form of Raoult's Law for volatile solutes.", 
-                opts: ["$P_T = P_A^\\circ \\chi_A + P_B^\\circ \\chi_B$", "$P_A = K_H \\chi_A$", "$\\pi = CRT$"], 
-                ans: 0, 
-                topic: "Solutions" 
-            },
-            { 
-                q: "Identify the hormone responsible for inducing ovulation.", 
-                opts: ["Follicle Stimulating Hormone (FSH)", "Progesterone", "Luteinizing Hormone (LH)"], 
-                ans: 2, 
-                topic: "Human Reproduction" 
-            },
-            { 
-                q: "What is the unit of the rate constant $k$ for a first-order reaction?", 
-                opts: ["$s^{-1}$", "$mol \\cdot L^{-1} \\cdot s^{-1}$", "$L \\cdot mol^{-1} \\cdot s^{-1}$"], 
-                ans: 0, 
-                topic: "Chemical Kinetics" 
-            },
-            { 
-                q: "Which logic gate outputs 1 only when all inputs are 1?", 
-                opts: ["OR Gate", "NAND Gate", "AND Gate"], 
-                ans: 2, 
-                topic: "IP - Boolean Logic" 
+        if (hoursPassed > 1) {
+            gameState.hunger = Math.max(0, Math.floor(gameState.hunger - (hoursPassed * 5)));
+            if (!gameState.isSleeping) {
+                gameState.energy = Math.max(0, Math.floor(gameState.energy - (hoursPassed * 4)));
             }
-        ];
+        }
+    }
 
-        // --- Massive Database Generation ---
-        function generateDatabaseContent() {
-            const physCats = {
-                "Mechanics & Properties of Matter": [
-                    "Kinematics 1D: $v = u + at$, $s = ut + \\frac{1}{2}at^2$, $v^2 = u^2 + 2as$", 
-                    "Work & Energy: $W = \\vec{F} \\cdot \\vec{s}$, $K.E. = \\frac{1}{2}mv^2$", 
-                    "Gravitation Force: $F = G \\frac{m_1 m_2}{r^2}$",
-                    "Escape Velocity: $v_e = \\sqrt{\\frac{2GM}{R}}$",
-                    "Terminal Velocity: $v_t = \\frac{2}{9} \\frac{r^2 (\\rho - \\sigma) g}{\\eta}$"
-                ],
-                "Electrostatics & Current": [
-                    "Coulomb's Law: $F = k \\frac{q_1 q_2}{r^2}$", 
-                    "Electric Field (Point): $E = k \\frac{q}{r^2}$",
-                    "Gauss's Law: $\\oint \\vec{E} \\cdot d\\vec{A} = \\frac{q_{\\text{enc}}}{\\varepsilon_0}$",
-                    "Electric Potential: $V = k \\frac{q}{r}$",
-                    "Capacitance (Parallel): $C = \\frac{\\varepsilon_0 A}{d}$",
-                    "Energy Stored (Capacitor): $U = \\frac{1}{2} CV^2 = \\frac{Q^2}{2C}$",
-                    "Ohm's Law: $V = IR$",
-                    "Drift Velocity: $v_d = \\frac{I}{neA} = \\frac{eE}{m} \\tau$",
-                    "Resistivity: $\\rho = \\frac{m}{ne^2 \\tau}$",
-                    "Kirchhoff's Voltage Law: $\\sum \\Delta V = 0$"
-                ],
-                "Magnetism & EMI & AC": [
-                    "Biot-Savart Law: $dB = \\frac{\\mu_0 I dl \\sin\\theta}{4\\pi r^2}$",
-                    "Ampere's Law: $\\oint \\vec{B} \\cdot d\\vec{l} = \\mu_0 I_{\\text{enc}}$",
-                    "Magnetic Force (Charge): $\\vec{F} = q(\\vec{v} \\times \\vec{B})$",
-                    "Magnetic Force (Wire): $\\vec{F} = I(\\vec{l} \\times \\vec{B})$",
-                    "Faraday's Law: $\\varepsilon = -N \\frac{d\\Phi}{dt}$",
-                    "Motional EMF: $\\varepsilon = Blv$",
-                    "Self-Inductance: $\\varepsilon = -L \\frac{dI}{dt}$",
-                    "AC RMS Voltage: $V_{\\text{rms}} = \\frac{V_0}{\\sqrt{2}}$",
-                    "LCR Impedance: $Z = \\sqrt{R^2 + (X_L - X_C)^2}$",
-                    "Resonant Frequency: $f_r = \\frac{1}{2\\pi\\sqrt{LC}}$"
-                ],
-                "Optics & Modern Physics": [
-                    "Mirror Formula: $\\frac{1}{v} + \\frac{1}{u} = \\frac{1}{f}$",
-                    "Lens Formula: $\\frac{1}{v} - \\frac{1}{u} = \\frac{1}{f}$",
-                    "Lens Maker's Eq: $\\frac{1}{f} = (n-1)(\\frac{1}{R_1} - \\frac{1}{R_2})$",
-                    "Snell's Law: $n_1 \\sin i = n_2 \\sin r$",
-                    "Fringe Width (YDSE): $\\beta = \\frac{\\lambda D}{d}$",
-                    "Photon Energy: $E = h\\nu = \\frac{hc}{\\lambda}$",
-                    "Photoelectric Eq: $K_{\\max} = h\\nu - \\Phi$",
-                    "De Broglie Wavelength: $\\lambda = \\frac{h}{p} = \\frac{h}{\\sqrt{2mK}}$",
-                    "Bohr Radius: $r_n = 0.529 \\frac{n^2}{Z} \\mathring{A}$",
-                    "Bohr Energy: $E_n = -13.6 \\frac{Z^2}{n^2} \\text{ eV}$",
-                    "Mass-Energy Eq: $E = \\Delta mc^2$",
-                    "Radioactive Decay: $N = N_0 e^{-\\lambda t}$",
-                    "Half-Life: $T_{1/2} = \\frac{0.693}{\\lambda}$"
-                ]
-            };
-
-            const chemCats = {
-                "Physical Chemistry": [
-                    "Molarity: $M = \\frac{\\text{Moles of Solute}}{\\text{Vol of Solution (L)}}$", 
-                    "Molality: $m = \\frac{\\text{Moles of Solute}}{\\text{Mass of Solvent (kg)}}$",
-                    "Henry's Law: $p = K_H \\chi$",
-                    "Raoult's Law (Volatile): $P_T = P_A^\\circ \\chi_A + P_B^\\circ \\chi_B$",
-                    "Elevation of B.P.: $\\Delta T_b = i K_b m$",
-                    "Depression of F.P.: $\\Delta T_f = i K_f m$",
-                    "Osmotic Pressure: $\\pi = i CRT$",
-                    "Nernst Equation: $E_{\\text{cell}} = E^\\circ_{\\text{cell}} - \\frac{0.0591}{n} \\log Q$",
-                    "Faraday's 1st Law: $w = ZIt$",
-                    "Kohlrausch Law: $\\Lambda^\\circ_m = \\nu_+ \\lambda^\\circ_+ + \\nu_- \\lambda^\\circ_-$",
-                    "Rate of Reaction: $r = \\pm \\frac{d[Conc]}{dt}$",
-                    "Zero Order Half-life: $t_{1/2} = \\frac{[R]_0}{2k}$",
-                    "First Order Rate: $k = \\frac{2.303}{t} \\log \\frac{[A]_0}{[A]}$",
-                    "First Order Half-life: $t_{1/2} = \\frac{0.693}{k}$",
-                    "Arrhenius Equation: $k = A e^{-E_a / RT}$"
-                ],
-                "Inorganic & Solid State": [
-                    "Density of Unit Cell: $d = \\frac{Z \\cdot M}{a^3 \\cdot N_A}$",
-                    "Magnetic Moment: $\\mu = \\sqrt{n(n+2)} \\text{ BM}$",
-                    "Crystal Field Splitting (Oct): $\\Delta_o = E(e_g) - E(t_{2g})$"
-                ],
-                "Organic Reactions & Mechanisms": [
-                    "SN1 Mechanism: 2 steps, Carbocation intermediate, Racemization, 3° > 2° > 1°", 
-                    "SN2 Mechanism: 1 step, Transition state, Inversion, 1° > 2° > 3°",
-                    "Markovnikov's Rule: Negative part of addendum attaches to C with fewer H atoms.",
-                    "Zaitsev (Saytzeff) Rule: Most substituted alkene is the major product in elimination.",
-                    "Aldol Condensation: Aldehydes/Ketones with $\\alpha$-H react with dilute base.",
-                    "Cannizzaro Reaction: Aldehydes without $\\alpha$-H undergo self ox/red with conc. base.",
-                    "Hoffmann Bromamide: R-CONH2 + Br2 + 4NaOH $\\rightarrow$ R-NH2 + Na2CO3 + 2NaBr + 2H2O"
-                ]
-            };
-
-            const bioDefs = [
-                "<b>Transcription:</b> Process of copying genetic info from one DNA strand into RNA.",
-                "<b>Translation:</b> Polymerization of amino acids to form a polypeptide.",
-                "<b>Point Mutation:</b> Change of a single base pair in DNA.",
-                "<b>Pleiotropy:</b> Single gene controlling multiple phenotypic expressions.",
-                "<b>Biomagnification:</b> Increase in toxicant concentration at successive trophic levels.",
-                "<b>Eutrophication:</b> Natural aging of a lake by biological enrichment of its water.",
-                "<b>Endemism:</b> Species confined to that region and not found anywhere else.",
-                "<b>Totipotency:</b> Capacity to generate a whole plant from any cell/explant.",
-                "<b>Apomixis:</b> Form of asexual reproduction that mimics sexual reproduction producing seeds without fertilization.",
-                "<b>Parthenocarpy:</b> Development of fruit without fertilization.",
-                "<b>Placenta:</b> Structural and functional unit between developing embryo and maternal body.",
-                "<b>Colostrum:</b> Milk produced during initial days of lactation, rich in IgA antibodies.",
-                "<b>Amniocentesis:</b> Fetal sex determination and disorder test based on chromosomal pattern in amniotic fluid.",
-                "<b>Linkage:</b> Physical association of genes on a chromosome.",
-                "<b>Codominance:</b> Both alleles express themselves equally in heterozygotes.",
-                "<b>Incomplete Dominance:</b> Heterozygote phenotype is intermediate between the two homozygous phenotypes.",
-                "<b>Operon:</b> A coordinated group of genes regulated together.",
-                "<b>Homologous Organs:</b> Same fundamental structure but different functions (divergent evolution).",
-                "<b>Analogous Organs:</b> Different structure but similar functions (convergent evolution).",
-                "<b>Passive Immunity:</b> Ready-made antibodies directly given to protect the body.",
-                "<b>Active Immunity:</b> Host's body produces antibodies upon exposure to antigens.",
-                "<b>Palindromic Sequence:</b> DNA sequence that reads the same forwards and backwards.",
-                "<b>Biopiracy:</b> Use of bio-resources by organizations without proper authorization."
-            ];
-
-            let pHTML = ''; Object.keys(physCats).forEach(k => { pHTML += `<div class="db-category">${k}</div><ul class="db-list">` + physCats[k].map(f => `<li>${f}</li>`).join('') + `</ul>`; });
-            document.getElementById('phyFormulasList').innerHTML = pHTML;
-
-            let cHTML = ''; Object.keys(chemCats).forEach(k => { cHTML += `<div class="db-category">${k}</div><ul class="db-list">` + chemCats[k].map(f => `<li>${f}</li>`).join('') + `</ul>`; });
-            document.getElementById('chemFormulasList').innerHTML = cHTML;
-            
-            document.getElementById('bioDefList').innerHTML = `<ul class="db-list">` + bioDefs.map(d => `<li>${d}</li>`).join('') + `</ul>`;
-            
-            const diagBio = ["Microsporangium T.S.", "Male Reproductive System", "Female Reproductive System", "Sperm Structure", "Ovary Section", "Nucleosome", "Replication Fork", "tRNA Structure", "Lac Operon", "Miller's Experiment Setup", "Antibody Molecule", "Life Cycle of Plasmodium", "HIV Replication", "Biogas Plant", "pBR322 Cloning Vector", "Bioreactor", "PCR Steps", "Pyramid of Energy", "Phosphorus Cycle"];
-            const diagChem = ["Galvanic Cell", "Standard Hydrogen Electrode", "Crystal Field Splitting (Octahedral)", "Crystal Field Splitting (Tetrahedral)", "Extent of Adsorption Graph", "Blast Furnace", "Haber Process Flow", "Contact Process Flow", "XeF2, XeF4, XeF6 Shapes", "Optical Isomers of [Co(en)3]3+", "SN2 Transition State", "SN1 Carbocation", "Peptide Bond Formation", "Pyranose Structure of Glucose", "DNA Nucleotide Linkage"];
-            const diagPhy = ["Electric Dipole Field Lines", "Equipotential Surfaces", "Van de Graaff Generator", "Wheatstone Bridge", "Potentiometer", "Moving Coil Galvanometer", "Cyclotron", "Hysteresis Loop", "AC Generator", "Transformer", "Electromagnetic Spectrum", "Ray Diagram: Compound Microscope", "Ray Diagram: Astronomical Telescope", "Young's Double Slit", "Polarization by Reflection", "Photoelectric Effect Setup", "Energy Level Diagram (Hydrogen)", "p-n Junction (Forward/Reverse)", "Full Wave Rectifier"];
-
-            const makeDiag = (list, icon) => list.map(d => `<div class="diagram-item"><span class="material-symbols-outlined icon">${icon}</span>${d}</div>`).join('');
-            document.getElementById('bioDiagramsList').innerHTML = makeDiag(diagBio, 'biotech');
-            document.getElementById('chemDiagramsList').innerHTML = makeDiag(diagChem, 'science');
-            document.getElementById('phyDiagramsList').innerHTML = makeDiag(diagPhy, 'electric_bolt');
+    function action(type) {
+        if (gameState.isSleeping && type !== 'sleep') {
+            showReaction("Shh... resting.");
+            return;
         }
 
-        // --- Flashcard Engine ---
-        let currentFcIndex = 0;
-        let priorityQueue = JSON.parse(localStorage.getItem('weakCards')) || [];
+        clearTimeout(animationTimeout);
 
-        function loadNextFlashcard() {
-            document.getElementById('fc-inner').classList.remove('is-flipped');
-            let card;
-            
-            if(priorityQueue.length > 0 && Math.random() > 0.4) {
-                let weakCardIndex = priorityQueue[Math.floor(Math.random() * priorityQueue.length)];
-                card = flashcardDeck[weakCardIndex];
-                currentFcIndex = weakCardIndex;
+        if (type === 'play') {
+            gameState.energy = Math.max(0, gameState.energy - 15);
+            showReaction(`${gameState.mainCatName} is chasing the toy! 🧶`);
+            playSound('audio-meow');
+            playAnimation('cat_play.gif', true);
+        } 
+        else if (type === 'cuddle') {
+            if (gameState.phase === 2) {
+                showReaction(`${gameState.mainCatName} is cuddling with Akira! 🧡`);
+                playSound('audio-purr');
+                playAnimation('meet_akira.gif', true);
+            } else if (gameState.phase === 4) {
+                showReaction(`The kittens pile up on ${gameState.mainCatName}.`);
+                playSound('audio-purr');
+                playAnimation('kitten_cuddle.gif', true);
             } else {
-                currentFcIndex = Math.floor(Math.random() * flashcardDeck.length);
-                card = flashcardDeck[currentFcIndex];
+                showReaction(`${gameState.mainCatName} purrs happily. 🧡`);
+                playSound('audio-purr');
+                playAnimation('cat_cuddle.gif', true);
             }
-
-            setTimeout(() => {
-                document.getElementById('fc-cat').innerHTML = card.cat + (priorityQueue.includes(currentFcIndex) ? ' <span style="color:var(--danger)">[WEAK]</span>' : '');
-                document.getElementById('fc-q').innerHTML = card.q;
-                document.getElementById('fc-a').innerHTML = card.a;
-                document.getElementById('fc-queue-count').innerText = priorityQueue.length;
-                if(window.MathJax) MathJax.typesetPromise();
-            }, 150);
         }
-
-        function markFlashcard(remembered) {
-            if(!remembered && !priorityQueue.includes(currentFcIndex)) {
-                priorityQueue.push(currentFcIndex);
-            } else if (remembered && priorityQueue.includes(currentFcIndex)) {
-                priorityQueue = priorityQueue.filter(idx => idx !== currentFcIndex);
-            }
-            localStorage.setItem('weakCards', JSON.stringify(priorityQueue));
-            loadNextFlashcard();
-        }
-
-        // --- Mock Test Engine (Multiple Choice) ---
-        let activeTestTimer;
-        let testTimeLeft = 2700; // 45 mins
-        let currentMockQuestions = [];
-
-        function startMockTest() {
-            document.getElementById('testSetup').style.display = 'none';
-            document.getElementById('testReport').style.display = 'none';
-            document.getElementById('testActive').style.display = 'block';
-            
-            currentMockQuestions = [...mockTestBank].sort(() => 0.5 - Math.random()).slice(0, 5);
-            
-            let qHTML = '';
-            currentMockQuestions.forEach((q, index) => {
-                let optsHTML = q.opts.map((opt, i) => `
-                    <label class="q-option-label" id="lbl-${index}-${i}">
-                        <input type="radio" name="q${index}" value="${i}">
-                        ${opt}
-                    </label>
-                `).join('');
-
-                qHTML += `
-                <div class="q-card" id="qcard-${index}">
-                    <div class="q-meta">Question ${index + 1} | ${q.topic}</div>
-                    <div class="q-title">${q.q}</div>
-                    <div>${optsHTML}</div>
-                    <div class="q-feedback" id="qfeed-${index}"></div>
-                </div>`;
-            });
-            
-            document.getElementById('testQuestionsArea').innerHTML = qHTML;
-            if(window.MathJax) MathJax.typesetPromise();
-
-            testTimeLeft = 2700;
-            updateTimerDisplay();
-            activeTestTimer = setInterval(() => {
-                testTimeLeft--;
-                updateTimerDisplay();
-                if(testTimeLeft <= 0) submitMockTest();
-            }, 1000);
-        }
-
-        function updateTimerDisplay() {
-            let m = Math.floor(testTimeLeft / 60);
-            let s = testTimeLeft % 60;
-            document.getElementById('testTimer').innerText = `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
-        }
-
-        function submitMockTest() {
-            clearInterval(activeTestTimer);
-            let score = 0;
-            let weakTopics = [];
-            
-            currentMockQuestions.forEach((q, idx) => {
-                let selectedRadio = document.querySelector(`input[name="q${idx}"]:checked`);
-                let feedbackDiv = document.getElementById(`qfeed-${idx}`);
-                let correctLabel = document.getElementById(`lbl-${idx}-${q.ans}`);
-                
-                feedbackDiv.style.display = 'block';
-                
-                if(selectedRadio && parseInt(selectedRadio.value) === q.ans) {
-                    score++;
-                    feedbackDiv.className = 'q-feedback feed-correct';
-                    feedbackDiv.innerText = '✓ Correct';
-                    correctLabel.style.borderColor = 'var(--success)';
-                } else {
-                    weakTopics.push(q.topic);
-                    feedbackDiv.className = 'q-feedback feed-wrong';
-                    feedbackDiv.innerText = '✗ Incorrect. The correct answer is highlighted below.';
-                    correctLabel.style.borderColor = 'var(--success)';
-                    correctLabel.style.background = 'rgba(16, 185, 129, 0.2)';
-                    
-                    if(selectedRadio) {
-                        let wrongLabel = document.getElementById(`lbl-${idx}-${selectedRadio.value}`);
-                        wrongLabel.style.borderColor = 'var(--danger)';
-                    }
-                }
-                
-                // Disable radios
-                document.querySelectorAll(`input[name="q${idx}"]`).forEach(r => r.disabled = true);
-            });
-
-            document.getElementById('testActive').style.display = 'none';
-            document.getElementById('testQuestionsArea').style.display = 'block'; 
-            document.getElementById('testActive').style.display = 'block'; 
-            document.querySelector('#testActive .btn-action').style.display = 'none'; // Hide submit button
-
-            document.getElementById('testReport').style.display = 'block';
-            document.getElementById('reportScore').innerText = score;
-            document.getElementById('reportScore').style.color = score > 3 ? 'var(--success)' : 'var(--danger)';
-            
-            if(weakTopics.length > 0) {
-                document.getElementById('reportWeakTopics').innerHTML = weakTopics.map(t => `<li>❌ ${t}</li>`).join('');
+        else if (type === 'sleep') {
+            gameState.isSleeping = !gameState.isSleeping;
+            if (gameState.isSleeping) {
+                showReaction(`${gameState.mainCatName} is falling asleep... 💤`);
+                document.getElementById('btn-sleep').innerHTML = "WAKE ☀️";
+                playAnimation('cat_sleep.gif', false);
             } else {
-                document.getElementById('reportWeakTopics').innerHTML = `<li style="color:var(--success)">Perfect Score! No weak topics detected.</li>`;
-            }
-            
-            window.scrollTo(0, document.getElementById('testReport').offsetTop - 50);
-        }
-
-        function resetMockTest() {
-            document.getElementById('testReport').style.display = 'none';
-            document.getElementById('testActive').style.display = 'none';
-            document.querySelector('#testActive .btn-action').style.display = 'flex'; // Restore submit button
-            document.getElementById('testSetup').style.display = 'block';
-            window.scrollTo(0, document.getElementById('testSetup').offsetTop - 50);
-        }
-
-        // --- General App Functions ---
-        function showToast(msg) {
-            const toast = document.getElementById("toast");
-            toast.innerText = msg;
-            toast.classList.add("show");
-            setTimeout(() => toast.classList.remove("show"), 3000);
-        }
-
-        function saveReflection() {
-            localStorage.setItem('reflectionLog', document.getElementById('reflectionText').value);
-            localStorage.setItem('dailyHours', document.getElementById('dailyHours').value);
-            showToast("Telemetry Logged Successfully.");
-            buildHeatmap();
-        }
-
-        function startLiveClock() {
-            setInterval(() => {
-                document.getElementById('liveClock').innerText = new Date().toLocaleTimeString('en-US', { hour12: false });
-            }, 1000);
-        }
-
-        function getCurrentDayIndex() {
-            const today = new Date();
-            const startD = new Date(START_DATE.getFullYear(), START_DATE.getMonth(), START_DATE.getDate());
-            const currentD = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-            const diffTime = currentD.getTime() - startD.getTime();
-            const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24)) + 1;
-            return Math.max(1, Math.min(diffDays, 90)); 
-        }
-
-        function updateHeaderDate() {
-            document.getElementById('dateDisplay').innerText = `Target: 87% | ${new Date().toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })} | Day ${getCurrentDayIndex()} of 90`;
-        }
-
-        function changeMonth(offset) {
-            viewMonth += offset;
-            if (viewMonth < 0) { viewMonth = 11; viewYear--; }
-            else if (viewMonth > 11) { viewMonth = 0; viewYear++; }
-            buildCalendar();
-        }
-
-        function buildCalendar() {
-            const grid = document.getElementById('calendarGrid');
-            const monthDisplay = document.getElementById('calMonthDisplay');
-            
-            const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-            monthDisplay.innerText = `${monthNames[viewMonth]} ${viewYear}`;
-            
-            grid.innerHTML = '';
-            ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].forEach(day => grid.innerHTML += `<div class="cal-header">${day}</div>`);
-
-            const firstDay = new Date(viewYear, viewMonth, 1).getDay();
-            const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
-            
-            const today = new Date();
-            const startD = new Date(START_DATE.getFullYear(), START_DATE.getMonth(), START_DATE.getDate());
-
-            for (let i = 0; i < firstDay; i++) {
-                grid.innerHTML += `<div></div>`;
-            }
-
-            for (let i = 1; i <= daysInMonth; i++) {
-                let cellDate = new Date(viewYear, viewMonth, i);
-                let diffTime = cellDate.getTime() - startD.getTime();
-                let dayOfPlan = Math.round(diffTime / (1000 * 60 * 60 * 24)) + 1;
-                
-                let classes = 'cal-day';
-                if (cellDate.toDateString() === today.toDateString()) classes += ' active';
-                else if (cellDate < today) classes += ' past';
-                
-                let innerHtml = `${i}`;
-                let clickAction = '';
-                
-                if (dayOfPlan >= 1 && dayOfPlan <= 90) {
-                    innerHtml += `<div class="plan-day-badge">D${dayOfPlan}</div>`;
-                    clickAction = `onclick="openDaySchedule(${dayOfPlan})"`;
-                    classes += ' plan-active';
-                } else {
-                    clickAction = `onclick="showToast('Out of bounds of 90-Day Protocol.')"`;
-                }
-                
-                grid.innerHTML += `<div class="${classes}" ${clickAction}>${innerHtml}</div>`;
+                gameState.energy = Math.min(100, gameState.energy + 40);
+                showReaction(`${gameState.mainCatName} is waking up! ☀️`);
+                document.getElementById('btn-sleep').innerHTML = "SLEEP 💤";
+                setIdleAnimation();
             }
         }
 
-        function buildHeatmap() {
-            const grid = document.getElementById('heatmapGrid');
-            grid.innerHTML = '';
-            const currentDay = getCurrentDayIndex();
-            let totalHours = 0;
-            let weekHours = 0;
+        saveData();
+        updateUI();
+    }
 
-            for(let i=1; i<=90; i++) {
-                let heatClass = '';
-                let loggedHours = 0;
+    function feedCat(foodName, hungerValue) {
+        gameState.hunger = Math.min(100, gameState.hunger + hungerValue);
+        showReaction(`${gameState.mainCatName} is eating ${foodName}... 🍖`);
+        playSound('audio-eat');
+        playAnimation('cat_eat.gif', true);
+        closeModal('food-modal');
+        saveData();
+        updateUI();
+    }
 
-                if(i < currentDay) {
-                    const r = Math.random();
-                    if(r > 0.8) { heatClass = 'heat-lvl-4'; loggedHours = 7; }
-                    else if(r > 0.6) { heatClass = 'heat-lvl-3'; loggedHours = 5; }
-                    else if(r > 0.3) { heatClass = 'heat-lvl-2'; loggedHours = 3; }
-                    else { heatClass = 'heat-lvl-1'; loggedHours = 1; }
-                } else if (i === currentDay) {
-                    loggedHours = parseInt(localStorage.getItem('dailyHours') || 0);
-                    if(loggedHours >= 7) heatClass = 'heat-lvl-4';
-                    else if(loggedHours >= 5) heatClass = 'heat-lvl-3';
-                    else if(loggedHours >= 3) heatClass = 'heat-lvl-2';
-                    else if(loggedHours > 0) heatClass = 'heat-lvl-1';
-                }
+    function skipDay() {
+        gameState.age++;
+        checkLifeEvents();
+        saveData();
+        updateUI();
+    }
 
-                totalHours += loggedHours;
-                if(i > currentDay - 7 && i <= currentDay) weekHours += loggedHours;
-
-                grid.innerHTML += `<div class="heat-cell ${heatClass}" title="Day ${i}"></div>`;
-            }
-            document.getElementById('statHours').innerText = totalHours;
-            document.getElementById('statWeekHours').innerText = weekHours;
+    function checkLifeEvents() {
+        if (gameState.phase === 4) {
+            showReaction(`Raising ${gameState.kittens.k1}, ${gameState.kittens.k2}, & ${gameState.kittens.k3}.`);
+            setIdleAnimation();
+            return;
         }
 
-        function openDaySchedule(dayNum) {
-            const modal = document.getElementById('calendarModal');
-            const list = document.getElementById('modalTaskList');
-            
-            if(dayNum < 1 || dayNum > 90) {
-                showToast("No active protocol for this date.");
-                return;
-            }
-
-            let exactDate = new Date(START_DATE.getTime() + (dayNum - 1) * 24 * 60 * 60 * 1000);
-            let dateStr = exactDate.toLocaleDateString('en-IN', { weekday: 'short', month: 'short', day: 'numeric' });
-
-            document.getElementById('modalTitle').innerText = `Day ${dayNum} Schedule (${dateStr})`;
-            const dayData = timetable.find(t => t.day === dayNum);
-
-            if (dayData) {
-                list.innerHTML = `
-                    <p><b style="color:#34d399">BIO:</b> ${dayData.bio}</p>
-                    <p><b style="color:#7dd3fc">CHEM:</b> ${dayData.chem}</p>
-                    <p><b style="color:#fb7185">PHY:</b> ${dayData.phy}</p>
-                    <p><b style="color:#fdba74">I.P.:</b> ${dayData.ip}</p>
-                    <p><b style="color:#a78bfa">NUM:</b> ${dayData.num}</p>
-                    <p><b style="color:#fcd34d">DIAG:</b> ${dayData.diag}</p>
-                `;
-            } else {
-                list.innerHTML = `<p style="color:var(--text-muted); text-align:center;">Data module pending for Day ${dayNum}.</p>`;
-            }
-            modal.style.display = 'block';
+        if (gameState.age === 8) {
+            gameState.phase = 2;
+            showReaction(`${gameState.mainCatName} met an orange Persian named Akira! 🧡`);
+        } else if (gameState.age === 12) {
+            gameState.phase = 3;
+            showReaction(`💍 Marriage Day for ${gameState.mainCatName} and Akira!`);
+        } else if (gameState.age === 16) {
+            document.getElementById('kitten-modal').style.display = 'flex';
+        } else {
+            showReaction("A day has passed.");
         }
+        setIdleAnimation();
+    }
 
-        function closeModal() { document.getElementById('calendarModal').style.display = 'none'; }
+    function saveKittens() {
+        gameState.kittens.k1 = document.getElementById('k1').value || "Kit1";
+        gameState.kittens.k2 = document.getElementById('k2').value || "Kit2";
+        gameState.kittens.k3 = document.getElementById('k3').value || "Kit3";
+        gameState.phase = 4;
+        
+        closeModal('kitten-modal');
+        showReaction("Welcome to the family!");
+        saveData();
+        setIdleAnimation();
+        updateUI();
+    }
 
-        function switchTab(sectionId) {
-            document.querySelectorAll('.section').forEach(sec => sec.classList.remove('active'));
-            document.getElementById(sectionId).classList.add('active');
-            document.getElementById('fabMenu').classList.remove('show');
-            
-            if(sectionId === 'importants' && window.MathJax) MathJax.typesetPromise();
-            if(sectionId === 'flashcards' && currentFcIndex === 0) loadNextFlashcard();
+    function updateUI() {
+        document.getElementById('stats-display').innerText = `Hunger: ${gameState.hunger} | Energy: ${gameState.energy}`;
+        let prefix = (gameState.phase === 4) ? "Family Era - " : "Adult Era - ";
+        document.getElementById('age-display').innerText = prefix + "Day " + gameState.age;
+    }
+
+    function showReaction(text) {
+        document.getElementById('reaction-text').innerText = text;
+    }
+
+    function playAnimation(gifName, revertToIdle) {
+        document.getElementById('cat-sprite').src = gifName;
+        if (revertToIdle) {
+            animationTimeout = setTimeout(() => {
+                if (!gameState.isSleeping) setIdleAnimation();
+            }, 3000);
         }
+    }
 
-        function renderTasks() {
-            const currentDay = getCurrentDayIndex();
-            const lists = { today: document.getElementById('todayTaskList'), rem: document.getElementById('remainingTaskList') };
-            lists.today.innerHTML = ''; lists.rem.innerHTML = '';
-
-            let completedToday = 0; let totalToday = 0;
-            let subMetrics = { bio: {c:0, t:0}, chem: {c:0, t:0}, phy: {c:0, t:0}, ip: {c:0, t:0} };
-            let maxCompletedDay = 0;
-
-            for (let i = 0; i < currentDay && i < timetable.length; i++) {
-                const dayData = timetable[i];
-                const isToday = (dayData.day === currentDay);
-                let dayCompletedCount = 0;
-                
-                const subjects = [
-                    { id: 'bio', name: 'BIO', val: dayData.bio, cClass: 'tag-bio' },
-                    { id: 'chem', name: 'CHM', val: dayData.chem, cClass: 'tag-chem' },
-                    { id: 'phy', name: 'PHY', val: dayData.phy, cClass: 'tag-phy' },
-                    { id: 'ip', name: 'I.P.', val: dayData.ip, cClass: 'tag-ip' },
-                    { id: 'num', name: 'NUM', val: dayData.num, cClass: 'tag-num' },
-                    { id: 'diag', name: 'DIAG', val: dayData.diag, cClass: 'tag-diag' }
-                ];
-
-                subjects.forEach(sub => {
-                    const taskId = `task-d${dayData.day}-${sub.id}`;
-                    const isCompleted = localStorage.getItem(taskId) === 'true';
-
-                    if (sub.id === 'bio' || sub.id === 'chem' || sub.id === 'phy' || sub.id === 'ip') {
-                        subMetrics[sub.id].t++;
-                        if (isCompleted) subMetrics[sub.id].c++;
-                    }
-
-                    const tHTML = `
-                        <div class="task-item" onclick="if(event.target.tagName !== 'INPUT') document.getElementById('${taskId}').click();">
-                            <input type="checkbox" id="${taskId}" onchange="handleTaskToggle('${taskId}')" ${isCompleted ? 'checked' : ''}>
-                            <span class="tag ${sub.cClass}">${sub.name} D${dayData.day}</span>
-                            <label style="color:${isCompleted ? 'var(--text-muted)' : 'var(--text-main)'}; text-decoration:${isCompleted ? 'line-through' : 'none'}; cursor:pointer;">${sub.val}</label>
-                        </div>
-                    `;
-
-                    if (!isCompleted) {
-                        if (isToday) { lists.today.innerHTML += tHTML; totalToday++; } 
-                        else { lists.rem.innerHTML += tHTML; }
-                    } else if (isToday && isCompleted) {
-                        totalToday++; completedToday++; lists.today.innerHTML += tHTML; 
-                    }
-
-                    if(isCompleted) dayCompletedCount++;
-                });
-
-                if(dayCompletedCount > 4) maxCompletedDay = dayData.day;
-            }
-
-            if (!lists.today.innerHTML) lists.today.innerHTML = '<div style="color:var(--text-muted); font-style:italic; padding:10px;">Queue cleared. Excellent work.</div>';
-            if (!lists.rem.innerHTML) lists.rem.innerHTML = '<div style="color:var(--text-muted); font-style:italic; padding:10px;">No backlog. Momentum steady.</div>';
-
-            const pFill = document.getElementById('dailyProgress');
-            const pText = document.getElementById('dailyProgressText');
-            if (totalToday === 0) {
-                pFill.style.width = '100%';
-                pText.innerText = '100% SECURED';
-            } else {
-                const pct = Math.round((completedToday / totalToday) * 100);
-                pFill.style.width = `${pct}%`;
-                pText.innerText = `${pct}% SECURED`;
-            }
-            
-            let comp = 0; 
-            Object.keys(localStorage).forEach(k => { if(k.startsWith('task-') && localStorage.getItem(k)==='true') comp++; });
-            
-            document.getElementById('xpLevel').innerText = Math.floor((comp * 50) / 1000) + 1;
-            let currentStreak = completedToday > 0 ? maxCompletedDay : Math.max(0, maxCompletedDay - 1);
-            document.getElementById('streakCounter').innerText = currentStreak;
-            
-            document.getElementById('statTasks').innerText = comp;
-            document.getElementById('statXp').innerText = comp * 50;
-            document.getElementById('chapCompleted').innerText = maxCompletedDay;
-
-            ['bio', 'chem', 'phy', 'ip'].forEach(sub => {
-                const subPct = Math.round((subMetrics[sub].c / (subMetrics[sub].t || 1)) * 100);
-                document.getElementById(`prog${sub.charAt(0).toUpperCase() + sub.slice(1)}`).style.width = `${subPct}%`;
-                document.getElementById(`progText${sub.charAt(0).toUpperCase() + sub.slice(1)}`).innerText = `${sub.toUpperCase()}: ${subPct}%`;
-            });
-
-            const overallPct = Math.round((comp / (currentDay * 6)) * 100) || 0;
-            document.getElementById('dragonText').innerText = `Day ${currentDay} active. Overall mastery at ${overallPct}%. Maintain trajectory, Scholar.`;
+    function setIdleAnimation() {
+        if (gameState.isSleeping) {
+            playAnimation('cat_sleep.gif', false);
+        } else if (gameState.phase === 4) {
+            playAnimation('family_idle.gif', false); 
+        } else if (gameState.phase === 3) {
+            playAnimation('cats_wedding.gif', false);
+        } else if (gameState.phase === 2) {
+            playAnimation('akira_idle.gif', false);
+        } else {
+            playAnimation('cat_idle.gif', false);
         }
+    }
 
-        function handleTaskToggle(taskId) {
-            localStorage.setItem(taskId, document.getElementById(taskId).checked);
-            renderTasks();
-        }
+    function openFoodMenu() {
+        if (gameState.isSleeping) { showReaction("Wake her up first."); return; }
+        
+        let foodList = document.getElementById('food-list');
+        foodList.innerHTML = "";
+        
+        let foods = (gameState.phase === 4) 
+            ? [{n: "Warm Milk 🍼", v: 20}, {n: "Kitten Mash 🥣", v: 25}]
+            : [{n: "Fresh Fish 🐟", v: 30}, {n: "Chicken Bone 🍗", v: 20}, {n: "Canned Food 🥫", v: 25}, {n: "Dry Kibble 🧆", v: 15}];
 
-        window.onload = () => {
-            startLiveClock();
-            updateHeaderDate();
-            buildCalendar();
-            generateDatabaseContent();
-            
-            if(localStorage.getItem('reflectionLog')) document.getElementById('reflectionText').value = localStorage.getItem('reflectionLog');
-            if(localStorage.getItem('dailyHours')) document.getElementById('dailyHours').value = localStorage.getItem('dailyHours');
+        foods.forEach(f => {
+            let div = document.createElement('div');
+            div.className = 'food-item';
+            div.innerText = f.n;
+            div.onclick = () => feedCat(f.n, f.v);
+            foodList.appendChild(div);
+        });
 
-            buildHeatmap();
-            renderTasks();
-            if(window.MathJax) MathJax.typesetPromise();
-        };
-    </script>
+        document.getElementById('food-modal').style.display = 'flex';
+    }
+
+    function closeModal(id) {
+        document.getElementById(id).style.display = 'none';
+    }
+
+    window.onload = init;
+</script>
 </body>
 </html>
