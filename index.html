@@ -46,7 +46,7 @@
         #cat-group {
             position: absolute; top: 55%; left: 50%; width: 200px; height: 200px; 
             z-index: 2; transform: translate(-50%, -50%);
-            transition: left 3s linear; /* Smooth walking */
+            transition: left 3s linear; 
             cursor: pointer;
         }
         .main-sprite {
@@ -69,11 +69,13 @@
         .anim-groom { animation: groom 1s infinite alternate ease-in-out; }
         .anim-play { animation: bounce 0.4s infinite alternate ease-in-out; }
         .anim-cuddle { filter: drop-shadow(0 0 20px #ff6699); transform: scale(1.05); }
+        .anim-eat { animation: tilt 0.3s infinite alternate ease-in-out; }
         .anim-sleep { filter: brightness(0.5); animation: breathe 4s infinite ease-in-out; }
 
         @keyframes breathe { 0%, 100% { transform: scale(1, 1); } 50% { transform: scale(1.03, 0.97); } }
         @keyframes walk { 0% { transform: translateY(0) rotate(-2deg); } 100% { transform: translateY(-10px) rotate(2deg); } }
         @keyframes bounce { 0% { transform: translateY(0); } 100% { transform: translateY(-30px); } }
+        @keyframes tilt { 0%, 100% { transform: rotate(0deg); } 25% { transform: rotate(-8deg); } 75% { transform: rotate(8deg); } }
         @keyframes groom { 0% { transform: rotate(0deg) scale(1); } 100% { transform: rotate(-10deg) scaleY(0.9); } }
 
         /* --- HUD --- */
@@ -93,18 +95,25 @@
             color: #fff; transition: opacity 0.3s ease; pointer-events: none;
         }
 
-        /* --- DRAG & DROP FOOD (PNGs) --- */
+        /* --- DRAG & DROP FOOD TRAY --- */
         #food-tray {
             position: absolute; bottom: 90px; left: 50%; transform: translateX(-50%);
             display: flex; gap: 15px; padding: 15px; z-index: 5;
             transition: opacity 0.3s, transform 0.3s;
         }
         .draggable-food {
-            width: 60px; height: 60px; cursor: grab; padding: 5px;
-            background: rgba(0, 0, 0, 0.4); border-radius: 12px;
-            border: 2px solid rgba(255,255,255,0.3); display: flex; justify-content: center; align-items: center;
+            width: 60px; height: 60px; cursor: grab; padding: 5px; position: relative;
+            background: rgba(0, 0, 0, 0.5); border-radius: 12px;
+            border: 2px solid rgba(255,255,255,0.4); display: flex; justify-content: center; align-items: center;
         }
         .draggable-food img { width: 100%; height: 100%; object-fit: contain; pointer-events: none; }
+        
+        /* The Notification Bubble showing stock amount */
+        .food-badge {
+            position: absolute; bottom: -8px; right: -8px; font-size: 16px; 
+            background: #ff3385; color: #fff; padding: 2px 6px; 
+            border-radius: 10px; border: 2px solid #fff; z-index: 2;
+        }
         
         .flying-food {
             position: fixed; width: 60px; height: 60px; z-index: 9999;
@@ -127,14 +136,13 @@
         }
         button:active { transform: translateY(4px); box-shadow: 0 0 0 rgba(0,0,0,0.5); }
 
-        /* --- MODALS (Shop & Minigame) --- */
+        /* --- MODALS --- */
         .modal {
             display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0, 0, 0, 0.85); z-index: 10; justify-content: center; align-items: center;
         }
         .modal-content { padding: 30px; width: 500px; text-align: center; position: relative; }
         
-        /* Shop Layout */
         .shop-items { display: flex; justify-content: space-around; margin-top: 20px; flex-wrap: wrap; }
         .shop-item {
             background: rgba(0,0,0,0.4); padding: 10px; border-radius: 8px; border: 1px solid #555;
@@ -143,7 +151,6 @@
         .shop-item:hover { background: rgba(255,255,255,0.1); }
         .shop-item img { width: 50px; height: 50px; object-fit: contain; margin-bottom: 5px; }
 
-        /* Minigame Area */
         #minigame-area {
             width: 100%; height: 250px; background: #222; border: 2px solid #555;
             position: relative; overflow: hidden; border-radius: 8px; cursor: crosshair;
@@ -172,8 +179,7 @@
 <audio id="audio-meow" src="meow.mp3"></audio>
 <audio id="audio-eat" src="eat.mp3"></audio>
 <audio id="audio-purr" src="purr.mp3"></audio>
-
-<div id="game-container">
+<audio id="audio-coin" src="coin.mp3"></audio> <div id="game-container">
     <div id="bg-layer"></div>
     
     <div id="cat-group" onclick="petCat()">
@@ -249,7 +255,6 @@
 </div>
 
 <script>
-    // --- GAME STATE ---
     let gameState = {
         name: "Kitty", phase: 1, age: 1, 
         hunger: 100, energy: 100, happy: 100, coins: 50,
@@ -266,7 +271,6 @@
         document.getElementById('kit2-sprite'), document.getElementById('kit3-sprite')
     ];
 
-    // --- ITEM DATABASE (Using user PNGs) ---
     const itemsDB = {
         fish: { name: "Fresh Fish", img: "icon_fish.png", price: 10, hunger: 30 },
         croissant: { name: "Croissant", img: "icon_croissant.png", price: 15, hunger: 20 },
@@ -275,9 +279,8 @@
         mash: { name: "Kitten Mash", img: "icon_mash.png", price: 25, hunger: 35 }
     };
 
-    // --- INITIALIZATION ---
     function init() {
-        let saved = localStorage.getItem('ragdoll_save_v6');
+        let saved = localStorage.getItem('ragdoll_save_v7');
         if (saved) {
             gameState = JSON.parse(saved);
             document.querySelector('.opening-title').innerText = "WELCOME BACK";
@@ -303,7 +306,6 @@
         showReaction(`${gameState.name} entered the room.`);
     }
 
-    // --- CORE LOGIC ---
     function calculateTimeDrain() {
         if (!gameState.lastPlayed || !gameState.startDate) return;
         let msPassed = Date.now() - gameState.lastPlayed;
@@ -315,7 +317,6 @@
             if (!gameState.isSleeping) gameState.energy = Math.max(0, Math.floor(gameState.energy - (hoursPassed * 3)));
         }
         
-        // 4 Years per 24 hours
         let totalMs = Date.now() - gameState.startDate;
         let yearsPassed = Math.floor(totalMs / (1000 * 60 * 60 * 6));
         gameState.age = 1 + yearsPassed;
@@ -324,7 +325,7 @@
 
     function saveData() {
         gameState.lastPlayed = Date.now();
-        localStorage.setItem('ragdoll_save_v6', JSON.stringify(gameState));
+        localStorage.setItem('ragdoll_save_v7', JSON.stringify(gameState));
     }
 
     function playAudio(id) {
@@ -340,13 +341,11 @@
         animationTimeout = setTimeout(() => { if (!gameState.isSleeping) setIdleState(); }, 2000);
     }
 
-    // --- INTERACTION (Petting & Sleeping) ---
     function petCat() {
         if (gameState.isSleeping) return;
         gameState.happy = Math.min(100, gameState.happy + 5);
         showReaction(`You pet ${gameState.name}. Purrr...`);
-        playAudio('audio-purr');
-        triggerAnimation('anim-cuddle');
+        playAudio('audio-purr'); triggerAnimation('anim-cuddle');
         saveData(); updateUI();
     }
 
@@ -358,6 +357,7 @@
                 showReaction("Falling asleep..."); 
                 document.getElementById('btn-sleep').innerHTML = "WAKE UP";
                 document.getElementById('bg-layer').style.filter = "brightness(0.2)";
+                document.getElementById('food-tray').classList.add('hidden');
                 triggerAnimation('anim-sleep');
             } else {
                 gameState.energy = Math.min(100, gameState.energy + 50);
@@ -370,7 +370,6 @@
         saveData(); updateUI();
     }
 
-    // --- AUTONOMOUS BEHAVIOR (Roaming) ---
     function startFelineBrain() {
         clearInterval(behaviorInterval);
         behaviorInterval = setInterval(() => {
@@ -378,7 +377,6 @@
             
             let chance = Math.random();
             if (chance < 0.4) {
-                // Roam Left/Right
                 let newX = 20 + Math.random() * 60; 
                 let currentX = parseFloat(catGroup.style.left || 50);
                 let flip = newX < currentX ? -1 : 1;
@@ -392,21 +390,23 @@
         }, 5000);
     }
 
-    // --- INVENTORY & DRAG FEEDING ---
+    // --- INVENTORY & DRAG FEEDING REWORKED ---
     let activeDrag = null;
 
-    function toggleFoodTray() {
-        if (gameState.isSleeping) return;
+    function updateTrayUI() {
         let tray = document.getElementById('food-tray');
+        if (tray.classList.contains('hidden')) return; // Do nothing if closed
+
         tray.innerHTML = ""; 
-        
         let hasFood = false;
+        
         Object.keys(gameState.inventory).forEach(key => {
             if (gameState.inventory[key] > 0) {
                 hasFood = true;
                 let div = document.createElement('div');
                 div.className = 'draggable-food';
-                div.innerHTML = `<img src="${itemsDB[key].img}" onerror="this.style.display='none'"> <span style="position:absolute; bottom:2px; right:2px; font-size:14px; background:#000; padding:2px; border-radius:4px;">${gameState.inventory[key]}</span>`;
+                div.innerHTML = `<img src="${itemsDB[key].img}" onerror="this.style.display='none'"> 
+                                 <span class="food-badge">${gameState.inventory[key]}</span>`;
                 div.onmousedown = (e) => startDrag(e, key);
                 div.ontouchstart = (e) => startDrag(e, key);
                 tray.appendChild(div);
@@ -414,7 +414,17 @@
         });
 
         if (!hasFood) tray.innerHTML = "<div style='padding:10px;'>No food! Buy some in the Shop.</div>";
-        tray.classList.toggle('hidden');
+    }
+
+    function toggleFoodTray() {
+        if (gameState.isSleeping) return;
+        let tray = document.getElementById('food-tray');
+        if (tray.classList.contains('hidden')) {
+            tray.classList.remove('hidden');
+            updateTrayUI();
+        } else {
+            tray.classList.add('hidden');
+        }
     }
 
     function startDrag(e, itemKey) {
@@ -447,14 +457,10 @@
         let clientY = e.clientY || (e.changedTouches && e.changedTouches[0].clientY);
         let catRect = catGroup.getBoundingClientRect();
         
+        // Checks if dropped on cat
         if (clientX >= catRect.left && clientX <= catRect.right && clientY >= catRect.top && clientY <= catRect.bottom) {
             let key = activeDrag.dataset.key;
-            gameState.inventory[key]--;
-            gameState.hunger = Math.min(100, gameState.hunger + itemsDB[key].hunger);
-            showReaction(`Eating ${itemsDB[key].name}...`);
-            playAudio('audio-eat'); triggerAnimation('anim-eat'); 
-            document.getElementById('food-tray').classList.add('hidden'); 
-            saveData(); updateUI();
+            feedCat(key);
         }
 
         activeDrag.remove(); activeDrag = null;
@@ -462,6 +468,20 @@
         document.removeEventListener('touchmove', moveDrag);
         document.removeEventListener('mouseup', endDrag);
         document.removeEventListener('touchend', endDrag);
+    }
+
+    function feedCat(key) {
+        if (gameState.inventory[key] <= 0) return; // Failsafe
+        
+        gameState.inventory[key]--; // Decreases Stock!
+        gameState.hunger = Math.min(100, gameState.hunger + itemsDB[key].hunger);
+        
+        showReaction(`Eating ${itemsDB[key].name}...`);
+        playAudio('audio-eat'); 
+        triggerAnimation('anim-eat'); 
+        
+        updateTrayUI(); // Dynamically updates the numbers without closing the tray
+        saveData(); updateUI();
     }
 
     // --- SHOP SYSTEM ---
@@ -487,14 +507,16 @@
         if (gameState.coins >= item.price) {
             gameState.coins -= item.price;
             gameState.inventory[key]++;
+            playAudio('audio-coin'); // Vending Machine sound!
+            
             document.getElementById('shop-coins').innerText = gameState.coins;
-            saveData(); updateUI();
+            saveData(); updateUI(); updateTrayUI();
         } else {
             alert("Not enough coins! Play the mini-game.");
         }
     }
 
-    // --- MINI-GAME (Catch the Mouse) ---
+    // --- MINI-GAME ---
     let mgTimer, mgInterval;
     let mgTime = 15; let mgScore = 0;
 
@@ -528,7 +550,7 @@
         area.innerHTML = "";
         let target = document.createElement('div');
         target.className = 'target-obj';
-        target.innerText = "🐭"; // Mini-game target
+        target.innerText = "🐭";
         target.style.left = Math.random() * (area.clientWidth - 40) + 'px';
         target.style.top = Math.random() * (area.clientHeight - 40) + 'px';
         
@@ -560,7 +582,6 @@
         if(id === 'minigame-modal') { clearInterval(mgTimer); clearTimeout(mgInterval); }
     }
 
-    // --- LIFE EVENTS ---
     function checkLifeEvents() {
         if (gameState.phase === 4) return;
         if (gameState.age >= 16 && gameState.phase < 4) {
@@ -613,7 +634,7 @@
 
     function hardReset() {
         if(confirm("Are you sure? This deletes ALL progress forever.")) {
-            localStorage.removeItem('ragdoll_save_v6'); location.reload();
+            localStorage.removeItem('ragdoll_save_v7'); location.reload();
         }
     }
 
