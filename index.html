@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Ragdoll Life - Perfected Journey</title>
+    <title>Ragdoll Life - Complete Journey</title>
     <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
     <style>
         /* --- CORE SETUP --- */
@@ -175,7 +175,7 @@
         .arcade-info { text-align: left; }
         .arcade-name { font-size: 24px; color: #fff; font-weight: bold; }
         .arcade-score-tag { font-size: 18px; color: #ffeaa7; margin-top: 2px; }
-        .arcade-play-icon { font-size: 26px; background: rgba(255,255,255,0.1); border-radius: 50%; width: 44px; height: 44px; display: flex; justify-content: center; align-items: center; border: 1px solid #ff6699; }
+        .arcade-play-icon { font-size: 26px; background: rgba(255,255,255,0.1); border-radius: 50%; width: 44px; height: 44px; display: flex; justify-content: center; align-items: border: 1px solid #ff6699; }
 
         .activities-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
         .act-btn { background: #2f3542; border: 2px solid #57606f; color: #fff; font-size: 20px; font-family: 'VT323'; padding: 10px; border-radius: 8px; cursor: pointer; }
@@ -335,6 +335,7 @@
         </div>
     </div>
 </div>
+
 <script>
     function playMeowSound() {
         let s = document.getElementById('audio-meow');
@@ -515,7 +516,8 @@
 
     function spawnHearts() {
         for(let i=0; i<4; i++) {
-            let h = document.createElement('img'); h.className = 'heart-particle'; h.src = 'hearts.png';
+            let h = document.createElement('img'); h.className = 'heart-particle'; 
+            h.src = 'heart.png'; 
             h.style.left = (40 + Math.random() * 20) + '%'; h.style.top = (45 + Math.random() * 10) + '%';
             document.getElementById('game-container').appendChild(h); setTimeout(() => h.remove(), 1500);
         }
@@ -798,7 +800,7 @@
             gameState.phase = 3; 
             showReaction(`Married Akira! 💍`); 
             setIdleState(); 
-            spawnHearts(); // Trigger hearts.png at age 9
+            spawnHearts(); // Trigger heart.png at age 9
             showAkiraThought("I love you! 💖"); // Akira reacts to marriage
         } 
         else if (gameState.age >= 5 && gameState.phase < 2) { 
@@ -839,6 +841,7 @@
     function setIdleState() {
         if (gameState.phase === 5) return;
         
+        // Strict Visibility Enforcement
         if (gameState.phase >= 2) { akiraWrap.classList.remove('hidden'); } else { akiraWrap.classList.add('hidden'); }
         
         let k1 = document.getElementById('kit1-sprite'); let k2 = document.getElementById('kit2-sprite'); let k3 = document.getElementById('kit3-sprite');
@@ -856,3 +859,5 @@
     function hardReset() { localStorage.removeItem('ragdoll_save_v12'); location.reload(); }
     window.onload = init;
 </script>
+</body>
+</html>
