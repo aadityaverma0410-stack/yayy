@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Ragdoll Life - Complete Journey</title>
+    <title>Ragdoll Life</title>
     <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
     <style>
         /* --- CORE SETUP --- */
@@ -37,7 +37,7 @@
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5); color: #fff; text-shadow: 1px 1px 0 #000;
         }
 
-        /* --- WEATHER & WEDDING EFFECTS --- */
+        /* --- WEATHER, WEDDING, & CREDITS EFFECTS --- */
         #weather-layer, #wedding-layer {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             pointer-events: none; z-index: 5; display: none; overflow: hidden;
@@ -55,6 +55,20 @@
             box-shadow: 0 0 20px rgba(255,255,255,0.5);
         }
 
+        #credits-layer {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: #000; color: #fff; z-index: 10000; display: none;
+            justify-content: center; align-items: center; text-align: center;
+            overflow: hidden;
+        }
+        .credits-scroll {
+            position: absolute; bottom: -100%; font-size: 32px; width: 100%;
+            animation: scrollUp 8s linear forwards;
+        }
+        .credits-scroll h1 { color: #ff6699; font-size: 50px; margin-bottom: 50px; }
+        .credits-scroll p { margin-bottom: 20px; }
+        @keyframes scrollUp { 0% { bottom: -50%; } 100% { bottom: 150%; } }
+
         /* --- SPRITE LAYER --- */
         #cat-group {
             position: absolute; top: 60%; left: 50%; width: 100%; height: 180px; 
@@ -63,9 +77,9 @@
         
         .sprite-wrap { 
             position: absolute; width: 130px; height: 130px; display: flex; justify-content: center; align-items: flex-end; 
-            pointer-events: auto; cursor: grab; transition: left 0.5s ease, top 0.5s ease;
+            pointer-events: auto; cursor: grab;
         }
-        .sprite-wrap:active { cursor: grabbing; transition: none; }
+        .sprite-wrap:active { cursor: grabbing; }
         
         #main-cat-wrap { left: 35%; top: 20px; }
         #akira-wrap { left: 55%; top: 20px; }
@@ -75,15 +89,16 @@
         .kitten-sprite {
             width: 55px; height: 55px; object-fit: contain; position: absolute; cursor: grab;
             z-index: 10; image-rendering: pixelated; transform-origin: bottom center; pointer-events: auto;
-            transition: left 0.5s ease, top 0.5s ease;
         }
-        .kitten-sprite:active { cursor: grabbing; transition: none; }
+        .kitten-sprite:active { cursor: grabbing; }
         #kit1-sprite { top: 120px; left: 30%; }
         #kit2-sprite { top: 130px; left: 45%; }
         #kit3-sprite { top: 115px; left: 60%; }
 
-        /* --- DYNAMIC PROPS --- */
-        .activity-prop { position: absolute; z-index: 4; font-size: 40px; pointer-events: none; animation: bounce 0.5s infinite alternate; }
+        /* --- DYNAMIC PROPS (CSS ONLY) --- */
+        .activity-prop { position: absolute; z-index: 4; pointer-events: none; animation: bounce 0.5s infinite alternate; }
+        .prop-ball { width: 40px; height: 40px; background: #ff6699; border-radius: 50%; box-shadow: inset -5px -5px rgba(0,0,0,0.3); border: 2px solid #fff; }
+        .prop-fish { width: 50px; height: 30px; background: #74b9ff; border-radius: 50% 50% 50% 10%; border: 2px solid #fff; }
 
         /* --- PARTICLES & THOUGHTS --- */
         .heart-particle {
@@ -122,11 +137,7 @@
         @keyframes pounce { 0%, 100% { transform: translateY(0) scale(1); } 50% { transform: translateY(-50px) scale(1.1); } }
 
         /* --- TOP HUD --- */
-        #hud-top {
-            position: absolute; top: 10px; left: 2%; width: 96%; display: flex; 
-            justify-content: space-between; align-items: center; z-index: 10; 
-            font-size: 22px; padding: 8px 15px; box-sizing: border-box;
-        }
+        #hud-top { position: absolute; top: 10px; left: 2%; width: 96%; display: flex; justify-content: space-between; align-items: center; z-index: 10; font-size: 22px; padding: 8px 15px; box-sizing: border-box; }
         .btn-small { background: rgba(255,255,255,0.1); border: 2px solid #fff; border-radius: 8px; color: #fff; font-family: 'VT323'; font-size: 20px; padding: 4px 12px; cursor: pointer; text-shadow: 1px 1px 0 #000; }
         .btn-small:hover { background: rgba(255,255,255,0.3); box-shadow: 0 0 8px #fff; }
         
@@ -137,10 +148,7 @@
         #age-bar-bg { width: 110px; height: 8px; background: rgba(0,0,0,0.6); border: 1px solid #fff; border-radius: 4px; overflow: hidden; }
         #age-bar-fill { height: 100%; background: #ffb199; width: 0%; transition: width 0.5s linear; }
 
-        #reaction-text {
-            position: absolute; top: 68px; right: 2%; padding: 6px 14px; z-index: 10; font-size: 22px; color: #fff; opacity: 0; 
-            transition: opacity 0.3s ease; pointer-events: none; background: rgba(0,0,0,0.75); border-radius: 8px; border: 2px solid #ff6699;
-        }
+        #reaction-text { position: absolute; top: 68px; right: 2%; padding: 6px 14px; z-index: 10; font-size: 22px; color: #fff; opacity: 0; transition: opacity 0.3s ease; pointer-events: none; background: rgba(0,0,0,0.75); border-radius: 8px; border: 2px solid #ff6699; }
 
         /* --- ITEMS & BATH --- */
         #food-tray { position: absolute; bottom: 75px; left: 50%; transform: translateX(-50%); display: flex; gap: 12px; padding: 10px; z-index: 12; transition: opacity 0.3s; }
@@ -149,7 +157,14 @@
         .flying-item { position: fixed; width: 55px; height: 55px; z-index: 99999; pointer-events: none; transform: translate(-50%, -50%); background-size: contain; background-repeat: no-repeat; background-position: center; }
 
         #bath-overlay { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 6; pointer-events: none; flex-direction: column; align-items: center; }
-        #soap-item { width: 70px; height: 70px; background: #a8e6cf; border: 3px solid #fff; border-radius: 16px; position: absolute; bottom: 90px; left: 50%; transform: translateX(-50%); cursor: grab; display: flex; justify-content: center; align-items: center; font-size: 36px; pointer-events: auto; }
+        
+        /* NO EMOJI SOAP - CSS DRAWN */
+        #soap-item {
+            width: 70px; height: 40px; background: linear-gradient(135deg, #74b9ff, #0984e3); border: 2px solid #fff; border-radius: 20px;
+            position: absolute; bottom: 90px; left: 50%; transform: translateX(-50%); cursor: grab;
+            display: flex; justify-content: center; align-items: center; pointer-events: auto; box-shadow: inset -5px -5px rgba(0,0,0,0.2), 0 4px 10px rgba(0,0,0,0.5);
+        }
+        #soap-item::after { content: 'SOAP'; color: #fff; font-size: 16px; font-weight: bold; font-family: sans-serif; opacity: 0.8; }
 
         /* --- BOTTOM CONTROLS --- */
         #controls { position: absolute; bottom: 10px; left: 2%; width: 96%; z-index: 15; display: flex; gap: 10px; justify-content: center; }
@@ -165,13 +180,12 @@
         .modal { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.85); z-index: 100; justify-content: center; align-items: center; }
         .modal-content { padding: 22px; width: 460px; border-radius: 16px; border: 3px solid #ff6699; box-shadow: 0 0 20px rgba(255,102,153,0.5); text-align: center; position: relative; max-height: 88vh; overflow-y: auto; }
         
-        .arcade-menu-grid { display: flex; flex-direction: column; gap: 10px; margin: 15px 0; }
+        .arcade-menu-grid { display: flex; flex-direction: column; gap: 8px; margin: 15px 0; }
         .arcade-card { background: linear-gradient(135deg, #1e272e, #2f3640); border: 2px solid #ff6699; border-radius: 10px; padding: 10px 16px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: transform 0.2s; }
         .arcade-card:hover { transform: scale(1.02); box-shadow: 0 0 12px rgba(255,102,153,0.8); }
         .arcade-info { text-align: left; } .arcade-name { font-size: 22px; color: #fff; font-weight: bold; }
         .arcade-score-tag { font-size: 16px; color: #ffeaa7; margin-top: 2px; }
-        .arcade-play-icon { font-size: 26px; background: rgba(255,255,255,0.1); border-radius: 50%; width: 40px; height: 40px; display: flex; justify-content: center; align-items: center; border: 1px solid #ff6699; }
-
+        
         .activities-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
         .act-btn { background: #2f3542; border: 2px solid #57606f; color: #fff; font-size: 20px; font-family: 'VT323'; padding: 10px; border-radius: 8px; cursor: pointer; }
         .act-btn:hover { background: #57606f; border-color: #ff6699; }
@@ -179,19 +193,19 @@
         #minigame-area { width: 100%; height: 210px; background: #111216; border: 3px solid #ff6699; position: relative; overflow: hidden; border-radius: 10px; margin-bottom: 12px; box-shadow: inset 0 0 15px #000; }
         
         /* Game Specific CSS */
-        .target-obj { width: 38px; height: 38px; position: absolute; cursor: pointer; display: flex; justify-content: center; align-items: center; font-size: 28px; }
-        .tower-block { position: absolute; height: 24px; background: #ff7675; border: 2px solid #fff; box-sizing: border-box; }
+        .target-obj { width: 30px; height: 30px; background: #d63031; border: 2px solid #fff; border-radius: 50%; position: absolute; cursor: pointer; display: flex; justify-content: center; align-items: center; box-shadow: 0 0 10px #d63031; }
+        .tower-block { position: absolute; height: 24px; background: #ff7675; border: 2px solid #fff; box-sizing: border-box; box-shadow: 0 2px 5px rgba(0,0,0,0.5); }
         #puzzle-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 2px; width: 190px; height: 190px; margin: 8px auto; background: #222; padding: 2px; border-radius: 6px; }
         .puzzle-piece { background-color: #333; background-image: url('cat.png'); background-size: 190px 190px; cursor: pointer; }
-        .puzzle-piece.selected { border: 2px solid #ff6699; transform: scale(0.92); }
+        .puzzle-piece.selected { border: 2px solid #ff6699; box-shadow: 0 0 8px #ff6699; transform: scale(0.92); }
         
         /* Flappy Game */
         #flappy-bird { position: absolute; width: 30px; height: 30px; background-image: url('cat.png'); background-size: contain; background-repeat: no-repeat; z-index: 5; }
-        .flappy-pipe { position: absolute; width: 40px; background: #55efc4; border: 2px solid #00b894; z-index: 4; }
+        .flappy-pipe { position: absolute; width: 40px; background: #55efc4; border: 2px solid #00b894; z-index: 4; box-sizing: border-box; }
         
         /* Memory Game */
         #memory-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; width: 95%; height: 95%; margin: 5px auto; }
-        .memory-card { background: #ff6699; border: 2px solid #fff; border-radius: 8px; cursor: pointer; display: flex; justify-content: center; align-items: center; transition: transform 0.2s; }
+        .memory-card { background: #ff6699; border: 2px solid #fff; border-radius: 8px; cursor: pointer; display: flex; justify-content: center; align-items: center; transition: transform 0.2s; pointer-events: auto; }
         .memory-card img { width: 80%; height: 80%; object-fit: contain; display: none; pointer-events: none; }
         .memory-card.flipped { background: #222; transform: scale(0.95); }
         .memory-card.flipped img { display: block; }
@@ -201,7 +215,7 @@
 </head>
 <body>
 
-<div id="landscape-lock"><div>📱 ➔ 🖥️</div><div style="font-size:24px; margin-top:10px;">Rotate to landscape mode to play.</div></div>
+<div id="landscape-lock"><div style="font-size: 24px; padding: 20px;">Please rotate to landscape mode.</div></div>
 
 <audio id="audio-bgm" src="bgm.mp3" loop></audio>
 <audio id="audio-meow" src="meow.mp3"></audio>
@@ -231,13 +245,13 @@
 
     <div id="hud-top" class="glass-panel">
         <div>
-            <button class="btn-small" onclick="openShop()">SHOP 🛒</button>
-            <button class="btn-small" onclick="openActivities()">ACTIVITIES 💖</button>
-            <button class="btn-small" onclick="openMiniGameHub()">ARCADE 🎮</button>
+            <button class="btn-small" onclick="openShop()">SHOP</button>
+            <button class="btn-small" onclick="openActivities()">ACTIVITIES</button>
+            <button class="btn-small" onclick="openMiniGameHub()">ARCADE</button>
         </div>
         <div id="hud-stats-right">
             <div id="age-container">
-                <span id="age-display">Kitty | Age: 1 Yr</span>
+                <span id="age-display">Age: 1 Yr</span>
                 <div id="age-bar-bg"><div id="age-bar-fill"></div></div>
             </div>
             <span id="coin-display">Coins: 0</span>
@@ -247,8 +261,8 @@
     <div id="food-tray" class="glass-panel hidden"></div>
 
     <div id="bath-overlay">
-        <div id="bath-instructions">Drag soap over cat to clean! 🧼</div>
-        <div id="soap-item">🧼</div>
+        <div id="bath-instructions" style="margin-top: 50px;">Drag soap over cat to clean!</div>
+        <div id="soap-item"></div>
     </div>
 
     <div id="controls">
@@ -276,7 +290,7 @@
 
     <div id="kitten-modal" class="modal">
         <div class="modal-content glass-panel">
-            <h2 style="color:#ff6699; margin-top:0;">KITTENS BORN! 🍼</h2>
+            <h2 style="color:#ff6699; margin-top:0;">KITTENS BORN!</h2>
             <input type="text" id="k1" placeholder="First Kitten Name">
             <input type="text" id="k2" placeholder="Second Kitten Name">
             <input type="text" id="k3" placeholder="Third Kitten Name">
@@ -289,7 +303,15 @@
             <h1 style="color:#fff; margin-top:0;">A BEAUTIFUL LIFE</h1>
             <p id="tribute-text" style="font-size:22px; line-height:1.5; color:#ccc;"></p>
             <p style="font-size:24px; color:#ffb199;">Thank you for giving her a wonderful home.</p>
-            <button class="btn-small" style="width: 100%; margin-top:15px; background:#ff6699;" onclick="hardReset()">RESTART JOURNEY</button>
+            <button class="btn-small" style="width: 100%; margin-top:15px; background:#ff6699;" onclick="startCreditsRoll()">RESTART JOURNEY</button>
+        </div>
+    </div>
+
+    <div id="credits-layer">
+        <div id="credits-container" class="credits-scroll">
+            <h1>RAGDOLL LIFE</h1>
+            <p>Created by Aaditya</p>
+            <p style="margin-top: 80px; font-size: 20px;">Thank you for playing.</p>
         </div>
     </div>
 
@@ -305,21 +327,11 @@
         <div class="modal-content glass-panel">
             <h2 style="margin-top:0; color:#ff6699; font-size:28px;">ARCADE SYSTEM</h2>
             <div class="arcade-menu-grid">
-                <div class="arcade-card" onclick="launchGame('catch')">
-                    <div class="arcade-info"><div class="arcade-name">🐭 Catch Mouse</div><div class="arcade-score-tag">High Score: <span id="hs-catch">0</span></div></div><div class="arcade-play-icon">▶</div>
-                </div>
-                <div class="arcade-card" onclick="launchGame('tower')">
-                    <div class="arcade-info"><div class="arcade-name">🧱 Build Tower</div><div class="arcade-score-tag">High Score: <span id="hs-tower">0</span></div></div><div class="arcade-play-icon">▶</div>
-                </div>
-                <div class="arcade-card" onclick="launchGame('puzzle')">
-                    <div class="arcade-info"><div class="arcade-name">🧩 Cat Jigsaw</div><div class="arcade-score-tag">Best Time: <span id="hs-puzzle">--</span>s</div></div><div class="arcade-play-icon">▶</div>
-                </div>
-                <div class="arcade-card" onclick="launchGame('flappy')">
-                    <div class="arcade-info"><div class="arcade-name">🦅 Flappy Cat</div><div class="arcade-score-tag">High Score: <span id="hs-flappy">0</span></div></div><div class="arcade-play-icon">▶</div>
-                </div>
-                <div class="arcade-card" onclick="launchGame('memory')">
-                    <div class="arcade-info"><div class="arcade-name">🃏 Memory Match</div><div class="arcade-score-tag">Best Time: <span id="hs-memory">--</span>s</div></div><div class="arcade-play-icon">▶</div>
-                </div>
+                <div class="arcade-card" onclick="launchGame('catch')"><div class="arcade-info"><div class="arcade-name">Catch Mouse</div><div class="arcade-score-tag">High Score: <span id="hs-catch">0</span></div></div></div>
+                <div class="arcade-card" onclick="launchGame('tower')"><div class="arcade-info"><div class="arcade-name">Build Tower</div><div class="arcade-score-tag">High Score: <span id="hs-tower">0</span></div></div></div>
+                <div class="arcade-card" onclick="launchGame('puzzle')"><div class="arcade-info"><div class="arcade-name">Cat Jigsaw</div><div class="arcade-score-tag">Best Time: <span id="hs-puzzle">--</span>s</div></div></div>
+                <div class="arcade-card" onclick="launchGame('flappy')"><div class="arcade-info"><div class="arcade-name">Flappy Cat</div><div class="arcade-score-tag">High Score: <span id="hs-flappy">0</span></div></div></div>
+                <div class="arcade-card" onclick="launchGame('memory')"><div class="arcade-info"><div class="arcade-name">Memory Match</div><div class="arcade-score-tag">Best Time: <span id="hs-memory">--</span>s</div></div></div>
             </div>
             <button class="btn-small" style="width: 100%; padding: 8px; background:#444;" onclick="closeModal('minigame-hub')">EXIT ARCADE</button>
         </div>
@@ -339,7 +351,6 @@
     </div>
 </div>
 <script>
-    // --- SYNTHESIZERS ---
     function playMeowSound() {
         let s = document.getElementById('audio-meow');
         if (s) { s.currentTime = 0; s.volume = 0.5; s.play().catch(e=>{}); setTimeout(() => { if(!s.paused) { s.pause(); s.currentTime = 0; } }, 1000); }
@@ -368,7 +379,6 @@
         } catch(e) {}
     }
 
-    // --- GAME STATE ---
     let gameState = {
         name: "Kitty", phase: 1, age: 1, 
         hunger: 100, energy: 100, happy: 100, clean: 100, coins: 50,
@@ -392,7 +402,7 @@
     };
 
     function init() {
-        let saved = localStorage.getItem('ragdoll_save_v13');
+        let saved = localStorage.getItem('ragdoll_save_v14');
         if (saved) {
             gameState = Object.assign(gameState, JSON.parse(saved)); 
             document.getElementById('main-cat-name').style.display = 'none'; 
@@ -403,11 +413,11 @@
         kittenHungerInterval = setInterval(() => {
             if(gameState.phase >= 4 && !gameState.isSleeping) {
                 gameState.kittenHunger = Math.max(0, gameState.kittenHunger - 8);
-                if(gameState.kittenHunger < 30) showReaction("Kittens are hungry! Drag them to mom. 🍼");
+                if(gameState.kittenHunger < 30) showReaction("Kittens hungry! Drag to mom.");
             }
         }, 60000);
 
-        setupDraggableCats(); // Initialize Drag System
+        setupDraggableCats(); 
     }
 
     function startGame() {
@@ -415,7 +425,7 @@
         if (nameInput.style.display !== 'none' && nameInput.value.trim() !== "") { gameState.name = nameInput.value; gameState.startDate = Date.now(); }
         gameState.lastPlayed = Date.now(); document.getElementById('start-modal').style.display = 'none';
         let bgm = document.getElementById('audio-bgm'); if(bgm) { bgm.volume = 0.15; bgm.play().catch(e=>{}); }
-        updateMeters(); startFelineBrain(); showReaction(`${gameState.name} entered the room.`);
+        updateMeters(); startFelineBrain(); showReaction(`${gameState.name} arrived.`);
     }
 
     function calculateTimeDrain() {
@@ -432,7 +442,7 @@
         checkLifeEvents();
     }
     function addInteractionBonus() { if(gameState.phase === 5) return; gameState.interactionBonusMs += (1000 * 60 * 20); calculateTimeDrain(); }
-    function saveData() { if(gameState.phase !== 5) { gameState.lastPlayed = Date.now(); localStorage.setItem('ragdoll_save_v13', JSON.stringify(gameState)); } }
+    function saveData() { if(gameState.phase !== 5) { gameState.lastPlayed = Date.now(); localStorage.setItem('ragdoll_save_v14', JSON.stringify(gameState)); } }
 
     function updateMeters() {
         document.getElementById('coin-display').innerText = `Coins: ${gameState.coins}`;
@@ -459,16 +469,15 @@
         animationTimeout = setTimeout(() => { if (!gameState.isSleeping) setIdleState(); }, 2000);
     }
 
-    // --- FREELY DRAGGABLE ADULT CATS ---
+    // --- FREELY DRAGGABLE CATS ---
     let activeCatDrag = null; let catDragStart = {x:0, y:0}; let catHasMoved = false;
     function setupDraggableCats() {
         const attachDrag = (id) => {
-            let el = document.getElementById(id);
-            if(!el) return;
+            let el = document.getElementById(id); if(!el) return;
             el.onmousedown = (e) => beginCatDrag(e, el); el.ontouchstart = (e) => beginCatDrag(e, el);
         };
         attachDrag('main-cat-wrap'); attachDrag('akira-wrap');
-        attachDrag('kit1-sprite'); attachDrag('kit2-sprite'); attachDrag('kit3-sprite'); // Kittens draggable too
+        attachDrag('kit1-sprite'); attachDrag('kit2-sprite'); attachDrag('kit3-sprite');
     }
     
     function beginCatDrag(e, el) {
@@ -476,7 +485,11 @@
         activeCatDrag = el; catHasMoved = false;
         catDragStart.x = e.clientX || (e.touches && e.touches[0].clientX);
         catDragStart.y = e.clientY || (e.touches && e.touches[0].clientY);
-        el.style.transition = 'none'; // Remove transition for smooth 1:1 drag
+        
+        let comp = window.getComputedStyle(el);
+        el.dataset.sLeft = parseFloat(comp.left) || 0; el.dataset.sTop = parseFloat(comp.top) || 0;
+        
+        el.style.transition = 'none';
         document.addEventListener('mousemove', runCatDrag); document.addEventListener('touchmove', runCatDrag, {passive: false});
         document.addEventListener('mouseup', finishCatDrag); document.addEventListener('touchend', finishCatDrag);
     }
@@ -487,41 +500,29 @@
         let dx = cx - catDragStart.x; let dy = cy - catDragStart.y;
         if(Math.abs(dx) > 5 || Math.abs(dy) > 5) catHasMoved = true;
         
-        // Convert to percentage for responsive resizing
-        let bounds = document.getElementById('cat-group').getBoundingClientRect();
-        let currentLeft = parseFloat(activeCatDrag.style.left) || 50;
-        let currentTop = parseFloat(activeCatDrag.style.top) || 20;
-        
-        let newLeft = currentLeft + (dx / bounds.width * 100);
-        let newTop = currentTop + dy; // Keep Top in px for stability
-        
-        activeCatDrag.style.left = newLeft + '%'; activeCatDrag.style.top = newTop + 'px';
-        catDragStart.x = cx; catDragStart.y = cy;
+        activeCatDrag.style.left = (parseFloat(activeCatDrag.dataset.sLeft) + dx) + 'px';
+        activeCatDrag.style.top = (parseFloat(activeCatDrag.dataset.sTop) + dy) + 'px';
     }
     
     function finishCatDrag(e) {
         if(!activeCatDrag) return;
-        activeCatDrag.style.transition = 'left 0.5s ease, top 0.5s ease'; // Restore CSS transition
+        activeCatDrag.style.transition = 'left 0.5s ease, top 0.5s ease';
         
-        // Click Threshold: If didn't move much, treat as a "Pet" click
-        if (!catHasMoved && (activeCatDrag.id === 'main-cat-wrap' || activeCatDrag.id === 'akira-wrap')) {
-            petCat();
-        }
+        if (!catHasMoved && (activeCatDrag.id === 'main-cat-wrap' || activeCatDrag.id === 'akira-wrap')) { petCat(); }
         
-        // Kitten Nursing Drop Logic
+        // Kitten Nursing Link
         if (activeCatDrag.classList.contains('kitten-sprite')) {
             let cx = e.clientX || (e.changedTouches && e.changedTouches[0].clientX); 
             let cy = e.clientY || (e.changedTouches && e.changedTouches[0].clientY);
-            let momRect = catSprite.getBoundingClientRect();
+            let momRect = document.getElementById('main-cat-wrap').getBoundingClientRect();
             
             if (cx >= momRect.left && cx <= momRect.right && cy >= momRect.top && cy <= momRect.bottom) {
-                // Attach for nursing!
-                activeCatDrag.style.left = '45%'; activeCatDrag.style.top = '140px'; // Snap to belly area
-                triggerAnimation('anim-nurse', [activeCatDrag]); // Specific nurse bounce
-                
+                // Snap to nursing position relative to mom
+                activeCatDrag.style.left = (parseFloat(document.getElementById('main-cat-wrap').style.left) + 20) + 'px';
+                activeCatDrag.style.top = (parseFloat(document.getElementById('main-cat-wrap').style.top) + 60) + 'px';
+                triggerAnimation('anim-nurse', [activeCatDrag]); 
                 gameState.kittenHunger = 100; gameState.happy = Math.min(100, gameState.happy + 15); gameState.coins += 12;
-                showReaction("Nursing milk! 🍼 (+12c)"); playAudio('audio-purr'); 
-                triggerAnimation('anim-cuddle', [catSprite]); // Mom cuddles
+                showReaction("Nursing milk! (+12c)"); playAudio('audio-purr'); triggerAnimation('anim-cuddle', [catSprite]);
                 addInteractionBonus(); updateMeters(); saveData();
             }
         }
@@ -552,7 +553,7 @@
         } else if (type === 'play') {
             if (gameState.energy < 15) { showReaction("Too tired."); return; }
             gameState.energy -= 15; gameState.happy = Math.min(100, gameState.happy + 20); gameState.clean = Math.max(0, gameState.clean - 10);
-            showReaction("Playing! 🧶"); playMeowSound(); triggerAnimation('anim-play'); addInteractionBonus();
+            showReaction("Playing!"); playMeowSound(); triggerAnimation('anim-play'); addInteractionBonus();
         }
         saveData(); updateMeters();
     }
@@ -565,16 +566,15 @@
         }
     }
 
-    function spawnProp(emoji, animClass) {
-        let p = document.createElement('div'); p.className = `activity-prop ${animClass}`; p.innerText = emoji;
-        p.style.left = '50%'; p.style.top = '40%';
-        document.getElementById('cat-group').appendChild(p);
-        setTimeout(() => p.remove(), 2500);
+    function spawnProp(typeStr, animClass) {
+        let p = document.createElement('div'); p.className = `activity-prop ${typeStr} ${animClass}`;
+        p.style.left = '45%'; p.style.top = '30%';
+        document.getElementById('cat-group').appendChild(p); setTimeout(() => p.remove(), 2500);
     }
 
-    function runActivity(label, baseType, customAnim, propEmoji) {
+    function runActivity(label, baseType, customAnim, propType) {
         showReaction(label);
-        if(propEmoji) spawnProp(propEmoji, 'anim-play');
+        if(propType === 'hearts') spawnHearts(); else if(propType) spawnProp(propType, 'anim-play');
         if(customAnim) triggerAnimation(customAnim); else triggerAnimation('anim-couple-cuddle');
         if(baseType) setTimeout(() => { action(baseType); }, 500);
     }
@@ -584,23 +584,23 @@
         let cont = document.getElementById('activities-container'); cont.innerHTML = "";
         
         let acts = [
-            {n: "Scratch Post 🪵", f:()=>runActivity("Scratching!", 'play', 'anim-scratch')}, 
-            {n: "Watch Bird 🐦", f:()=>runActivity("Watching birds...", null, 'anim-watch', '🐦')}
+            {n: "Scratch Post", f:()=>runActivity("Scratching!", 'play', 'anim-scratch')}, 
+            {n: "Watch Bird", f:()=>runActivity("Watching birds...", null, 'anim-watch')}
         ];
         if (gameState.phase >= 2) {
             acts.push(
-                {n: "Date Night 💖", f:()=>{ spawnHearts(); runActivity("Snuggling on sofa!", 'play', 'anim-couple-cuddle'); }},
-                {n: "Groom Akira 👅", f:()=>runActivity("Grooming session!", 'play', 'anim-groom')},
-                {n: "Backyard Hunt 🐭", f:()=>runActivity("Hunting mice together!", 'play', 'anim-pounce', '🐭')},
-                {n: "Share Fish Bowl 🐟", f:()=>runActivity("Sharing premium snack!", 'play', 'anim-eat', '🐟')}
+                {n: "Date Night", f:()=>runActivity("Snuggling on sofa!", 'play', 'anim-couple-cuddle', 'hearts')},
+                {n: "Groom Akira", f:()=>runActivity("Grooming session!", 'play', 'anim-groom')},
+                {n: "Backyard Hunt", f:()=>runActivity("Hunting mice together!", 'play', 'anim-pounce')},
+                {n: "Share Fish Bowl", f:()=>runActivity("Sharing premium snack!", 'play', 'anim-eat', 'prop-fish')}
             );
         }
         if (gameState.phase >= 4) {
             acts.push(
-                {n: "Teach Pounce 🐾", f:()=>runActivity("Teaching the kids to hunt!", 'play', 'anim-pounce')},
-                {n: "Clean Kittens 🧼", f:()=>runActivity("Bath time for the babies!", 'play', 'anim-groom')},
-                {n: "Yarn Ball Chaos 🧶", f:()=>runActivity("Kittens playing with yarn!", 'play', 'anim-play', '🧶')},
-                {n: "Group Nap 💤", f:()=>runActivity("Cozy family sleeping!", 'sleep', 'anim-sleep', '💤')}
+                {n: "Teach Pounce", f:()=>runActivity("Teaching the kids to hunt!", 'play', 'anim-pounce')},
+                {n: "Clean Kittens", f:()=>runActivity("Bath time for the babies!", 'play', 'anim-groom')},
+                {n: "Yarn Ball Chaos", f:()=>runActivity("Kittens playing with yarn!", 'play', 'anim-play', 'prop-ball')},
+                {n: "Group Nap", f:()=>runActivity("Cozy family sleeping!", 'sleep', 'anim-sleep')}
             );
         }
         acts.forEach(a => {
@@ -628,7 +628,7 @@
         if(!soapDrag) return; e.preventDefault();
         let cx = e.clientX || (e.touches && e.touches[0].clientX); let cy = e.clientY || (e.touches && e.touches[0].clientY);
         soapDrag.style.left = cx + 'px'; soapDrag.style.top = cy + 'px'; soapDrag.style.bottom = 'auto';
-        let rect = catGroup.getBoundingClientRect();
+        let rect = document.getElementById('main-cat-wrap').getBoundingClientRect();
         if (cx >= rect.left && cx <= rect.right && cy >= rect.top && cy <= rect.bottom) {
             gameState.clean = Math.min(100, gameState.clean + 2); updateMeters();
             if(Math.random() < 0.1) triggerAnimation('anim-groom');
@@ -644,7 +644,7 @@
     }
 
     // --- FOOD HANDLING ---
-    let activeDrag = null;
+    let activeFoodDrag = null;
     function toggleFoodTray() {
         if (gameState.isSleeping || isBathing || gameState.phase === 5) return;
         let tray = document.getElementById('food-tray');
@@ -662,25 +662,25 @@
         if (!hasFood) tray.innerHTML = "<div style='padding:5px; color:#fff;'>No food! Use the shop.</div>";
     }
     function startFoodDrag(e, key) {
-        e.preventDefault(); activeDrag = document.createElement('div'); activeDrag.className = 'flying-item';
-        activeDrag.style.backgroundImage = `url('${itemsDB[key].img}')`; activeDrag.dataset.key = key; document.body.appendChild(activeDrag); moveFoodDrag(e);
+        e.preventDefault(); activeFoodDrag = document.createElement('div'); activeFoodDrag.className = 'flying-item';
+        activeFoodDrag.style.backgroundImage = `url('${itemsDB[key].img}')`; activeFoodDrag.dataset.key = key; document.body.appendChild(activeFoodDrag); moveFoodDrag(e);
         document.addEventListener('mousemove', moveFoodDrag); document.addEventListener('touchmove', moveFoodDrag, {passive: false});
         document.addEventListener('mouseup', endFoodDrag); document.addEventListener('touchend', endFoodDrag);
     }
-    function moveFoodDrag(e) { if(!activeDrag) return; e.preventDefault(); activeDrag.style.left = (e.clientX || (e.touches && e.touches[0].clientX)) + 'px'; activeDrag.style.top = (e.clientY || (e.touches && e.touches[0].clientY)) + 'px'; }
+    function moveFoodDrag(e) { if(!activeFoodDrag) return; e.preventDefault(); activeFoodDrag.style.left = (e.clientX || (e.touches && e.touches[0].clientX)) + 'px'; activeFoodDrag.style.top = (e.clientY || (e.touches && e.touches[0].clientY)) + 'px'; }
     function endFoodDrag(e) {
-        if(!activeDrag) return;
+        if(!activeFoodDrag) return;
         let cx = e.clientX || (e.changedTouches && e.changedTouches[0].clientX); let cy = e.clientY || (e.changedTouches && e.changedTouches[0].clientY);
-        let rect = catGroup.getBoundingClientRect();
+        let rect = document.getElementById('main-cat-wrap').getBoundingClientRect();
         if (cx >= rect.left && cx <= rect.right && cy >= rect.top && cy <= rect.bottom) {
-            let key = activeDrag.dataset.key;
+            let key = activeFoodDrag.dataset.key;
             if (gameState.inventory[key] > 0) {
                 gameState.inventory[key]--; gameState.hunger = Math.min(100, gameState.hunger + itemsDB[key].hunger);
                 gameState.clean = Math.max(0, gameState.clean - 5); showReaction(`Ate ${itemsDB[key].name}!`);
                 playAudio('audio-eat'); triggerAnimation('anim-eat'); addInteractionBonus(); updateTrayUI(); saveData(); updateMeters();
             }
         }
-        activeDrag.remove(); activeDrag = null;
+        activeFoodDrag.remove(); activeFoodDrag = null;
         document.removeEventListener('mousemove', moveFoodDrag); document.removeEventListener('touchmove', moveFoodDrag);
         document.removeEventListener('mouseup', endFoodDrag); document.removeEventListener('touchend', endFoodDrag);
     }
@@ -688,7 +688,7 @@
     function startFelineBrain() {
         clearInterval(behaviorInterval);
         behaviorInterval = setInterval(() => {
-            if (gameState.isSleeping || activeDrag || activeCatDrag || isBathing || gameState.phase === 5 || !document.getElementById('food-tray').classList.contains('hidden')) return;
+            if (gameState.isSleeping || activeFoodDrag || activeCatDrag || isBathing || gameState.phase === 5 || !document.getElementById('food-tray').classList.contains('hidden')) return;
             if (Math.random() < 0.35) {
                 let mWrap = document.getElementById('main-cat-wrap'); let aWrap = document.getElementById('akira-wrap');
                 let target = Math.random() < 0.5 ? mWrap : aWrap;
@@ -726,7 +726,7 @@
     }
     function launchGame(id) {
         document.getElementById('minigame-hub').style.display = 'none'; currentGame = id;
-        let t = { 'catch': 'CATCH MOUSE', 'tower': 'BUILD TOWER', 'puzzle': '5x5 CAT PUZZLE', 'flappy': 'FLAPPY CAT', 'memory': 'MEMORY MATCH' };
+        let t = { 'catch': 'CATCH MOUSE', 'tower': 'BUILD TOWER', 'puzzle': 'CAT JIGSAW', 'flappy': 'FLAPPY CAT', 'memory': 'MEMORY MATCH' };
         document.getElementById('mg-title').innerText = t[id];
         document.getElementById('active-minigame-modal').style.display = 'flex'; document.getElementById('mg-start-btn').style.display = 'block'; document.getElementById('minigame-area').innerHTML = "";
     }
@@ -766,7 +766,7 @@
     // Catch Mouse
     function spawnTarget() {
         if (!gameActive) return; let area = document.getElementById('minigame-area'); area.innerHTML = "";
-        let t = document.createElement('div'); t.className = 'target-obj'; t.innerText = "🐭";
+        let t = document.createElement('div'); t.className = 'target-obj'; t.innerHTML = '<div style="width:10px; height:10px; background:#fff; border-radius:50%;"></div>';
         t.style.left = Math.random() * (area.clientWidth - 45) + 'px'; t.style.top = Math.random() * (area.clientHeight - 45) + 'px';
         t.onmousedown = (e) => { e.preventDefault(); mgScore+=2; document.getElementById('mg-score').innerText = mgScore; clearTimeout(mgInterval); spawnTarget(); };
         t.ontouchstart = t.onmousedown; area.appendChild(t); mgInterval = setTimeout(spawnTarget, 750);
@@ -797,12 +797,13 @@
     }
     function checkPuzzleWin() { let won = true; for(let i=0; i<25; i++) { if (parseInt(pPieces[i].dataset.correct) !== i) { won = false; break; } } if (won) { clearInterval(mgTimer); document.getElementById('minigame-area').innerHTML = `<div style="color:#ff6699; margin-top:75px; font-size:32px; font-weight:bold;">PUZZLE SOLVED!</div>`; setTimeout(() => finishMiniGame(true), 1500); } }
 
-    // Flappy Cat
+    // Flappy Cat (Gap Fixed)
     let birdY = 100, birdVel = 0, pipes = [];
     function initFlappyGame() {
         let area = document.getElementById('minigame-area'); area.innerHTML = '<div id="flappy-bird"></div>';
         birdY = 100; birdVel = 0; pipes = [];
         area.onclick = () => { if(gameActive) birdVel = -6; };
+        area.ontouchstart = area.onclick;
         mgTimer = setInterval(flappyLoop, 30);
     }
     function flappyLoop() {
@@ -811,22 +812,33 @@
         birdVel += 0.4; birdY += birdVel; bird.style.top = birdY + 'px'; bird.style.left = '40px';
         if(birdY > area.clientHeight || birdY < 0) { finishMiniGame(); return; }
         
-        if(Math.random() < 0.03) {
-            let p = document.createElement('div'); p.className = 'flappy-pipe'; p.style.left = area.clientWidth + 'px';
-            let h = 40 + Math.random() * 80;
-            if(Math.random() < 0.5) { p.style.top = '0'; p.style.height = h + 'px'; } else { p.style.bottom = '0'; p.style.height = h + 'px'; }
-            area.appendChild(p); pipes.push(p);
+        let spawnNew = false;
+        if(pipes.length === 0) spawnNew = true;
+        else if (parseFloat(pipes[pipes.length-1].style.left) < area.clientWidth - 160) spawnNew = true; // Horizontal Spacing
+
+        if(spawnNew && Math.random() < 0.05) {
+            let gap = 85; // Fixed Vertical Gap size!
+            let minH = 20; let maxTop = area.clientHeight - gap - minH;
+            let topH = minH + Math.random() * (maxTop - minH);
+            let botH = area.clientHeight - topH - gap;
+            
+            let pTop = document.createElement('div'); pTop.className = 'flappy-pipe'; pTop.style.left = area.clientWidth + 'px'; pTop.style.top = '0'; pTop.style.height = topH + 'px';
+            let pBot = document.createElement('div'); pBot.className = 'flappy-pipe'; pBot.style.left = area.clientWidth + 'px'; pBot.style.bottom = '0'; pBot.style.height = botH + 'px';
+            area.appendChild(pTop); area.appendChild(pBot); pipes.push(pTop, pBot);
         }
         
         for(let i=pipes.length-1; i>=0; i--) {
             let p = pipes[i]; let px = parseFloat(p.style.left) - 4; p.style.left = px + 'px';
-            if(px < -50) { p.remove(); pipes.splice(i, 1); mgScore++; document.getElementById('mg-score').innerText = mgScore; }
+            if(px < -50) { 
+                p.remove(); pipes.splice(i, 1); 
+                if(p.style.top === '0px') { mgScore++; document.getElementById('mg-score').innerText = mgScore; }
+            }
             let bRect = bird.getBoundingClientRect(); let pRect = p.getBoundingClientRect();
-            if (bRect.right > pRect.left && bRect.left < pRect.right && bRect.bottom > pRect.top && bRect.top < pRect.bottom) { finishMiniGame(); return; }
+            if (bRect.right - 4 > pRect.left && bRect.left + 4 < pRect.right && bRect.bottom - 4 > pRect.top && bRect.top + 4 < pRect.bottom) { finishMiniGame(); return; }
         }
     }
 
-    // Memory Match
+    // Memory Match (Mobile Fixed)
     let memCards = [], flippedCards = [], matchedPairs = 0;
     function initMemoryGame() {
         let area = document.getElementById('minigame-area'); area.innerHTML = '<div id="memory-grid"></div>';
@@ -836,7 +848,8 @@
         memCards = []; flippedCards = []; matchedPairs = 0;
         deck.forEach((imgSrc, i) => {
             let card = document.createElement('div'); card.className = 'memory-card'; card.dataset.icon = imgSrc;
-            card.innerHTML = `<img src="${imgSrc}">`; card.onclick = () => flipCard(card);
+            card.innerHTML = `<img src="${imgSrc}">`; 
+            card.onclick = () => flipCard(card); card.ontouchstart = () => flipCard(card); // Added Touch Support!
             grid.appendChild(card); memCards.push(card);
         });
     }
@@ -851,15 +864,15 @@
         }
     }
 
-    // --- LIFE EVENTS & ENDING ---
+    // --- LIFE EVENTS & ENDING CREDITS ---
     function checkLifeEvents() {
         if (gameState.phase === 5) return;
         if (gameState.age >= 22 && gameState.phase < 5) { triggerDeathSequence(); } 
         else if (gameState.age >= 14 && gameState.phase < 4) { document.getElementById('kitten-modal').style.display = 'flex'; } 
         else if (gameState.age >= 9 && gameState.phase < 3) { 
-            gameState.phase = 3; showReaction(`Married Akira! 💍`); setIdleState(); spawnHearts(); showAkiraThought("I love you! 💖");
+            gameState.phase = 3; showReaction(`Married Akira!`); setIdleState(); spawnHearts(); showAkiraThought("I love you!");
         } else if (gameState.age >= 5 && gameState.phase < 2) { 
-            gameState.phase = 2; showReaction(`Akira Joined! 🧡`); setIdleState(); showAkiraThought("Hi there! 🐾");
+            gameState.phase = 2; showReaction(`Akira Joined!`); setIdleState(); showAkiraThought("Hi there!");
         }
     }
 
@@ -874,7 +887,14 @@
         
         playSadTune(); allSprites.forEach(sprite => { if(sprite) sprite.style.opacity = '0'; });
         let txt = `Across ${gameState.age} legendary years, ${gameState.name} lived a gorgeous, full life.<br><br>Final Gold Reserve: ${gameState.coins}c<br>Legacy: Raised a beautiful family with Akira.<br>`;
-        document.getElementById('tribute-text').innerHTML = txt; setTimeout(() => { document.getElementById('death-modal').style.display = 'flex'; }, 5500); localStorage.removeItem('ragdoll_save_v13');
+        document.getElementById('tribute-text').innerHTML = txt; setTimeout(() => { document.getElementById('death-modal').style.display = 'flex'; }, 5500); localStorage.removeItem('ragdoll_save_v14');
+    }
+
+    function startCreditsRoll() {
+        document.getElementById('death-modal').style.display = 'none';
+        document.getElementById('credits-layer').style.display = 'flex';
+        // After credits finish scrolling (8s animation), refresh the page to truly restart.
+        setTimeout(() => { location.reload(); }, 8500); 
     }
 
     function saveKittens() { gameState.phase = 4; document.getElementById('kitten-modal').style.display = 'none'; showReaction("Kittens arrived!"); saveData(); setIdleState(); updateMeters(); }
@@ -882,16 +902,15 @@
     function setIdleState() {
         if (gameState.phase === 5) return;
         
-        // CSS Wedding Decor Logic
         if (gameState.phase >= 3) {
             let bg = document.getElementById('bg-layer');
-            bg.style.backgroundImage = "url('wedding.jpg')"; // Will fall back to color if missing
+            bg.style.backgroundImage = "url('wedding.jpg')"; 
             if(!bg.style.backgroundImage || bg.style.backgroundImage === "none") bg.style.backgroundColor = "#ffeaa7";
             document.getElementById('wedding-layer').style.display = 'block'; document.getElementById('wedding-arch').style.display = 'block';
             if(!document.querySelector('.confetti')) { for(let i=0; i<30; i++){ let c = document.createElement('div'); c.className='confetti'; c.style.left=Math.random()*100+'%'; c.style.backgroundColor=`hsl(${Math.random()*360},100%,70%)`; c.style.animationDelay=Math.random()*3+'s'; document.getElementById('wedding-layer').appendChild(c); } }
         }
         
-        if (gameState.phase >= 2) { akiraWrap.classList.remove('hidden'); } else { akiraWrap.classList.add('hidden'); }
+        if (gameState.phase >= 2) { document.getElementById('akira-wrap').classList.remove('hidden'); } else { document.getElementById('akira-wrap').classList.add('hidden'); }
         if (gameState.phase >= 4) { document.getElementById('kit1-sprite').classList.remove('hidden'); document.getElementById('kit2-sprite').classList.remove('hidden'); document.getElementById('kit3-sprite').classList.remove('hidden'); } 
         else { document.getElementById('kit1-sprite').classList.add('hidden'); document.getElementById('kit2-sprite').classList.add('hidden'); document.getElementById('kit3-sprite').classList.add('hidden'); }
 
@@ -899,6 +918,5 @@
         allSprites.forEach(sprite => { if (sprite && !sprite.classList.contains('hidden') && !sprite.parentNode.classList.contains('hidden')) { sprite.className = (sprite.id === 'cat-sprite' || sprite.id === 'akira-sprite') ? `main-sprite ${anim}` : `kitten-sprite ${anim}`; } });
     }
 
-    function hardReset() { localStorage.removeItem('ragdoll_save_v13'); location.reload(); }
     window.onload = init;
 </script>
