@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Ragdoll Life - Perfected Journey</title>
+    <title>Ragdoll Life - Complete Journey</title>
     <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
     <style>
-        /* --- CORE CONFIGURATION --- */
+        /* --- CORE SETUP --- */
         body {
             margin: 0; padding: 0; background-color: #000;
             font-family: 'VT323', monospace; display: flex; justify-content: center; align-items: center;
@@ -30,27 +30,23 @@
         }
 
         .glass-panel {
-            background: rgba(15, 15, 25, 0.9); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
-            border: 2px solid rgba(255, 255, 255, 0.25); border-radius: 12px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.7); color: #fff; text-shadow: 1px 1px 0 #000;
+            background: rgba(15, 15, 25, 0.85); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+            border: 2px solid rgba(255, 255, 255, 0.2); border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5); color: #fff; text-shadow: 1px 1px 0 #000;
         }
 
-        /* --- WEATHER EFFECTS --- */
-        #weather-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 5; display: none; overflow: hidden; }
-        .rain-drop { position: absolute; background: rgba(255, 255, 255, 0.4); width: 2px; height: 30px; animation: rainFall linear infinite; }
+        /* --- WEATHER --- */
+        #weather-layer {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; z-index: 5; display: none; overflow: hidden;
+        }
+        .rain-drop {
+            position: absolute; background: rgba(255, 255, 255, 0.4); width: 2px; height: 30px;
+            animation: rainFall linear infinite;
+        }
         @keyframes rainFall { to { transform: translateY(100vh); } }
 
-        /* --- HEART PARTICLES --- */
-        .heart-particle {
-            position: absolute; color: #ff6699; font-size: 24px; pointer-events: none; z-index: 99;
-            animation: floatUpHeart 1.5s forwards ease-out; text-shadow: 1px 1px 2px #000;
-        }
-        @keyframes floatUpHeart {
-            0% { transform: translateY(0) scale(0.5); opacity: 1; }
-            100% { transform: translateY(-80px) scale(1.2); opacity: 0; }
-        }
-
-        /* --- MULTI-SPRITE SYSTEM --- */
+        /* --- SPRITE LAYER --- */
         #cat-group {
             position: absolute; top: 60%; left: 50%; width: 320px; height: 180px; 
             z-index: 2; transform: translate(-50%, -50%); transition: left 2.5s cubic-bezier(0.25, 1, 0.5, 1);
@@ -67,26 +63,31 @@
         #kit2-sprite { bottom: 0px; left: 40px; }
         #kit3-sprite { bottom: -15px; right: -20px; }
 
-        /* --- REWORKED GAME ANIMATIONS --- */
+        /* --- HEART PARTICLES --- */
+        .heart-particle {
+            position: absolute; color: #ff6699; font-size: 24px; pointer-events: none; z-index: 99;
+            animation: floatUpHeart 1.5s forwards ease-out; text-shadow: 1px 1px 2px #000;
+        }
+        @keyframes floatUpHeart {
+            0% { transform: translateY(0) scale(0.5); opacity: 1; }
+            100% { transform: translateY(-80px) scale(1.2); opacity: 0; }
+        }
+
+        /* --- ANIMATIONS --- */
         .anim-breathe { animation: breathe 3s infinite ease-in-out; }
         .anim-walk { animation: walk 0.4s infinite alternate ease-in-out; }
         .anim-groom { animation: groom 0.8s infinite alternate ease-in-out; }
         .anim-play { animation: bounce 0.3s infinite alternate ease-in-out; }
         .anim-sleep { filter: brightness(0.35); animation: breathe 4s infinite ease-in-out; }
-        
-        /* Couple Activity Animations */
         .anim-couple-cuddle { animation: coupleCuddle 1.5s infinite alternate ease-in-out; }
-        @keyframes coupleCuddle {
-            0% { transform: scale(1) rotate(-2deg); }
-            100% { transform: scale(1.06) rotate(2deg); filter: drop-shadow(0 0 8px #ff6699); }
-        }
 
         @keyframes breathe { 0%, 100% { transform: scale(1, 1); } 50% { transform: scale(1.04, 0.96); } }
         @keyframes walk { 0% { transform: translateY(0) rotate(-3deg); } 100% { transform: translateY(-8px) rotate(3deg); } }
         @keyframes bounce { 0% { transform: translateY(0); } 100% { transform: translateY(-25px); } }
         @keyframes groom { 0% { transform: rotate(0deg); } 100% { transform: rotate(-12deg) scaleY(0.95); } }
+        @keyframes coupleCuddle { 0% { transform: scale(1) rotate(-2deg); } 100% { transform: scale(1.06) rotate(2deg); filter: drop-shadow(0 0 8px #ff6699); } }
 
-        /* --- TOP STATS PANEL --- */
+        /* --- TOP HUD --- */
         #hud-top {
             position: absolute; top: 10px; left: 2%; width: 96%; display: flex; 
             justify-content: space-between; align-items: center; z-index: 10; 
@@ -111,8 +112,8 @@
             background: rgba(0,0,0,0.75); border-radius: 8px; border: 2px solid #ff6699;
         }
 
-        /* --- DRAGGABLE FOOD HUD --- */
-        #food-tray { position: absolute; bottom: 75px; left: 50%; transform: translateX(-50%); display: flex; gap: 12px; padding: 10px; z-index: 12; }
+        /* --- ITEMS & BATH --- */
+        #food-tray { position: absolute; bottom: 75px; left: 50%; transform: translateX(-50%); display: flex; gap: 12px; padding: 10px; z-index: 12; transition: opacity 0.3s, transform 0.3s; }
         .draggable-item {
             width: 48px; height: 48px; cursor: grab; padding: 4px; position: relative;
             background: rgba(0, 0, 0, 0.6); border-radius: 10px; border: 2px solid rgba(255,255,255,0.4); 
@@ -124,7 +125,6 @@
             transform: translate(-50%, -50%); background-size: contain; background-repeat: no-repeat; background-position: center;
         }
 
-        /* --- SOAP OVERLAY --- */
         #bath-overlay { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 6; pointer-events: none; flex-direction: column; align-items: center; }
         #soap-item {
             width: 70px; height: 70px; background: #a8e6cf; border: 3px solid #fff; border-radius: 16px;
@@ -132,30 +132,30 @@
             display: flex; justify-content: center; align-items: center; font-size: 36px; pointer-events: auto;
         }
 
-        /* --- BOTTOM QUICK STAT CONTROLS --- */
+        /* --- BOTTOM CONTROLS --- */
         #controls { position: absolute; bottom: 10px; left: 2%; width: 96%; z-index: 15; display: flex; gap: 10px; justify-content: center; }
         .stat-btn {
             position: relative; overflow: hidden; width: 125px; height: 42px;
             background: rgba(25, 25, 35, 0.85); border: 2px solid rgba(255,255,255,0.4); border-radius: 8px;
             color: #ffffff; cursor: pointer; font-size: 19px; font-family: 'VT323'; box-shadow: 0 3px 0 rgba(0,0,0,0.6);
         }
+        .stat-btn:active { transform: translateY(4px); box-shadow: 0 0 0 rgba(0,0,0,0.6); }
         .stat-fill { position: absolute; bottom: 0; left: 0; height: 100%; width: 100%; z-index: 1; transition: width 0.3s; }
         .stat-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 2; width: 100%; text-shadow: 1px 1px 0 #000; }
+
         #fill-food { background: rgba(85, 239, 196, 0.45); }
         #fill-clean { background: rgba(116, 185, 255, 0.45); }
         #fill-happy { background: rgba(255, 118, 117, 0.45); }
         #fill-energy { background: rgba(162, 155, 254, 0.45); }
 
-        /* --- BEAUTIFIED RESPONSIVE ARCADE MODALS --- */
+        /* --- MODALS --- */
         .modal { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.85); z-index: 100; justify-content: center; align-items: center; }
         .modal-content { padding: 22px; width: 460px; border-radius: 16px; border: 3px solid #ff6699; box-shadow: 0 0 20px rgba(255,102,153,0.5); text-align: center; position: relative; max-height: 88vh; overflow-y: auto; }
         
-        /* Premium Arcade Grid Layout Fixes */
         .arcade-menu-grid { display: flex; flex-direction: column; gap: 12px; margin: 15px 0; }
         .arcade-card {
             background: linear-gradient(135deg, #1e272e, #2f3640); border: 2px solid #ff6699; border-radius: 10px;
-            padding: 12px 16px; display: flex; justify-content: space-between; align-items: center;
-            cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;
+            padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: transform 0.2s;
         }
         .arcade-card:hover { transform: scale(1.02); box-shadow: 0 0 12px rgba(255,102,153,0.8); }
         .arcade-info { text-align: left; }
@@ -166,12 +166,8 @@
         .activities-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
         .act-btn { background: #2f3542; border: 2px solid #57606f; color: #fff; font-size: 20px; font-family: 'VT323'; padding: 10px; border-radius: 8px; cursor: pointer; }
         .act-btn:hover { background: #57606f; border-color: #ff6699; }
-        
-        /* Polished Gaming Canvas UI */
-        #minigame-area {
-            width: 100%; height: 210px; background: #111216; border: 3px solid #ff6699;
-            position: relative; overflow: hidden; border-radius: 10px; margin-bottom: 12px; box-shadow: inset 0 0 15px #000;
-        }
+
+        #minigame-area { width: 100%; height: 210px; background: #111216; border: 3px solid #ff6699; position: relative; overflow: hidden; border-radius: 10px; margin-bottom: 12px; box-shadow: inset 0 0 15px #000; }
         .target-obj { width: 38px; height: 38px; position: absolute; cursor: pointer; display: flex; justify-content: center; align-items: center; font-size: 28px; }
         .tower-block { position: absolute; height: 24px; background: #ff7675; border: 2px solid #fff; box-sizing: border-box; box-shadow: 0 2px 5px rgba(0,0,0,0.5); }
         
@@ -196,17 +192,12 @@
     <div id="weather-layer"></div>
     
     <div id="cat-group" onclick="petCat()">
-        <!-- Main Cat wrapper -->
         <div class="sprite-wrap" id="main-cat-wrap">
             <img id="cat-sprite" class="main-sprite anim-breathe" src="cat.png" onerror="this.src='cat.png'">
-            
-            <!-- Target-nursing kittens loaded inside mom's layout zone -->
             <img id="kit1-sprite" class="kitten-sprite hidden anim-breathe" src="kitten1.png" onmousedown="startKittenDrag(event, 'kit1-sprite')" ontouchstart="startKittenDrag(event, 'kit1-sprite')" onerror="this.src='cat.png'">
             <img id="kit2-sprite" class="kitten-sprite hidden anim-breathe" src="kitten2.png" onmousedown="startKittenDrag(event, 'kit2-sprite')" ontouchstart="startKittenDrag(event, 'kit2-sprite')" onerror="this.src='cat.png'">
             <img id="kit3-sprite" class="kitten-sprite hidden anim-breathe" src="kitten3.png" onmousedown="startKittenDrag(event, 'kit3-sprite')" ontouchstart="startKittenDrag(event, 'kit3-sprite')" onerror="this.src='cat.png'">
         </div>
-        
-        <!-- Separate independent Akira wrapper -->
         <div class="sprite-wrap hidden" id="akira-wrap">
             <img id="akira-sprite" class="main-sprite anim-breathe" src="akira.png" onerror="this.src='cat.png'">
         </div>
@@ -222,7 +213,7 @@
         </div>
         <div id="hud-stats-right">
             <div id="age-container">
-                <span id="age-display">Age: 1 Yr</span>
+                <span id="age-display">Kitty | Age: 1 Yr</span>
                 <div id="age-bar-bg"><div id="age-bar-fill"></div></div>
             </div>
             <span id="coin-display">Coins: 0</span>
@@ -243,7 +234,6 @@
         <button class="stat-btn" onclick="action('sleep')"><div class="stat-fill" id="fill-energy"></div><div class="stat-text" id="text-sleep">SLEEP</div></button>
     </div>
 
-    <!-- Modals System -->
     <div id="start-modal" class="modal" style="display: flex;">
         <div class="modal-content glass-panel">
             <h1 style="color:#ff6699; margin-top:0;">RAGDOLL LIFE</h1>
@@ -330,16 +320,11 @@
         </div>
     </div>
 </div>
-<!-- ======================= END OF PART 1 ======================= -->
-<!-- ======================= START OF PART 2 ======================= -->
 <script>
-    // --- AUDIO SYSTEM WITH 1-SEC TIMEOUT LIMIT ---
     function playMeowSound() {
         let s = document.getElementById('audio-meow');
         if (s) {
-            s.currentTime = 0; s.volume = 0.5;
-            s.play().catch(e=>{});
-            // Force code to cut music playback off at exactly 1.0 seconds
+            s.currentTime = 0; s.volume = 0.5; s.play().catch(e=>{});
             setTimeout(() => { if(!s.paused) { s.pause(); s.currentTime = 0; } }, 1000);
         }
     }
@@ -370,7 +355,6 @@
         } catch(e) {}
     }
 
-    // --- SYSTEM STATE DATA ---
     let gameState = {
         name: "Kitty", phase: 1, age: 1, 
         hunger: 100, energy: 100, happy: 100, clean: 100, coins: 50,
@@ -397,7 +381,7 @@
     };
 
     function init() {
-        let saved = localStorage.getItem('ragdoll_save_v11');
+        let saved = localStorage.getItem('ragdoll_save_v12');
         if (saved) {
             gameState = Object.assign(gameState, JSON.parse(saved)); 
             document.getElementById('main-cat-name').style.display = 'none'; 
@@ -442,15 +426,15 @@
 
     function addInteractionBonus() {
         if(gameState.phase === 5) return;
-        gameState.interactionBonusMs += (1000 * 60 * 20); // Adds 20 interaction bonus aging minutes
+        gameState.interactionBonusMs += (1000 * 60 * 20);
         calculateTimeDrain();
     }
 
-    function saveData() { if(gameState.phase !== 5) { gameState.lastPlayed = Date.now(); localStorage.setItem('ragdoll_save_v11', JSON.stringify(gameState)); } }
+    function saveData() { if(gameState.phase !== 5) { gameState.lastPlayed = Date.now(); localStorage.setItem('ragdoll_save_v12', JSON.stringify(gameState)); } }
 
     function updateMeters() {
         document.getElementById('coin-display').innerText = `Coins: ${gameState.coins}`;
-        document.getElementById('age-display').innerText = `Age: ${gameState.age} Yr`;
+        document.getElementById('age-display').innerText = `${gameState.name} | Age: ${gameState.age} Yr`;
         
         if(gameState.startDate && gameState.phase < 5) {
             let oneYearMs = 1000 * 60 * 60 * 6;
@@ -477,7 +461,6 @@
         animationTimeout = setTimeout(() => { if (!gameState.isSleeping) setIdleState(); }, 2000);
     }
 
-    // --- PHYSICAL INTERACTION PROCESSORS ---
     function petCat() {
         if (gameState.isSleeping || activeDrag || isBathing || gameState.phase === 5) return;
         gameState.happy = Math.min(100, gameState.happy + 5); addInteractionBonus();
@@ -506,20 +489,16 @@
         saveData(); updateMeters();
     }
 
-    // --- COMPANION ACTIVITIES ENGINE & ANIMATION ---
     function spawnHearts() {
         for(let i=0; i<4; i++) {
             let h = document.createElement('div'); h.className = 'heart-particle'; h.innerText = '❤';
             h.style.left = (40 + Math.random() * 20) + '%'; h.style.top = (45 + Math.random() * 10) + '%';
-            document.getElementById('game-container').appendChild(h);
-            setTimeout(() => h.remove(), 1500);
+            document.getElementById('game-container').appendChild(h); setTimeout(() => h.remove(), 1500);
         }
     }
 
     function runCoupleAnimation(label, baseType) {
-        showReaction(label); spawnHearts();
-        triggerAnimation('anim-couple-cuddle');
-        setTimeout(() => { action(baseType); }, 500);
+        showReaction(label); spawnHearts(); triggerAnimation('anim-couple-cuddle'); setTimeout(() => { action(baseType); }, 500);
     }
 
     function openActivities() {
@@ -527,8 +506,7 @@
         let cont = document.getElementById('activities-container'); cont.innerHTML = "";
         
         let acts = [{n: "Scratch Post", f:()=>action('play')}, {n: "Watch Bird Window", f:()=>action('play')}];
-        
-        if (gameState.phase >= 2) { // Couples Actions Allowed
+        if (gameState.phase >= 2) {
             acts.push(
                 {n: "Date Night 💖", f:()=>runCoupleAnimation("Snuggling on sofa!", 'play')},
                 {n: "Groom Akira 👅", f:()=>runCoupleAnimation("Grooming session!", 'play')},
@@ -536,7 +514,7 @@
                 {n: "Share Fish Bowl 🐟", f:()=>runCoupleAnimation("Sharing premium snack!", 'play')}
             );
         }
-        if (gameState.phase >= 4) { // Family Actions Allowed
+        if (gameState.phase >= 4) {
             acts.push(
                 {n: "Teach Pounce 🐾", f:()=>runCoupleAnimation("Teaching the kids to hunt!", 'play')},
                 {n: "Clean Kittens 🧼", f:()=>runCoupleAnimation("Bath time for the babies!", 'play')},
@@ -544,7 +522,6 @@
                 {n: "Group Blanket Nap 💤", f:()=>runCoupleAnimation("Cozy family sleeping!", 'play')}
             );
         }
-        
         acts.forEach(a => {
             let btn = document.createElement('button'); btn.className = 'act-btn'; btn.innerText = a.n;
             btn.onclick = () => { closeModal('activities-modal'); a.f(); }; cont.appendChild(btn);
@@ -552,13 +529,11 @@
         document.getElementById('activities-modal').style.display = 'flex';
     }
 
-    // --- SHOWER SOAP METER ENGINE ---
     let isBathing = false; let soapDrag = null;
     function startBathMode() {
         if (gameState.isSleeping || gameState.phase === 5) return;
         if (gameState.clean >= 100) { showReaction("Perfectly clean!"); return; }
-        isBathing = true; document.getElementById('food-tray').classList.add('hidden');
-        document.getElementById('bath-overlay').style.display = 'flex';
+        isBathing = true; document.getElementById('food-tray').classList.add('hidden'); document.getElementById('bath-overlay').style.display = 'flex';
         let soap = document.getElementById('soap-item'); soap.style.left = '50%'; soap.style.top = 'auto'; soap.style.bottom = '90px';
         soap.onmousedown = startSoapDrag; soap.ontouchstart = startSoapDrag;
     }
@@ -586,18 +561,14 @@
         document.removeEventListener('mouseup', endSoapDrag); document.removeEventListener('touchend', endSoapDrag);
     }
 
-    // --- DRAG NURSE TARGET SYSTEMS ---
     let activeKittenDrag = null; let activeKittenImg = null;
     function startKittenDrag(e, kitId) {
-        if (gameState.isSleeping || gameState.phase === 5) return;
-        e.preventDefault(); e.stopPropagation();
+        if (gameState.isSleeping || gameState.phase === 5) return; e.preventDefault(); e.stopPropagation();
         let srcEl = document.getElementById(kitId);
         activeKittenDrag = document.createElement('div'); activeKittenDrag.className = 'flying-item';
         activeKittenDrag.style.backgroundImage = `url('${srcEl.src}')`; activeKittenDrag.dataset.id = kitId;
-        document.body.appendChild(activeKittenDrag);
-        activeKittenImg = srcEl; activeKittenImg.style.opacity = '0.3';
-        moveKittenDrag(e);
-        document.addEventListener('mousemove', moveKittenDrag); document.addEventListener('touchmove', moveKittenDrag, {passive: false});
+        document.body.appendChild(activeKittenDrag); activeKittenImg = srcEl; activeKittenImg.style.opacity = '0.3';
+        moveKittenDrag(e); document.addEventListener('mousemove', moveKittenDrag); document.addEventListener('touchmove', moveKittenDrag, {passive: false});
         document.addEventListener('mouseup', endKittenDrag); document.addEventListener('touchend', endKittenDrag);
     }
     function moveKittenDrag(e) { if(!activeKittenDrag) return; e.preventDefault(); activeKittenDrag.style.left = (e.clientX || (e.touches && e.touches[0].clientX)) + 'px'; activeKittenDrag.style.top = (e.clientY || (e.touches && e.touches[0].clientY)) + 'px'; }
@@ -615,7 +586,6 @@
         updateMeters(); saveData();
     }
 
-    // --- FOOD HANDLING ---
     let activeDrag = null;
     function toggleFoodTray() {
         if (gameState.isSleeping || isBathing || gameState.phase === 5) return;
@@ -628,16 +598,14 @@
             if (gameState.inventory[key] > 0) {
                 hasFood = true; let div = document.createElement('div'); div.className = 'draggable-item';
                 div.innerHTML = `<img src="${itemsDB[key].img}" onerror="this.style.display='none'"> <span class="badge" style="position:absolute; bottom:-6px; right:-6px; background:#ff6699; padding:2px 5px; border-radius:50%; font-size:12px;">${gameState.inventory[key]}</span>`;
-                div.onmousedown = (e) => startFoodDrag(e, key); div.ontouchstart = (e) => startFoodDrag(e, key);
-                tray.appendChild(div);
+                div.onmousedown = (e) => startFoodDrag(e, key); div.ontouchstart = (e) => startFoodDrag(e, key); tray.appendChild(div);
             }
         });
         if (!hasFood) tray.innerHTML = "<div style='padding:5px; color:#fff;'>No food! Use the shop.</div>";
     }
     function startFoodDrag(e, key) {
         e.preventDefault(); activeDrag = document.createElement('div'); activeDrag.className = 'flying-item';
-        activeDrag.style.backgroundImage = `url('${itemsDB[key].img}')`; activeDrag.dataset.key = key;
-        document.body.appendChild(activeDrag); moveFoodDrag(e);
+        activeDrag.style.backgroundImage = `url('${itemsDB[key].img}')`; activeDrag.dataset.key = key; document.body.appendChild(activeDrag); moveFoodDrag(e);
         document.addEventListener('mousemove', moveFoodDrag); document.addEventListener('touchmove', moveFoodDrag, {passive: false});
         document.addEventListener('mouseup', endFoodDrag); document.addEventListener('touchend', endFoodDrag);
     }
@@ -659,7 +627,6 @@
         document.removeEventListener('mouseup', endFoodDrag); document.removeEventListener('touchend', endFoodDrag);
     }
 
-    // --- INTELLECTUAL ROAMING ENGINE ---
     function startFelineBrain() {
         clearInterval(behaviorInterval);
         behaviorInterval = setInterval(() => {
@@ -671,7 +638,6 @@
         }, 5000);
     }
 
-    // --- SYSTEM MARKETPLACE ---
     function openShop() {
         if (gameState.isSleeping || gameState.phase === 5) return;
         let container = document.getElementById('shop-items-container'); container.innerHTML = "";
@@ -680,8 +646,7 @@
             div.innerHTML = `<img src="${i.img}" onerror="this.style.display='none'"><div style="position:absolute; bottom:-22px; color:#ffeaa7; width:100%; text-align:center; font-size:18px;">${i.price}c</div>`;
             div.onclick = () => {
                 if (gameState.coins >= i.price) {
-                    gameState.coins -= i.price; gameState.inventory[key]++;
-                    playCoinSound(); saveData(); updateMeters(); updateTrayUI();
+                    gameState.coins -= i.price; gameState.inventory[key]++; playCoinSound(); saveData(); updateMeters(); updateTrayUI();
                 } else showReaction("Need more coins!");
             };
             container.appendChild(div);
@@ -689,7 +654,6 @@
         document.getElementById('shop-modal').style.display = 'flex';
     }
 
-    // --- ARCADE STORAGE ENGINE & RUNTIME ---
     let currentGame = ""; let mgTimer, mgInterval; let mgTime = 0, mgScore = 0;
     function openMiniGameHub() { if (gameState.isSleeping || gameState.phase === 5) return; document.getElementById('minigame-hub').style.display = 'flex'; }
     function launchGame(id) {
@@ -726,10 +690,15 @@
         document.getElementById('mg-start-btn').innerText = "PLAY AGAIN"; document.getElementById('mg-start-btn').style.display = 'block';
         gameState.coins += reward; gameState.energy = Math.max(0, gameState.energy - 8); saveData(); updateMeters();
     }
-    function closeActiveGame() { clearInterval(mgTimer); clearTimeout(mgInterval); document.getElementById('active-minigame-modal').style.display = 'none'; openMiniGameHub(); }
+    function closeActiveGame() {
+        clearInterval(mgTimer); clearTimeout(mgInterval); document.getElementById('active-minigame-modal').style.display = 'none';
+        document.getElementById('hs-catch').innerText = gameState.highScores.catch;
+        document.getElementById('hs-tower').innerText = gameState.highScores.tower;
+        document.getElementById('hs-puzzle').innerText = gameState.highScores.puzzle === 999 ? "--" : gameState.highScores.puzzle;
+        openMiniGameHub();
+    }
     function closeModal(id) { document.getElementById(id).style.display = 'none'; }
 
-    // Catch Mouse
     function spawnTarget() {
         if (mgTime <= 0) return; let area = document.getElementById('minigame-area'); area.innerHTML = "";
         let t = document.createElement('div'); t.className = 'target-obj'; t.innerText = "🐭";
@@ -738,7 +707,6 @@
         t.ontouchstart = t.onmousedown; area.appendChild(t); mgInterval = setTimeout(spawnTarget, 750);
     }
 
-    // Tower Stacking
     let tBlocks = []; let tCurrent; let tDir = 1; let tWidth = 100; let tSpeed = 4;
     function spawnBaseBlock() {
         let area = document.getElementById('minigame-area'); let b = document.createElement('div'); b.className = 'tower-block';
@@ -763,7 +731,6 @@
         mgScore += 4; document.getElementById('mg-score').innerText = mgScore; tSpeed += 0.4; spawnMovingBlock();
     }
 
-    // Puzzle Mode Fixes
     let pPieces = []; let pSelected = null;
     function initJigsawPuzzle() {
         let area = document.getElementById('minigame-area'); area.innerHTML = '<div id="puzzle-grid"></div>';
@@ -792,19 +759,12 @@
         }
     }
 
-    // --- DEVELOPMENT LIFECYCLE & KITTEN MATURATION SYSTEM ---
     function checkLifeEvents() {
         if (gameState.phase === 5) return;
-        
-        if (gameState.age >= 22 && gameState.phase < 5) {
-            triggerDeathSequence();
-        } else if (gameState.age >= 14 && gameState.phase < 4) {
-            document.getElementById('kitten-modal').style.display = 'flex';
-        } else if (gameState.age >= 9 && gameState.phase < 3) {
-            gameState.phase = 3; showReaction(`Married Akira! 💍`); setIdleState();
-        } else if (gameState.age >= 5 && gameState.phase < 2) { // Akira Appears Next to Cat
-            gameState.phase = 2; showReaction(`Akira Joined the Room! 🧡`); setIdleState();
-        }
+        if (gameState.age >= 22 && gameState.phase < 5) { triggerDeathSequence(); } 
+        else if (gameState.age >= 14 && gameState.phase < 4) { document.getElementById('kitten-modal').style.display = 'flex'; } 
+        else if (gameState.age >= 9 && gameState.phase < 3) { gameState.phase = 3; showReaction(`Married Akira! 💍`); setIdleState(); } 
+        else if (gameState.age >= 5 && gameState.phase < 2) { gameState.phase = 2; showReaction(`Akira Joined the Room! 🧡`); setIdleState(); }
     }
 
     function createRain() {
@@ -826,7 +786,7 @@
         let txt = `Across ${gameState.age} legendary years, ${gameState.name} lived a gorgeous, full life.<br><br>Final Gold Reserve: ${gameState.coins}c<br>Legacy: Raised a beautiful family with Akira.<br>`;
         document.getElementById('tribute-text').innerHTML = txt;
         setTimeout(() => { document.getElementById('death-modal').style.display = 'flex'; }, 5500);
-        localStorage.removeItem('ragdoll_save_v11');
+        localStorage.removeItem('ragdoll_save_v12');
     }
 
     function saveKittens() {
@@ -836,15 +796,12 @@
 
     function setIdleState() {
         if (gameState.phase === 5) return;
-        
-        // Render both side-by-side
         if (gameState.phase >= 2) { akiraWrap.classList.remove('hidden'); } else { akiraWrap.classList.add('hidden'); }
         if (gameState.phase === 4) {
             document.getElementById('kit1-sprite').classList.remove('hidden');
             document.getElementById('kit2-sprite').classList.remove('hidden');
             document.getElementById('kit3-sprite').classList.remove('hidden');
         }
-        
         let anim = gameState.isSleeping ? 'anim-sleep' : 'anim-breathe';
         allSprites.forEach(sprite => {
             if (sprite && !sprite.classList.contains('hidden') && !sprite.parentNode.classList.contains('hidden')) {
@@ -853,7 +810,6 @@
         });
     }
 
-    function hardReset() { localStorage.removeItem('ragdoll_save_v11'); location.reload(); }
+    function hardReset() { localStorage.removeItem('ragdoll_save_v12'); location.reload(); }
     window.onload = init;
 </script>
-<!-- ======================= END OF PART 2 ======================= -->
