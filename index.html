@@ -3,10 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Ragdoll Life - Complete Journey</title>
+    <title>Ragdoll Life - Perfected Journey</title>
     <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
     <style>
         /* --- CORE SETUP --- */
+        .hidden { display: none !important; }
+        
         body {
             margin: 0; padding: 0; background-color: #000;
             font-family: 'VT323', monospace; display: flex; justify-content: center; align-items: center;
@@ -63,14 +65,26 @@
         #kit2-sprite { bottom: 0px; left: 40px; }
         #kit3-sprite { bottom: -15px; right: -20px; }
 
-        /* --- HEART PARTICLES --- */
+        /* --- CUSTOM ASSET PARTICLES & THOUGHTS --- */
         .heart-particle {
-            position: absolute; color: #ff6699; font-size: 24px; pointer-events: none; z-index: 99;
-            animation: floatUpHeart 1.5s forwards ease-out; text-shadow: 1px 1px 2px #000;
+            position: absolute; width: 35px; height: 35px; pointer-events: none; z-index: 99;
+            animation: floatUpHeart 1.5s forwards ease-out; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
         }
         @keyframes floatUpHeart {
             0% { transform: translateY(0) scale(0.5); opacity: 1; }
             100% { transform: translateY(-80px) scale(1.2); opacity: 0; }
+        }
+
+        .thought-bubble {
+            position: absolute; top: -45px; left: 50%; transform: translateX(-50%);
+            background: #fff; color: #000; padding: 6px 12px; border-radius: 12px;
+            font-size: 20px; font-family: 'VT323', monospace; pointer-events: none; z-index: 30;
+            opacity: 0; transition: opacity 0.4s ease; white-space: nowrap;
+            border: 2px solid #000; box-shadow: 2px 2px 0 rgba(0,0,0,0.5); text-shadow: none;
+        }
+        .thought-bubble::after {
+            content: ''; position: absolute; bottom: -8px; left: 50%; transform: translateX(-50%);
+            border-width: 8px 8px 0; border-style: solid; border-color: #fff transparent transparent transparent;
         }
 
         /* --- ANIMATIONS --- */
@@ -199,7 +213,8 @@
             <img id="kit3-sprite" class="kitten-sprite hidden anim-breathe" src="kitten3.png" onmousedown="startKittenDrag(event, 'kit3-sprite')" ontouchstart="startKittenDrag(event, 'kit3-sprite')" onerror="this.src='cat.png'">
         </div>
         <div class="sprite-wrap hidden" id="akira-wrap">
-            <img id="akira-sprite" class="main-sprite anim-breathe" src="akira.png" onerror="this.src='cat.png'">
+            <div id="akira-thought" class="thought-bubble">Hi!</div>
+            <img id="akira-sprite" class="main-sprite anim-breathe" src="akira.png" onerror="this.onerror=null; this.src='cat.png'; this.style.filter='hue-rotate(280deg) brightness(1.2) drop-shadow(0 0 5px rgba(255,255,255,0.3))';">
         </div>
     </div>
 
@@ -449,6 +464,15 @@
     }
 
     function showReaction(text) { let box = document.getElementById('reaction-text'); box.innerText = text; box.style.opacity = '1'; setTimeout(() => box.style.opacity = '0', 3000); }
+    
+    function showAkiraThought(text) {
+        let tb = document.getElementById('akira-thought');
+        if(tb) {
+            tb.innerHTML = text; tb.style.opacity = '1';
+            setTimeout(() => { tb.style.opacity = '0'; }, 4000);
+        }
+    }
+
     function playAudio(id) { let s = document.getElementById(id); if (s) { s.currentTime = 0; s.play().catch(e=>{}); } }
 
     function triggerAnimation(animClass) {
@@ -491,14 +515,16 @@
 
     function spawnHearts() {
         for(let i=0; i<4; i++) {
-            let h = document.createElement('div'); h.className = 'heart-particle'; h.innerText = '❤';
+            let h = document.createElement('img'); h.className = 'heart-particle'; h.src = 'hearts.png';
             h.style.left = (40 + Math.random() * 20) + '%'; h.style.top = (45 + Math.random() * 10) + '%';
             document.getElementById('game-container').appendChild(h); setTimeout(() => h.remove(), 1500);
         }
     }
 
     function runCoupleAnimation(label, baseType) {
-        showReaction(label); spawnHearts(); triggerAnimation('anim-couple-cuddle'); setTimeout(() => { action(baseType); }, 500);
+        showReaction(label); spawnHearts(); triggerAnimation('anim-couple-cuddle'); 
+        showAkiraThought("Purrr... 💓");
+        setTimeout(() => { action(baseType); }, 500);
     }
 
     function openActivities() {
@@ -761,10 +787,26 @@
 
     function checkLifeEvents() {
         if (gameState.phase === 5) return;
-        if (gameState.age >= 22 && gameState.phase < 5) { triggerDeathSequence(); } 
-        else if (gameState.age >= 14 && gameState.phase < 4) { document.getElementById('kitten-modal').style.display = 'flex'; } 
-        else if (gameState.age >= 9 && gameState.phase < 3) { gameState.phase = 3; showReaction(`Married Akira! 💍`); setIdleState(); } 
-        else if (gameState.age >= 5 && gameState.phase < 2) { gameState.phase = 2; showReaction(`Akira Joined the Room! 🧡`); setIdleState(); }
+        
+        if (gameState.age >= 22 && gameState.phase < 5) { 
+            triggerDeathSequence(); 
+        } 
+        else if (gameState.age >= 14 && gameState.phase < 4) { 
+            document.getElementById('kitten-modal').style.display = 'flex'; 
+        } 
+        else if (gameState.age >= 9 && gameState.phase < 3) { 
+            gameState.phase = 3; 
+            showReaction(`Married Akira! 💍`); 
+            setIdleState(); 
+            spawnHearts(); // Trigger hearts.png at age 9
+            showAkiraThought("I love you! 💖"); // Akira reacts to marriage
+        } 
+        else if (gameState.age >= 5 && gameState.phase < 2) { 
+            gameState.phase = 2; 
+            showReaction(`Akira Joined the Room! 🧡`); 
+            setIdleState(); 
+            showAkiraThought("Hi there! 🐾"); // Akira reacts to meeting Billu at age 5
+        }
     }
 
     function createRain() {
@@ -796,12 +838,13 @@
 
     function setIdleState() {
         if (gameState.phase === 5) return;
+        
         if (gameState.phase >= 2) { akiraWrap.classList.remove('hidden'); } else { akiraWrap.classList.add('hidden'); }
-        if (gameState.phase === 4) {
-            document.getElementById('kit1-sprite').classList.remove('hidden');
-            document.getElementById('kit2-sprite').classList.remove('hidden');
-            document.getElementById('kit3-sprite').classList.remove('hidden');
-        }
+        
+        let k1 = document.getElementById('kit1-sprite'); let k2 = document.getElementById('kit2-sprite'); let k3 = document.getElementById('kit3-sprite');
+        if (gameState.phase >= 4) { k1.classList.remove('hidden'); k2.classList.remove('hidden'); k3.classList.remove('hidden'); } 
+        else { k1.classList.add('hidden'); k2.classList.add('hidden'); k3.classList.add('hidden'); }
+
         let anim = gameState.isSleeping ? 'anim-sleep' : 'anim-breathe';
         allSprites.forEach(sprite => {
             if (sprite && !sprite.classList.contains('hidden') && !sprite.parentNode.classList.contains('hidden')) {
