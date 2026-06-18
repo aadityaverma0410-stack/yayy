@@ -6,16 +6,14 @@
     <title>Ragdoll Life - Premium Landscape Edition</title>
     <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
     <style>
-        /* --- CORE FULLSCREEN SETUP --- */
+        /* --- CORE SETUP --- */
         body {
             margin: 0; padding: 0; background-color: #000;
             font-family: 'VT323', monospace; display: flex; justify-content: center; align-items: center;
             height: 100vh; width: 100vw; user-select: none; overflow: hidden; touch-action: none;
         }
         
-        #game-container {
-            width: 100vw; height: 100vh; position: relative; overflow: hidden; 
-        }
+        #game-container { width: 100vw; height: 100vh; position: relative; overflow: hidden; }
         
         #bg-layer {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
@@ -24,7 +22,6 @@
             transition: filter 1.5s ease;
         }
 
-        /* --- PORTRAIT LOCK OVERLAY --- */
         #landscape-lock {
             display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
             background: #111; z-index: 99999; color: #fff; flex-direction: column;
@@ -35,7 +32,6 @@
             #game-container { display: none; }
         }
 
-        /* --- UI GLASSMORPHISM --- */
         .glass-panel {
             background: rgba(15, 15, 25, 0.85); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
             border: 2px solid rgba(255, 255, 255, 0.2); border-radius: 12px;
@@ -49,9 +45,8 @@
             transition: left 3s linear; cursor: pointer;
         }
         .main-sprite {
-            width: 100%; height: 100%; object-fit: contain;
-            position: absolute; z-index: 3; image-rendering: pixelated;
-            transform-origin: bottom center; transition: filter 0.5s ease;
+            width: 100%; height: 100%; object-fit: contain; position: absolute; z-index: 3; 
+            image-rendering: pixelated; transform-origin: bottom center; transition: filter 0.5s ease;
         }
         .kitten-sprite {
             width: 70px; height: 70px; object-fit: contain; position: absolute; 
@@ -76,10 +71,10 @@
         @keyframes bounce { 0% { transform: translateY(0); } 100% { transform: translateY(-30px); } }
         @keyframes groom { 0% { transform: rotate(0deg) scale(1); } 100% { transform: rotate(-10deg) scaleY(0.9); } }
 
-        /* --- TOP HUD (Streamlined) --- */
+        /* --- TOP HUD --- */
         #hud-top {
-            position: absolute; top: 15px; left: 2%; width: 96%;
-            display: flex; justify-content: space-between; align-items: center; z-index: 3; 
+            position: absolute; top: 15px; left: 2%; width: 96%; display: flex; 
+            justify-content: space-between; align-items: center; z-index: 3; 
             font-size: 24px; padding: 10px 15px; box-sizing: border-box;
         }
         .btn-small {
@@ -90,10 +85,14 @@
         .btn-danger { border-color: #ff8b94; color: #ff8b94; }
         
         #hud-stats-right { display: flex; gap: 20px; align-items: center; }
-        #age-display { color: #ffb199; }
         #coin-display { color: #ffeaa7; font-size: 28px; }
+        
+        /* Age Progress Bar */
+        #age-container { display: flex; flex-direction: column; align-items: flex-end; }
+        #age-display { color: #ffb199; margin-bottom: 2px; }
+        #age-bar-bg { width: 100px; height: 8px; background: rgba(0,0,0,0.5); border: 1px solid #fff; border-radius: 4px; overflow: hidden; }
+        #age-bar-fill { height: 100%; background: #ffb199; width: 0%; transition: width 1s linear; }
 
-        /* --- REACTION TEXT (Moved off face to Top Right) --- */
         #reaction-text {
             position: absolute; top: 70px; right: 2%; padding: 8px 15px; z-index: 3; 
             font-size: 22px; color: #fff; opacity: 0; transition: opacity 0.3s ease; pointer-events: none;
@@ -103,8 +102,7 @@
         /* --- DRAG & DROP FOOD TRAY --- */
         #food-tray {
             position: absolute; bottom: 90px; left: 50%; transform: translateX(-50%);
-            display: flex; gap: 15px; padding: 15px; z-index: 5;
-            transition: opacity 0.3s, transform 0.3s;
+            display: flex; gap: 15px; padding: 15px; z-index: 5; transition: opacity 0.3s, transform 0.3s;
         }
         .draggable-food {
             width: 60px; height: 60px; cursor: grab; padding: 5px; position: relative;
@@ -117,11 +115,26 @@
             background: #ff3385; color: #fff; padding: 2px 6px; 
             border-radius: 10px; border: 2px solid #fff; z-index: 2;
         }
-        .flying-food {
-            position: fixed; width: 60px; height: 60px; z-index: 9999;
-            pointer-events: none; transform: translate(-50%, -50%); 
-            filter: drop-shadow(0 8px 12px rgba(0,0,0,0.6));
+        .flying-item {
+            position: fixed; width: 60px; height: 60px; z-index: 9999; pointer-events: none; 
+            transform: translate(-50%, -50%); filter: drop-shadow(0 8px 12px rgba(0,0,0,0.6));
             background-size: contain; background-repeat: no-repeat; background-position: center;
+        }
+
+        /* --- INTERACTIVE BATH UI --- */
+        #bath-overlay {
+            display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 6; pointer-events: none; flex-direction: column; align-items: center;
+        }
+        #soap-item {
+            width: 80px; height: 80px; background: #a8e6cf; border: 3px solid #fff; border-radius: 20px;
+            position: absolute; bottom: 100px; left: 50%; transform: translateX(-50%); cursor: grab;
+            display: flex; justify-content: center; align-items: center; font-size: 40px;
+            pointer-events: auto; box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+        }
+        #bath-instructions {
+            margin-top: 100px; font-size: 28px; color: #fff; background: rgba(0,0,0,0.6); 
+            padding: 10px 20px; border-radius: 8px; border: 2px solid #fff; pointer-events: none;
         }
 
         /* --- DYNAMIC METER BUTTONS --- */
@@ -145,67 +158,70 @@
             z-index: 2; width: 100%; text-align: center; text-shadow: 1px 1px 0 #000;
         }
 
-        /* Specific Meter Colors */
         #fill-food { background: rgba(85, 239, 196, 0.5); }
         #fill-clean { background: rgba(116, 185, 255, 0.5); }
         #fill-happy { background: rgba(255, 118, 117, 0.5); }
         #fill-energy { background: rgba(162, 155, 254, 0.5); }
 
-        /* --- CUSTOM MODALS & ALERTS --- */
+        /* --- MODALS (Fixed Scrolling for Mobile Landscape) --- */
         .modal {
             display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0, 0, 0, 0.85); z-index: 100; justify-content: center; align-items: center;
         }
-        .modal-content { padding: 30px; width: 500px; text-align: center; position: relative; }
+        .modal-content { 
+            padding: 20px; width: 500px; text-align: center; position: relative;
+            max-height: 85vh; overflow-y: auto; /* Fixes buttons getting cut off */
+        }
         
         .alert-box { width: 350px; padding: 25px; }
         .alert-text { font-size: 24px; margin-bottom: 20px; line-height: 1.2; }
 
         /* --- SHOP UI --- */
-        .shop-items { display: flex; justify-content: space-around; margin-top: 20px; flex-wrap: wrap; gap: 10px; }
+        .shop-items { display: flex; justify-content: space-around; margin-top: 15px; flex-wrap: wrap; gap: 10px; }
         .shop-item {
-            background: rgba(0,0,0,0.4); padding: 10px; border-radius: 8px; border: 1px solid #555;
-            cursor: pointer; width: 80px; transition: background 0.2s;
+            background: rgba(0,0,0,0.4); padding: 5px; border-radius: 8px; border: 1px solid #555;
+            cursor: pointer; width: 70px; transition: background 0.2s;
         }
         .shop-item:hover { background: rgba(255,255,255,0.1); }
-        .shop-item img { width: 50px; height: 50px; object-fit: contain; margin-bottom: 5px; }
+        .shop-item img { width: 45px; height: 45px; object-fit: contain; margin-bottom: 5px; }
 
         /* --- MINIGAMES UI --- */
         .mg-menu-btn {
-            display: block; width: 100%; padding: 15px; margin-bottom: 10px;
-            background: #2d3436; border: 2px solid #636e72; color: #fff; font-size: 24px;
-            font-family: 'VT323'; cursor: pointer; border-radius: 8px;
+            display: flex; justify-content: space-between; align-items: center;
+            width: 100%; padding: 10px 15px; margin-bottom: 10px;
+            background: #2d3436; border: 2px solid #636e72; color: #fff; font-size: 22px;
+            font-family: 'VT323'; cursor: pointer; border-radius: 8px; box-sizing: border-box;
         }
         .mg-menu-btn:hover { background: #636e72; }
+        .hs-text { color: #ffeaa7; font-size: 18px; }
 
         #minigame-area {
-            width: 100%; height: 260px; background: #222; border: 2px solid #555;
+            width: 100%; height: 220px; background: #222; border: 2px solid #555;
             position: relative; overflow: hidden; border-radius: 8px; cursor: crosshair; margin-bottom: 10px;
         }
         
-        /* Catch Mouse Target */
+        /* Catch Mouse */
         .target-obj {
             width: 40px; height: 40px; background: #ff6699; border-radius: 50%;
             position: absolute; cursor: pointer; display: flex; justify-content: center; align-items: center; color: #fff;
         }
 
         /* Tower Blocks */
-        .tower-block {
-            position: absolute; height: 30px; background: #a8e6cf; border: 2px solid #fff; box-sizing: border-box;
-        }
+        .tower-block { position: absolute; height: 25px; background: #a8e6cf; border: 2px solid #fff; box-sizing: border-box; }
 
-        /* 8x8 Puzzle Grid */
+        /* 5x5 Jigsaw Swap Puzzle */
         #puzzle-grid {
-            display: grid; grid-template-columns: repeat(8, 1fr); gap: 2px;
-            width: 256px; height: 256px; margin: 0 auto; background: #111; padding: 2px;
+            display: grid; grid-template-columns: repeat(5, 1fr); gap: 2px;
+            width: 220px; height: 220px; margin: 0 auto; background: #111; padding: 2px;
         }
-        .puzzle-cell {
-            background: #333; display: flex; justify-content: center; align-items: center; cursor: pointer;
+        .puzzle-piece {
+            background-color: #333; background-image: url('cat.png'); background-size: 220px 220px;
+            cursor: pointer; border: 1px solid #555; transition: transform 0.1s;
         }
-        .puzzle-cell img { width: 90%; height: 90%; object-fit: contain; pointer-events: none; }
+        .puzzle-piece.selected { border: 2px solid #ff6699; transform: scale(0.9); z-index: 10; }
 
         input {
-            width: 80%; padding: 12px; margin: 10px 0; border-radius: 8px; 
+            width: 80%; padding: 10px; margin: 10px 0; border-radius: 8px; 
             border: 2px solid rgba(255,255,255,0.3); background: rgba(0,0,0,0.5); 
             color: #fff; font-family: 'VT323'; font-size: 22px; text-align: center;
         }
@@ -214,7 +230,7 @@
 <body>
 
 <div id="landscape-lock">
-    <div>📱</div>
+    <div style="font-size: 50px; margin-bottom: 10px;">📱 ➔ 🖥️</div>
     <div>Please rotate your device to landscape mode.</div>
 </div>
 
@@ -242,19 +258,27 @@
             <button class="btn-small" onclick="openMiniGameHub()">ARCADE 🎮</button>
         </div>
         <div id="hud-stats-right">
-            <span id="age-display">Age: 1 Yr</span>
+            <div id="age-container">
+                <span id="age-display">Age: 1 Yr</span>
+                <div id="age-bar-bg"><div id="age-bar-fill"></div></div>
+            </div>
             <span id="coin-display">Coins: 0</span>
         </div>
     </div>
 
     <div id="food-tray" class="glass-panel hidden"></div>
 
+    <div id="bath-overlay">
+        <div id="bath-instructions">Drag soap over cat to clean! 🧼</div>
+        <div id="soap-item">🧼</div>
+    </div>
+
     <div id="controls">
         <button class="stat-btn" onclick="toggleFoodTray()">
             <div class="stat-fill" id="fill-food"></div>
             <div class="stat-text">FEED</div>
         </button>
-        <button class="stat-btn" onclick="action('bath')">
+        <button class="stat-btn" onclick="startBathMode()">
             <div class="stat-fill" id="fill-clean"></div>
             <div class="stat-text">BATH</div>
         </button>
@@ -300,30 +324,34 @@
         <div class="modal-content glass-panel">
             <h2 style="margin-top:0;">SUPERMARKET</h2>
             <div class="shop-items" id="shop-items-container"></div>
-            <button class="btn-small" style="width: 100%; margin-top:20px;" onclick="closeModal('shop-modal')">CLOSE SHOP</button>
+            <button class="btn-small" style="width: 100%; margin-top:15px;" onclick="closeModal('shop-modal')">CLOSE SHOP</button>
         </div>
     </div>
 
     <div id="minigame-hub" class="modal">
         <div class="modal-content glass-panel">
-            <h2 style="margin-top:0;">ARCADE (Earn Coins)</h2>
-            <button class="mg-menu-btn" onclick="launchGame('catch')">1. Catch the Mouse</button>
-            <button class="mg-menu-btn" onclick="launchGame('tower')">2. Build the Tower</button>
-            <button class="mg-menu-btn" onclick="launchGame('puzzle')">3. 8x8 Icon Pop</button>
+            <h2 style="margin-top:0;">ARCADE</h2>
+            <button class="mg-menu-btn" onclick="launchGame('catch')">
+                <span>1. Catch Mouse</span><span class="hs-text">Best: <span id="hs-catch">0</span></span>
+            </button>
+            <button class="mg-menu-btn" onclick="launchGame('tower')">
+                <span>2. Build Tower</span><span class="hs-text">Best: <span id="hs-tower">0</span></span>
+            </button>
+            <button class="mg-menu-btn" onclick="launchGame('puzzle')">
+                <span>3. 5x5 Cat Jigsaw</span><span class="hs-text">Best: <span id="hs-puzzle">0</span>s</span>
+            </button>
             <button class="btn-small" style="width: 100%; margin-top:10px;" onclick="closeModal('minigame-hub')">EXIT ARCADE</button>
         </div>
     </div>
 
     <div id="active-minigame-modal" class="modal">
         <div class="modal-content glass-panel">
-            <h2 id="mg-title" style="margin-top:0;">Game</h2>
-            <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+            <h2 id="mg-title" style="margin-top:0; margin-bottom: 5px;">Game</h2>
+            <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
                 <span style="color:#a8e6cf;">Score: <span id="mg-score">0</span></span>
-                <span style="color:#ff8b94;">Time/Moves: <span id="mg-time">0</span></span>
+                <span style="color:#ff8b94;">Time: <span id="mg-time">0</span></span>
             </div>
-            
             <div id="minigame-area"></div>
-            
             <button id="mg-start-btn" class="btn-small" style="width: 100%; margin-bottom:10px;" onclick="startCurrentGame()">START GAME</button>
             <button class="btn-small" style="width: 100%; background:#444;" onclick="closeActiveGame()">BACK TO HUB</button>
         </div>
@@ -332,20 +360,19 @@
 </div>
 
 <script>
-    // --- VENDING MACHINE COIN SOUND SYNTHESIZER ---
+    // --- VENDING MACHINE SOUND ---
     function playCoinSound() {
         try {
             let ctx = new (window.AudioContext || window.webkitAudioContext)();
             let osc1 = ctx.createOscillator(); osc1.type = 'square'; osc1.frequency.setValueAtTime(150, ctx.currentTime);
             let gain1 = ctx.createGain(); gain1.gain.setValueAtTime(0.3, ctx.currentTime); gain1.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.1);
             osc1.connect(gain1); gain1.connect(ctx.destination); osc1.start(); osc1.stop(ctx.currentTime + 0.1);
-            
             setTimeout(() => {
                 let osc2 = ctx.createOscillator(); osc2.type = 'sine'; osc2.frequency.setValueAtTime(1400, ctx.currentTime);
                 let gain2 = ctx.createGain(); gain2.gain.setValueAtTime(0.2, ctx.currentTime); gain2.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.4);
                 osc2.connect(gain2); gain2.connect(ctx.destination); osc2.start(); osc2.stop(ctx.currentTime + 0.4);
             }, 100);
-        } catch(e) { console.log("Audio API blocked"); }
+        } catch(e) {}
     }
 
     // --- CUSTOM ALERTS ---
@@ -363,13 +390,14 @@
         document.getElementById('alert-modal').style.display = 'flex';
     }
 
-    // --- STATE MANAGEMENT ---
+    // --- GAME STATE ---
     let gameState = {
         name: "Kitty", phase: 1, age: 1, 
         hunger: 100, energy: 100, happy: 100, clean: 100, coins: 50,
         isSleeping: false, startDate: null, lastPlayed: null,
         inventory: { fish: 2, croissant: 1, can: 1, milk: 0, mash: 0 },
-        kittens: { k1: "Kit1", k2: "Kit2", k3: "Kit3" }
+        kittens: { k1: "Kit1", k2: "Kit2", k3: "Kit3" },
+        highScores: { catch: 0, tower: 0, puzzle: 999 } // Puzzle is time-based, lower is better
     };
 
     let behaviorInterval, animationTimeout;
@@ -385,10 +413,9 @@
     };
 
     function init() {
-        let saved = localStorage.getItem('ragdoll_save_v8');
+        let saved = localStorage.getItem('ragdoll_save_v9');
         if (saved) {
-            gameState = JSON.parse(saved);
-            if(gameState.clean === undefined) gameState.clean = 100; // Legacy support
+            gameState = Object.assign(gameState, JSON.parse(saved)); // Merge to keep new variables like highScores
             document.querySelector('.opening-title').innerText = "WELCOME BACK";
             document.getElementById('main-cat-name').style.display = 'none'; 
             calculateTimeDrain();
@@ -406,13 +433,13 @@
         document.getElementById('start-modal').style.display = 'none';
         
         let bgm = document.getElementById('audio-bgm');
-        if(bgm) { bgm.volume = 0.2; bgm.play().catch(e=>console.log(e)); }
+        if(bgm) { bgm.volume = 0.2; bgm.play().catch(e=>{}); }
         
         updateMeters(); startFelineBrain();
         showReaction(`${gameState.name} entered the room.`);
     }
 
-    // --- TIME MATH ---
+    // --- TIME & AGE MATH ---
     function calculateTimeDrain() {
         if (!gameState.lastPlayed || !gameState.startDate) return;
         let hoursPassed = (Date.now() - gameState.lastPlayed) / (1000 * 60 * 60);
@@ -424,21 +451,30 @@
             if (!gameState.isSleeping) gameState.energy = Math.max(0, Math.floor(gameState.energy - (hoursPassed * 3)));
         }
         
-        let yearsPassed = Math.floor((Date.now() - gameState.startDate) / (1000 * 60 * 60 * 6));
-        gameState.age = 1 + yearsPassed;
-        
+        // 1 Year = 6 Hours Real Time
+        let oneYearMs = 1000 * 60 * 60 * 6;
+        let totalMs = Date.now() - gameState.startDate;
+        gameState.age = 1 + Math.floor(totalMs / oneYearMs);
         checkLifeEvents();
     }
 
     function saveData() {
         gameState.lastPlayed = Date.now();
-        localStorage.setItem('ragdoll_save_v8', JSON.stringify(gameState));
+        localStorage.setItem('ragdoll_save_v9', JSON.stringify(gameState));
     }
 
-    // --- UPDATE DYNAMIC METERS ---
+    // --- DYNAMIC METERS & UI ---
     function updateMeters() {
         document.getElementById('coin-display').innerText = `Coins: ${gameState.coins}`;
         document.getElementById('age-display').innerText = `Age: ${gameState.age} Yr`;
+        
+        // Update Age Progress Bar
+        if(gameState.startDate) {
+            let oneYearMs = 1000 * 60 * 60 * 6;
+            let timeIntoCurrentYear = (Date.now() - gameState.startDate) % oneYearMs;
+            let percentToNextYear = (timeIntoCurrentYear / oneYearMs) * 100;
+            document.getElementById('age-bar-fill').style.width = percentToNextYear + '%';
+        }
         
         let mFood = document.getElementById('fill-food');
         let mClean = document.getElementById('fill-clean');
@@ -447,8 +483,8 @@
 
         mFood.style.width = gameState.hunger + '%';
         mFood.style.background = gameState.hunger < 30 ? 'rgba(255, 0, 0, 0.6)' : 'rgba(85, 239, 196, 0.5)';
-        
         mClean.style.width = gameState.clean + '%';
+        mClean.style.background = gameState.clean < 30 ? 'rgba(255, 0, 0, 0.6)' : 'rgba(116, 185, 255, 0.5)';
         mHappy.style.width = gameState.happy + '%';
         mEnergy.style.width = gameState.energy + '%';
     }
@@ -458,7 +494,6 @@
         box.innerText = text; box.style.opacity = '1';
         setTimeout(() => box.style.opacity = '0', 3000);
     }
-
     function playAudio(id) { let s = document.getElementById(id); if (s) { s.currentTime = 0; s.play().catch(e=>{}); } }
 
     function triggerAnimation(animClass) {
@@ -469,9 +504,9 @@
         animationTimeout = setTimeout(() => { if (!gameState.isSleeping) setIdleState(); }, 2000);
     }
 
-    // --- ACTIONS ---
+    // --- ACTIONS & INTERACTIVE BATH ---
     function petCat() {
-        if (gameState.isSleeping) return;
+        if (gameState.isSleeping || activeDrag || isBathing) return;
         gameState.happy = Math.min(100, gameState.happy + 5);
         showReaction(`Purrr...`); playAudio('audio-purr'); triggerAnimation('anim-cuddle');
         saveData(); updateMeters();
@@ -495,21 +530,71 @@
                 setIdleState();
             }
         } else if (type === 'play') {
-            if (gameState.energy < 15) { showAlert("Too tired to play. Let her sleep."); return; }
-            gameState.energy -= 15; gameState.happy = Math.min(100, gameState.happy + 20);
+            if (gameState.energy < 15) { showAlert("Too tired to play."); return; }
+            gameState.energy -= 15; gameState.happy = Math.min(100, gameState.happy + 20); gameState.clean = Math.max(0, gameState.clean - 10);
             showReaction("Playing! 🧶"); playAudio('audio-meow'); triggerAnimation('anim-play');
-        } else if (type === 'bath') {
-            gameState.clean = 100; gameState.happy = Math.max(0, gameState.happy - 10);
-            showReaction("All clean! 🧼"); triggerAnimation('anim-play');
         }
         saveData(); updateMeters();
+    }
+
+    // INTERACTIVE BATH LOGIC
+    let isBathing = false;
+    let soapDrag = null;
+    function startBathMode() {
+        if (gameState.isSleeping) { showAlert("Wake her up first."); return; }
+        if (gameState.clean >= 100) { showReaction("Already perfectly clean!"); return; }
+        
+        isBathing = true;
+        document.getElementById('food-tray').classList.add('hidden');
+        document.getElementById('bath-overlay').style.display = 'flex';
+        
+        let soap = document.getElementById('soap-item');
+        soap.style.left = '50%'; soap.style.top = 'auto'; soap.style.bottom = '100px';
+        
+        soap.onmousedown = startSoapDrag;
+        soap.ontouchstart = startSoapDrag;
+    }
+
+    function startSoapDrag(e) {
+        e.preventDefault(); soapDrag = document.getElementById('soap-item');
+        document.addEventListener('mousemove', moveSoap); document.addEventListener('touchmove', moveSoap, {passive: false});
+        document.addEventListener('mouseup', endSoapDrag); document.addEventListener('touchend', endSoapDrag);
+    }
+    
+    function moveSoap(e) {
+        if(!soapDrag) return; e.preventDefault();
+        let cx = e.clientX || (e.touches && e.touches[0].clientX);
+        let cy = e.clientY || (e.touches && e.touches[0].clientY);
+        soapDrag.style.left = cx + 'px'; soapDrag.style.top = cy + 'px'; soapDrag.style.bottom = 'auto';
+        
+        // Rubbing logic
+        let rect = catGroup.getBoundingClientRect();
+        if (cx >= rect.left && cx <= rect.right && cy >= rect.top && cy <= rect.bottom) {
+            gameState.clean = Math.min(100, gameState.clean + 1.5);
+            updateMeters();
+            if(Math.random() < 0.1) triggerAnimation('anim-groom');
+            
+            if (gameState.clean >= 100) {
+                endSoapDrag();
+                document.getElementById('bath-overlay').style.display = 'none';
+                isBathing = false;
+                showReaction("Sparkling clean! ✨"); playAudio('audio-meow');
+                saveData();
+            }
+        }
+    }
+    
+    function endSoapDrag() {
+        soapDrag = null;
+        document.removeEventListener('mousemove', moveSoap); document.removeEventListener('touchmove', moveSoap);
+        document.removeEventListener('mouseup', endSoapDrag); document.removeEventListener('touchend', endSoapDrag);
     }
 
     // --- ROAMING ---
     function startFelineBrain() {
         clearInterval(behaviorInterval);
         behaviorInterval = setInterval(() => {
-            if (gameState.isSleeping || document.getElementById('food-tray').classList.contains('hidden') === false) return;
+            if (gameState.isSleeping || activeDrag || isBathing || document.getElementById('food-tray').classList.contains('hidden') === false) return;
             if (Math.random() < 0.4) {
                 let newX = 20 + Math.random() * 60; 
                 let currentX = parseFloat(catGroup.style.left || 50);
@@ -521,42 +606,39 @@
     }
 
     // --- DRAG FEEDING ---
-    let activeDrag = null;
     function toggleFoodTray() {
-        if (gameState.isSleeping) return;
+        if (gameState.isSleeping || isBathing) return;
         let tray = document.getElementById('food-tray');
         if (tray.classList.contains('hidden')) { tray.classList.remove('hidden'); updateTrayUI(); }
         else tray.classList.add('hidden');
     }
     function updateTrayUI() {
-        let tray = document.getElementById('food-tray');
-        tray.innerHTML = ""; let hasFood = false;
+        let tray = document.getElementById('food-tray'); tray.innerHTML = ""; let hasFood = false;
         Object.keys(gameState.inventory).forEach(key => {
             if (gameState.inventory[key] > 0) {
-                hasFood = true;
-                let div = document.createElement('div'); div.className = 'draggable-food';
+                hasFood = true; let div = document.createElement('div'); div.className = 'draggable-food';
                 div.innerHTML = `<img src="${itemsDB[key].img}" onerror="this.style.display='none'"> <span class="food-badge">${gameState.inventory[key]}</span>`;
-                div.onmousedown = (e) => startDrag(e, key); div.ontouchstart = (e) => startDrag(e, key);
+                div.onmousedown = (e) => startFoodDrag(e, key); div.ontouchstart = (e) => startFoodDrag(e, key);
                 tray.appendChild(div);
             }
         });
         if (!hasFood) tray.innerHTML = "<div style='padding:10px;'>Empty! Buy food in Shop.</div>";
     }
-    function startDrag(e, key) {
+    function startFoodDrag(e, key) {
         e.preventDefault(); 
-        activeDrag = document.createElement('div'); activeDrag.className = 'flying-food';
+        activeDrag = document.createElement('div'); activeDrag.className = 'flying-item';
         activeDrag.style.backgroundImage = `url('${itemsDB[key].img}')`; activeDrag.dataset.key = key;
         document.body.appendChild(activeDrag);
-        moveDrag(e); 
-        document.addEventListener('mousemove', moveDrag); document.addEventListener('touchmove', moveDrag, {passive: false});
-        document.addEventListener('mouseup', endDrag); document.addEventListener('touchend', endDrag);
+        moveFoodDrag(e); 
+        document.addEventListener('mousemove', moveFoodDrag); document.addEventListener('touchmove', moveFoodDrag, {passive: false});
+        document.addEventListener('mouseup', endFoodDrag); document.addEventListener('touchend', endFoodDrag);
     }
-    function moveDrag(e) {
+    function moveFoodDrag(e) {
         if(!activeDrag) return; e.preventDefault(); 
         activeDrag.style.left = (e.clientX || (e.touches && e.touches[0].clientX)) + 'px';
         activeDrag.style.top = (e.clientY || (e.touches && e.touches[0].clientY)) + 'px';
     }
-    function endDrag(e) {
+    function endFoodDrag(e) {
         if(!activeDrag) return;
         let cx = e.clientX || (e.changedTouches && e.changedTouches[0].clientX);
         let cy = e.clientY || (e.changedTouches && e.changedTouches[0].clientY);
@@ -566,15 +648,15 @@
             let key = activeDrag.dataset.key;
             if (gameState.inventory[key] > 0) {
                 gameState.inventory[key]--; gameState.hunger = Math.min(100, gameState.hunger + itemsDB[key].hunger);
-                gameState.clean = Math.max(0, gameState.clean - 5); // Eating makes slight mess
+                gameState.clean = Math.max(0, gameState.clean - 5); 
                 showReaction(`Eating ${itemsDB[key].name}...`);
                 playAudio('audio-eat'); triggerAnimation('anim-eat'); 
                 updateTrayUI(); saveData(); updateMeters();
             }
         }
         activeDrag.remove(); activeDrag = null;
-        document.removeEventListener('mousemove', moveDrag); document.removeEventListener('touchmove', moveDrag);
-        document.removeEventListener('mouseup', endDrag); document.removeEventListener('touchend', endDrag);
+        document.removeEventListener('mousemove', moveFoodDrag); document.removeEventListener('touchmove', moveFoodDrag);
+        document.removeEventListener('mouseup', endFoodDrag); document.removeEventListener('touchend', endFoodDrag);
     }
 
     // --- SHOP ---
@@ -588,28 +670,32 @@
                 if (gameState.coins >= i.price) {
                     gameState.coins -= i.price; gameState.inventory[key]++;
                     playCoinSound(); saveData(); updateMeters(); updateTrayUI();
-                } else showAlert("Not enough coins! Play Minigames.");
+                } else showAlert("Not enough coins! Play Arcade.");
             };
             container.appendChild(div);
         });
         document.getElementById('shop-modal').style.display = 'flex';
     }
 
-    // --- MINIGAME ARCADE SYSTEM ---
+    // --- ARCADE HUB ---
     let currentGame = ""; let mgTimer, mgInterval; let mgTime = 0, mgScore = 0;
     
-    // Tower Game Variables
-    let tBlocks = []; let tCurrent; let tDir = 1; let tWidth = 100; let tSpeed = 5;
+    function updateHighScoresDisplay() {
+        document.getElementById('hs-catch').innerText = gameState.highScores.catch;
+        document.getElementById('hs-tower').innerText = gameState.highScores.tower;
+        document.getElementById('hs-puzzle').innerText = gameState.highScores.puzzle === 999 ? "--" : gameState.highScores.puzzle;
+    }
 
     function openMiniGameHub() {
         if (gameState.isSleeping) { showAlert("Wake up to play."); return; }
+        updateHighScoresDisplay();
         document.getElementById('minigame-hub').style.display = 'flex';
     }
     
     function launchGame(gameID) {
         document.getElementById('minigame-hub').style.display = 'none';
         currentGame = gameID;
-        document.getElementById('mg-title').innerText = gameID === 'catch' ? 'CATCH THE MOUSE' : gameID === 'tower' ? 'BUILD THE TOWER' : '8x8 ICON POP';
+        document.getElementById('mg-title').innerText = gameID === 'catch' ? 'CATCH MOUSE' : gameID === 'tower' ? 'BUILD TOWER' : '5x5 CAT PUZZLE';
         document.getElementById('active-minigame-modal').style.display = 'flex';
         document.getElementById('mg-start-btn').style.display = 'block';
         document.getElementById('minigame-area').innerHTML = "";
@@ -636,42 +722,54 @@
             spawnBaseBlock(); spawnMovingBlock();
             mgTimer = setInterval(moveBlock, 20);
         } else if (currentGame === 'puzzle') {
-            mgTime = 15; document.getElementById('mg-time').innerText = mgTime + " moves";
-            buildPuzzleGrid();
+            mgTime = 0; document.getElementById('mg-time').innerText = mgTime + "s";
+            document.getElementById('mg-score').innerText = "Time Base";
+            mgTimer = setInterval(() => { mgTime++; document.getElementById('mg-time').innerText = mgTime + "s"; }, 1000);
+            initJigsawPuzzle();
         }
     }
 
     function finishMiniGame() {
         clearInterval(mgTimer); clearTimeout(mgInterval);
         document.getElementById('minigame-area').onclick = null;
-        document.getElementById('minigame-area').innerHTML = `<div style="color:#fff; margin-top:100px; font-size:24px;">Game Over!<br>Earned: ${mgScore} Coins</div>`;
+        
+        let reward = mgScore;
+        if (currentGame === 'puzzle') {
+            reward = Math.max(5, 50 - mgTime); // Faster = more coins
+            if(mgTime < gameState.highScores.puzzle) gameState.highScores.puzzle = mgTime;
+        } else {
+            if(mgScore > gameState.highScores[currentGame]) gameState.highScores[currentGame] = mgScore;
+        }
+
+        document.getElementById('minigame-area').innerHTML = `<div style="color:#fff; margin-top:80px; font-size:24px;">Game Over!<br>Earned: ${reward} Coins</div>`;
         document.getElementById('mg-start-btn').innerText = "PLAY AGAIN";
         document.getElementById('mg-start-btn').style.display = 'block';
-        gameState.coins += mgScore; gameState.energy = Math.max(0, gameState.energy - 10);
+        
+        gameState.coins += reward; gameState.energy = Math.max(0, gameState.energy - 10);
         saveData(); updateMeters();
     }
 
     function closeActiveGame() {
         clearInterval(mgTimer); clearTimeout(mgInterval);
         document.getElementById('active-minigame-modal').style.display = 'none';
+        updateHighScoresDisplay();
         document.getElementById('minigame-hub').style.display = 'flex';
     }
     function closeModal(id) { document.getElementById(id).style.display = 'none'; }
 
-    // -- Catch Mouse Logic --
+    // -- Catch Mouse --
     function spawnTarget() {
         if (mgTime <= 0) return;
         let area = document.getElementById('minigame-area'); area.innerHTML = "";
         let t = document.createElement('div'); t.className = 'target-obj'; t.innerText = "🐭";
-        t.style.left = Math.random() * (area.clientWidth - 40) + 'px';
-        t.style.top = Math.random() * (area.clientHeight - 40) + 'px';
+        t.style.left = Math.random() * (area.clientWidth - 40) + 'px'; t.style.top = Math.random() * (area.clientHeight - 40) + 'px';
         t.onmousedown = (e) => { e.preventDefault(); mgScore+=2; document.getElementById('mg-score').innerText = mgScore; clearTimeout(mgInterval); spawnTarget(); };
-        t.ontouchstart = t.onmousedown;
-        area.appendChild(t);
+        t.ontouchstart = t.onmousedown; area.appendChild(t);
         mgInterval = setTimeout(spawnTarget, 700 + Math.random() * 400);
     }
 
     // -- Tower Logic --
+    let tBlocks = []; let tCurrent; let tDir = 1; let tWidth = 100; let tSpeed = 5;
     function spawnBaseBlock() {
         let area = document.getElementById('minigame-area');
         let b = document.createElement('div'); b.className = 'tower-block';
@@ -681,102 +779,78 @@
     function spawnMovingBlock() {
         let area = document.getElementById('minigame-area');
         tCurrent = document.createElement('div'); tCurrent.className = 'tower-block';
-        tCurrent.style.width = tWidth + 'px'; tCurrent.style.bottom = (tBlocks.length * 30) + 'px';
-        tCurrent.style.left = '0px'; tDir = 1;
-        area.appendChild(tCurrent);
-        // Scroll down visually if tower gets tall
-        if(tBlocks.length > 5) area.style.transform = `translateY(${ (tBlocks.length - 5) * 30 }px)`;
+        tCurrent.style.width = tWidth + 'px'; tCurrent.style.bottom = (tBlocks.length * 25) + 'px';
+        tCurrent.style.left = '0px'; tDir = 1; area.appendChild(tCurrent);
+        if(tBlocks.length > 6) area.style.transform = `translateY(${ (tBlocks.length - 6) * 25 }px)`;
     }
     function moveBlock() {
         let area = document.getElementById('minigame-area');
         let currentLeft = parseFloat(tCurrent.style.left);
-        if (currentLeft <= 0) tDir = 1;
-        if (currentLeft + tWidth >= area.clientWidth) tDir = -1;
+        if (currentLeft <= 0) tDir = 1; if (currentLeft + tWidth >= area.clientWidth) tDir = -1;
         tCurrent.style.left = (currentLeft + (tSpeed * tDir)) + 'px';
     }
     function placeBlock() {
-        let last = tBlocks[tBlocks.length - 1];
-        let currentLeft = parseFloat(tCurrent.style.left);
-        
-        let diff = currentLeft - last.left;
-        let overlap = tWidth - Math.abs(diff);
-        
-        if (overlap <= 0) { finishMiniGame(); return; } // Missed
-        
-        tWidth = overlap; // Cut block
-        let newLeft = diff > 0 ? currentLeft : last.left;
-        tCurrent.style.width = tWidth + 'px';
-        tCurrent.style.left = newLeft + 'px';
-        
+        let last = tBlocks[tBlocks.length - 1]; let currentLeft = parseFloat(tCurrent.style.left);
+        let diff = currentLeft - last.left; let overlap = tWidth - Math.abs(diff);
+        if (overlap <= 0) { finishMiniGame(); return; } 
+        tWidth = overlap; let newLeft = diff > 0 ? currentLeft : last.left;
+        tCurrent.style.width = tWidth + 'px'; tCurrent.style.left = newLeft + 'px';
         tBlocks.push({left: newLeft, width: tWidth});
         mgScore += 3; document.getElementById('mg-score').innerText = mgScore;
         tSpeed += 0.5; spawnMovingBlock();
     }
 
-    // -- 8x8 Puzzle Logic (Pop/Collapse) --
-    let pGrid = []; const pIcons = ['icon_fish.png', 'icon_croissant.png', 'icon_can.png', 'icon_milk.png'];
-    function buildPuzzleGrid() {
+    // -- 5x5 Jigsaw Swap Puzzle --
+    let pPieces = []; let pSelected = null;
+    function initJigsawPuzzle() {
         let area = document.getElementById('minigame-area');
         area.innerHTML = '<div id="puzzle-grid"></div>';
-        let gridDiv = document.getElementById('puzzle-grid');
-        pGrid = [];
-        for(let r=0; r<8; r++) {
-            pGrid[r] = [];
-            for(let c=0; c<8; c++) {
-                let val = Math.floor(Math.random() * 4);
-                pGrid[r][c] = val;
-                let cell = document.createElement('div'); cell.className = 'puzzle-cell';
-                cell.id = `p-${r}-${c}`;
-                cell.innerHTML = `<img src="${pIcons[val]}" onerror="this.style.display='none'">`;
-                cell.onclick = () => popCell(r, c);
-                gridDiv.appendChild(cell);
-            }
-        }
-    }
-    function popCell(r, c) {
-        if(mgTime <= 0) return;
-        let val = pGrid[r][c]; if(val === -1) return;
-        let toClear = [];
-        // Simple flood fill to find adjacent matches
-        let queue = [{r:r, c:c}]; let visited = new Set();
-        while(queue.length > 0) {
-            let curr = queue.shift();
-            let key = curr.r + "," + curr.c;
-            if(visited.has(key)) continue; visited.add(key);
-            
-            if(pGrid[curr.r][curr.c] === val) {
-                toClear.push(curr);
-                if(curr.r > 0) queue.push({r: curr.r-1, c: curr.c});
-                if(curr.r < 7) queue.push({r: curr.r+1, c: curr.c});
-                if(curr.c > 0) queue.push({r: curr.r, c: curr.c-1});
-                if(curr.c < 7) queue.push({r: curr.r, c: curr.c+1});
-            }
-        }
+        let grid = document.getElementById('puzzle-grid');
         
-        if(toClear.length >= 2) {
-            toClear.forEach(cell => { pGrid[cell.r][cell.c] = -1; document.getElementById(`p-${cell.r}-${cell.c}`).innerHTML = ""; });
-            mgScore += toClear.length; document.getElementById('mg-score').innerText = mgScore;
-            mgTime--; document.getElementById('mg-time').innerText = mgTime + " moves";
-            applyPuzzleGravity();
-            if(mgTime <= 0) finishMiniGame();
+        let order = Array.from({length: 25}, (_, i) => i);
+        order.sort(() => Math.random() - 0.5); // Shuffle
+        
+        pPieces = [];
+        for(let i=0; i<25; i++) {
+            let div = document.createElement('div');
+            div.className = 'puzzle-piece';
+            div.dataset.index = i;
+            div.dataset.correct = order[i];
+            
+            // Calculate background position to show specific slice of cat.png
+            let row = Math.floor(order[i] / 5);
+            let col = order[i] % 5;
+            div.style.backgroundPosition = `-${col * 44}px -${row * 44}px`;
+            
+            div.onclick = () => selectPuzzlePiece(div);
+            grid.appendChild(div);
+            pPieces.push(div);
         }
     }
-    function applyPuzzleGravity() {
-        for(let c=0; c<8; c++) {
-            let emptySpaces = 0;
-            for(let r=7; r>=0; r--) {
-                if(pGrid[r][c] === -1) emptySpaces++;
-                else if(emptySpaces > 0) {
-                    pGrid[r+emptySpaces][c] = pGrid[r][c]; pGrid[r][c] = -1;
-                    document.getElementById(`p-${r+emptySpaces}-${c}`).innerHTML = `<img src="${pIcons[pGrid[r+emptySpaces][c]]}">`;
-                    document.getElementById(`p-${r}-${c}`).innerHTML = "";
-                }
-            }
-            for(let r=0; r<emptySpaces; r++) {
-                pGrid[r][c] = Math.floor(Math.random() * 4);
-                document.getElementById(`p-${r}-${c}`).innerHTML = `<img src="${pIcons[pGrid[r][c]]}">`;
-            }
+    function selectPuzzlePiece(div) {
+        if (!pSelected) {
+            pSelected = div; div.classList.add('selected');
+        } else {
+            // Swap logic
+            let tempCorrect = pSelected.dataset.correct;
+            let tempBg = pSelected.style.backgroundPosition;
+            
+            pSelected.dataset.correct = div.dataset.correct;
+            pSelected.style.backgroundPosition = div.style.backgroundPosition;
+            
+            div.dataset.correct = tempCorrect;
+            div.style.backgroundPosition = tempBg;
+            
+            pSelected.classList.remove('selected'); pSelected = null;
+            checkPuzzleWin();
         }
+    }
+    function checkPuzzleWin() {
+        let won = true;
+        for(let i=0; i<25; i++) {
+            if (parseInt(pPieces[i].dataset.correct) !== i) { won = false; break; }
+        }
+        if (won) finishMiniGame();
     }
 
     // --- LIFE EVENTS ---
