@@ -2,19 +2,19 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ragdoll Life Simulation</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Ragdoll Life - Landscape Edition</title>
     <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
     <style>
-        /* --- FULL SCREEN LANDSCAPE SETUP --- */
+        /* --- CORE SETUP --- */
         body {
             margin: 0; padding: 0; background-color: #0f0f15;
             font-family: 'VT323', monospace; display: flex; justify-content: center; align-items: center;
             height: 100vh; width: 100vw; user-select: none; overflow: hidden; touch-action: none;
         }
+        
         #game-container {
-            width: 100vw; height: 100vh; /* Forces full screen */
-            position: relative; overflow: hidden; 
+            width: 100vw; height: 100vh; position: relative; overflow: hidden; 
         }
         
         #bg-layer {
@@ -24,25 +24,30 @@
             transition: filter 1.5s ease;
         }
 
-        /* --- UI STYLING (NO EMOJIS) --- */
+        /* --- PORTRAIT LOCK OVERLAY --- */
+        #landscape-lock {
+            display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: #000; z-index: 99999; color: #fff; flex-direction: column;
+            justify-content: center; align-items: center; text-align: center; font-size: 32px;
+        }
+        @media screen and (orientation: portrait) {
+            #landscape-lock { display: flex; }
+            #game-container { display: none; }
+        }
+
+        /* --- UI GLASSMORPHISM --- */
         .glass-panel {
-            background: rgba(15, 15, 25, 0.7); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
-            border: 2px solid rgba(255, 255, 255, 0.15); border-radius: 12px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4); color: #fff; text-shadow: 1px 1px 0 #000;
+            background: rgba(15, 15, 25, 0.7); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+            border: 2px solid rgba(255, 255, 255, 0.2); border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5); color: #fff; text-shadow: 1px 1px 0 #000;
         }
 
-        .svg-icon {
-            width: 24px; height: 24px; vertical-align: middle; margin-right: 8px;
-            filter: drop-shadow(1px 1px 2px rgba(0,0,0,0.5));
-        }
-
-        /* --- DYNAMIC SPRITE LAYER --- */
+        /* --- SPRITE LAYER --- */
         #cat-group {
-            position: absolute; top: 60%; left: 50%; width: 200px; height: 200px; 
+            position: absolute; top: 55%; left: 50%; width: 200px; height: 200px; 
             z-index: 2; transform: translate(-50%, -50%);
-            /* Smooth transitions for roaming around */
-            transition: left 3s ease-in-out, transform 0.3s ease;
-            will-change: left, transform;
+            transition: left 3s linear; /* Smooth walking */
+            cursor: pointer;
         }
         .main-sprite {
             width: 100%; height: 100%; object-fit: contain;
@@ -58,102 +63,120 @@
         #kit3-sprite { bottom: -25px; left: 50px; z-index: 5; }
         .hidden { display: none !important; }
 
-        /* --- REAL CAT BEHAVIOR ANIMATIONS --- */
+        /* --- ANIMATIONS --- */
         .anim-breathe { animation: breathe 3s infinite ease-in-out; }
+        .anim-walk { animation: walk 0.5s infinite alternate ease-in-out; }
         .anim-groom { animation: groom 1s infinite alternate ease-in-out; }
-        .anim-stretch { animation: stretch 2.5s ease-in-out; }
         .anim-play { animation: bounce 0.4s infinite alternate ease-in-out; }
         .anim-cuddle { filter: drop-shadow(0 0 20px #ff6699); transform: scale(1.05); }
-        .anim-eat { animation: tilt 0.3s infinite alternate ease-in-out; }
         .anim-sleep { filter: brightness(0.5); animation: breathe 4s infinite ease-in-out; }
 
-        @keyframes breathe { 0%, 100% { transform: scale(1, 1); } 50% { transform: scale(1.02, 0.98); } }
-        @keyframes bounce { 0% { transform: translateY(0); } 100% { transform: translateY(-30px) scale(0.95, 1.05); } }
-        @keyframes tilt { 0% { transform: rotate(-5deg); } 100% { transform: rotate(5deg); } }
-        @keyframes groom { 0% { transform: rotate(0deg) scale(1); } 100% { transform: rotate(-15deg) scaleY(0.9); } }
-        @keyframes stretch { 
-            0%, 100% { transform: scale(1, 1); } 
-            50% { transform: scale(1.3, 0.7) translateY(20px); } 
-        }
+        @keyframes breathe { 0%, 100% { transform: scale(1, 1); } 50% { transform: scale(1.03, 0.97); } }
+        @keyframes walk { 0% { transform: translateY(0) rotate(-2deg); } 100% { transform: translateY(-10px) rotate(2deg); } }
+        @keyframes bounce { 0% { transform: translateY(0); } 100% { transform: translateY(-30px); } }
+        @keyframes groom { 0% { transform: rotate(0deg) scale(1); } 100% { transform: rotate(-10deg) scaleY(0.9); } }
 
         /* --- HUD --- */
         #hud-top {
-            position: absolute; top: 20px; left: 5%; width: 90%;
+            position: absolute; top: 15px; left: 2%; width: 96%;
             display: flex; justify-content: space-between; align-items: center; z-index: 3; 
-            font-size: 24px; font-weight: bold; padding: 10px 20px; box-sizing: border-box;
+            font-size: 22px; padding: 10px 15px; box-sizing: border-box;
         }
-        .stat-group { display: flex; gap: 20px; align-items: center; }
-        .stat-item { display: flex; align-items: center; }
-        #age-display { font-size: 22px; color: #ffb199; }
+        .stat-group { display: flex; gap: 15px; flex-wrap: wrap; }
+        .stat-item { color: #a8e6cf; display: flex; align-items: center; gap: 5px; }
+        .stat-item span { color: #fff; }
+        #age-display { color: #ffb199; font-size: 20px; }
 
         #reaction-text {
-            position: absolute; bottom: 180px; left: 50%; transform: translateX(-50%);
-            text-align: center; padding: 12px 25px; z-index: 3; font-size: 24px; 
-            color: #fff; transition: opacity 0.3s ease;
+            position: absolute; bottom: 160px; left: 50%; transform: translateX(-50%);
+            text-align: center; padding: 10px 20px; z-index: 3; font-size: 24px; 
+            color: #fff; transition: opacity 0.3s ease; pointer-events: none;
         }
 
-        /* --- FOOD TRAY & DRAG --- */
+        /* --- DRAG & DROP FOOD (PNGs) --- */
         #food-tray {
-            position: absolute; bottom: 100px; left: 50%; transform: translateX(-50%);
-            display: flex; gap: 20px; padding: 15px 25px; z-index: 5;
+            position: absolute; bottom: 90px; left: 50%; transform: translateX(-50%);
+            display: flex; gap: 15px; padding: 15px; z-index: 5;
             transition: opacity 0.3s, transform 0.3s;
         }
         .draggable-food {
-            width: 50px; height: 50px; cursor: grab; padding: 10px;
-            background: rgba(255, 255, 255, 0.1); border-radius: 50%;
+            width: 60px; height: 60px; cursor: grab; padding: 5px;
+            background: rgba(0, 0, 0, 0.4); border-radius: 12px;
             border: 2px solid rgba(255,255,255,0.3); display: flex; justify-content: center; align-items: center;
-            transition: background 0.2s, transform 0.2s;
         }
-        .draggable-food:hover { background: rgba(255, 255, 255, 0.2); transform: scale(1.1); }
-        .draggable-food:active { cursor: grabbing; transform: scale(0.9); }
+        .draggable-food img { width: 100%; height: 100%; object-fit: contain; pointer-events: none; }
         
         .flying-food {
             position: fixed; width: 60px; height: 60px; z-index: 9999;
             pointer-events: none; transform: translate(-50%, -50%); 
             filter: drop-shadow(0 8px 12px rgba(0,0,0,0.6));
+            background-size: contain; background-repeat: no-repeat; background-position: center;
         }
 
         /* --- CONTROLS --- */
         #controls {
-            position: absolute; bottom: 20px; left: 5%; width: 90%; z-index: 3;
-            display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;
+            position: absolute; bottom: 15px; left: 5%; width: 90%; z-index: 3;
+            display: flex; gap: 10px; justify-content: center;
         }
         button {
-            padding: 12px 25px; border: 2px solid rgba(255,255,255,0.4); border-radius: 8px;
+            padding: 10px 20px; border: 2px solid rgba(255,255,255,0.4); border-radius: 8px;
             background: rgba(20, 20, 30, 0.8); color: #ffffff; cursor: pointer; 
-            font-size: 22px; font-family: 'VT323', monospace; text-transform: uppercase; 
+            font-size: 20px; font-family: 'VT323', monospace; text-transform: uppercase; 
             backdrop-filter: blur(5px); transition: transform 0.1s, background 0.2s;
-            display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 0 rgba(0,0,0,0.5);
+            box-shadow: 0 4px 0 rgba(0,0,0,0.5); display: flex; align-items: center; gap: 5px;
         }
-        button:active { transform: translateY(4px); box-shadow: 0 0 0 rgba(0,0,0,0.5); background: rgba(255,255,255,0.2); }
+        button:active { transform: translateY(4px); box-shadow: 0 0 0 rgba(0,0,0,0.5); }
 
+        /* --- MODALS (Shop & Minigame) --- */
         .modal {
             display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0, 0, 0, 0.85); z-index: 10; justify-content: center; align-items: center;
         }
-        .modal-content { padding: 40px; width: 400px; text-align: center; }
-        .opening-title { font-size: 52px; margin-bottom: 5px; color: #a8e6cf; letter-spacing: 2px; }
-        .opening-subtitle { font-size: 20px; margin-bottom: 30px; color: #ccc; }
+        .modal-content { padding: 30px; width: 500px; text-align: center; position: relative; }
         
-        input {
-            width: 100%; padding: 15px; margin: 10px 0; border-radius: 8px; 
-            border: 2px solid rgba(255,255,255,0.3); background: rgba(0,0,0,0.5); 
-            color: #fff; font-family: 'VT323', monospace; font-size: 24px;
-            text-align: center; box-sizing: border-box; outline: none;
+        /* Shop Layout */
+        .shop-items { display: flex; justify-content: space-around; margin-top: 20px; flex-wrap: wrap; }
+        .shop-item {
+            background: rgba(0,0,0,0.4); padding: 10px; border-radius: 8px; border: 1px solid #555;
+            cursor: pointer; width: 80px; transition: background 0.2s; margin-bottom: 10px;
         }
-        input:focus { border-color: #a8e6cf; }
+        .shop-item:hover { background: rgba(255,255,255,0.1); }
+        .shop-item img { width: 50px; height: 50px; object-fit: contain; margin-bottom: 5px; }
+
+        /* Minigame Area */
+        #minigame-area {
+            width: 100%; height: 250px; background: #222; border: 2px solid #555;
+            position: relative; overflow: hidden; border-radius: 8px; cursor: crosshair;
+        }
+        .target-obj {
+            width: 40px; height: 40px; background: #ff6699; border-radius: 50%;
+            position: absolute; cursor: pointer; display: flex; justify-content: center; align-items: center;
+            font-size: 20px; color: #fff;
+        }
+
+        input {
+            width: 80%; padding: 12px; margin: 10px 0; border-radius: 8px; 
+            border: 2px solid rgba(255,255,255,0.3); background: rgba(0,0,0,0.5); 
+            color: #fff; font-family: 'VT323', monospace; font-size: 22px; text-align: center;
+        }
     </style>
 </head>
 <body>
 
+<div id="landscape-lock">
+    <div>📱</div>
+    <div>Please rotate your device to landscape mode.</div>
+</div>
+
 <audio id="audio-bgm" src="bgm.mp3" loop></audio>
 <audio id="audio-meow" src="meow.mp3"></audio>
 <audio id="audio-eat" src="eat.mp3"></audio>
+<audio id="audio-purr" src="purr.mp3"></audio>
 
 <div id="game-container">
     <div id="bg-layer"></div>
     
-    <div id="cat-group">
+    <div id="cat-group" onclick="petCat()">
         <img id="cat-sprite" class="main-sprite anim-breathe" src="cat.png" onerror="this.src='cat.png'">
         <img id="kit1-sprite" class="kitten-sprite hidden anim-breathe" src="kitten1.png" onerror="this.src='cat.png'">
         <img id="kit2-sprite" class="kitten-sprite hidden anim-breathe" src="kitten2.png" onerror="this.src='cat.png'">
@@ -162,16 +185,12 @@
 
     <div id="hud-top" class="glass-panel">
         <div class="stat-group">
-            <div class="stat-item">
-                <svg class="svg-icon" viewBox="0 0 24 24" fill="#ffb199"><path d="M18.8 4.2c-1.2-1.2-3.1-1.2-4.2 0l-1.4 1.4-7.8-7.8c-1.2-1.2-3.1-1.2-4.2 0-1.2 1.2-1.2 3.1 0 4.2l7.8 7.8-1.4 1.4c-1.2 1.2-1.2 3.1 0 4.2 1.2 1.2 3.1 1.2 4.2 0l10.6-10.6c1.2-1.1 1.2-3 0-4.2z"/></svg>
-                <span id="stat-food">100</span>
-            </div>
-            <div class="stat-item">
-                <svg class="svg-icon" viewBox="0 0 24 24" fill="#ffeaa7"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
-                <span id="stat-energy">100</span>
-            </div>
+            <div class="stat-item">FOOD: <span id="stat-food">100</span></div>
+            <div class="stat-item">ENERGY: <span id="stat-energy">100</span></div>
+            <div class="stat-item">HAPPY: <span id="stat-happy">100</span></div>
+            <div class="stat-item" style="color:#ffeaa7;">COINS: <span id="stat-coins">50</span></div>
         </div>
-        <div id="age-display">Age: 1 Year</div>
+        <div id="age-display">Age: 1 Yr</div>
     </div>
 
     <div id="reaction-text" class="glass-panel">Waiting...</div>
@@ -179,75 +198,231 @@
     <div id="food-tray" class="glass-panel hidden"></div>
 
     <div id="controls">
-        <button onclick="toggleFoodTray()">
-            <svg class="svg-icon" viewBox="0 0 24 24" fill="#a8e6cf"><path d="M12 2C6.48 2 2 4.24 2 7v10c0 2.76 4.48 5 10 5s10-2.24 10-5V7c0-2.76-4.48-5-10-5zm0 18c-4.42 0-8-1.79-8-4v-2.22C5.64 15.15 8.65 16 12 16s6.36-.85 8-2.22V16c0 2.21-3.58 4-8 4z"/></svg>
-            Feed
-        </button>
-        <button onclick="action('play')">
-            <svg class="svg-icon" viewBox="0 0 24 24" fill="#74b9ff"><circle cx="12" cy="12" r="10"/><path d="M12 2a10 10 0 00-10 10M22 12a10 10 0 00-10-10" stroke="#fff" stroke-width="2" fill="none"/></svg>
-            Play
-        </button>
-        <button onclick="action('cuddle')">
-            <svg class="svg-icon" viewBox="0 0 24 24" fill="#ff6699"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
-            Cuddle
-        </button>
-        <button onclick="action('sleep')" id="btn-sleep">
-            <svg class="svg-icon" viewBox="0 0 24 24" fill="#a29bfe"><path d="M12 3a9 9 0 109 9c0-.46-.04-.92-.1-1.36a5.389 5.389 0 01-4.4 2.26 5.403 5.403 0 01-3.14-9.8c-.44-.06-.9-.1-1.36-.1z"/></svg>
-            Sleep
-        </button>
+        <button onclick="toggleFoodTray()">FEED</button>
+        <button onclick="openMiniGame()">MINI-GAME</button>
+        <button onclick="openShop()">SHOP</button>
+        <button onclick="action('sleep')" id="btn-sleep">SLEEP</button>
+        <button onclick="hardReset()" style="background: #e6737b;">RESET</button>
     </div>
 
     <div id="start-modal" class="modal" style="display: flex;">
         <div class="modal-content glass-panel">
-            <div class="opening-title">RAGDOLL LIFE</div>
-            <div class="opening-subtitle">Virtual Pet Simulation</div>
+            <h1 style="color:#a8e6cf; margin-top:0;">RAGDOLL LIFE</h1>
+            <p>Landscape Edition</p>
             <input type="text" id="main-cat-name" placeholder="Name your cat...">
-            <button style="width: 100%; margin-top: 15px; justify-content: center;" onclick="startGame()">Start Life</button>
+            <button style="width: 100%; justify-content: center; margin-top:10px;" onclick="startGame()">START</button>
+        </div>
+    </div>
+
+    <div id="shop-modal" class="modal">
+        <div class="modal-content glass-panel">
+            <h2 style="margin-top:0;">SUPERMARKET</h2>
+            <div style="color:#ffeaa7;">Coins: <span id="shop-coins"></span></div>
+            <div class="shop-items" id="shop-items-container">
+                </div>
+            <button style="width: 100%; justify-content: center; margin-top:20px;" onclick="closeModal('shop-modal')">LEAVE</button>
+        </div>
+    </div>
+
+    <div id="minigame-modal" class="modal">
+        <div class="modal-content glass-panel">
+            <h2 style="margin-top:0;">CATCH THE MOUSE</h2>
+            <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+                <span style="color:#a8e6cf;">Score: <span id="mg-score">0</span></span>
+                <span style="color:#ff8b94;">Time: <span id="mg-time">15</span>s</span>
+            </div>
+            <div id="minigame-area"></div>
+            <button id="mg-start-btn" style="width: 100%; justify-content: center; margin-top:15px;" onclick="startMiniGame()">START GAME</button>
+            <button style="width: 100%; justify-content: center; margin-top:10px; background:#444;" onclick="closeModal('minigame-modal')">CLOSE</button>
         </div>
     </div>
 
     <div id="kitten-modal" class="modal">
         <div class="modal-content glass-panel">
-            <h3 style="margin-top:0; color:#a8e6cf; font-size:40px;">KITTENS BORN!</h3>
+            <h2 style="color:#a8e6cf; margin-top:0;">KITTENS BORN!</h2>
             <input type="text" id="k1" placeholder="First Kitten">
             <input type="text" id="k2" placeholder="Second Kitten">
             <input type="text" id="k3" placeholder="Third Kitten">
-            <button style="width: 100%; margin-top: 15px; justify-content: center;" onclick="saveKittens()">Save Family</button>
+            <button style="width: 100%; justify-content: center; margin-top:10px;" onclick="saveKittens()">SAVE FAMILY</button>
         </div>
     </div>
 </div>
 
 <script>
+    // --- GAME STATE ---
     let gameState = {
-        name: "Kitty", phase: 1, age: 1, hunger: 100, energy: 100,
+        name: "Kitty", phase: 1, age: 1, 
+        hunger: 100, energy: 100, happy: 100, coins: 50,
         isSleeping: false, startDate: null, lastPlayed: null,
+        inventory: { fish: 2, croissant: 1, can: 1, milk: 0, mash: 0 },
         kittens: { k1: "Kit1", k2: "Kit2", k3: "Kit3" }
     };
 
-    let animationTimeout;
     let behaviorInterval;
+    let animationTimeout;
     const catGroup = document.getElementById('cat-group');
-    const catSprite = document.getElementById('cat-sprite');
-    const allSprites = [catSprite, document.getElementById('kit1-sprite'), document.getElementById('kit2-sprite'), document.getElementById('kit3-sprite')];
+    const allSprites = [
+        document.getElementById('cat-sprite'), document.getElementById('kit1-sprite'), 
+        document.getElementById('kit2-sprite'), document.getElementById('kit3-sprite')
+    ];
 
-    // --- SVG CODE ELEMENTS FOR DRAG & DROP FOOD ---
-    const svgFood = {
-        fish: `<svg viewBox="0 0 24 24" fill="#a8e6cf"><path d="M22 12l-6-6v4c-6 0-10 4-12 8 2-2 6-3 12-3v4l6-6z"/></svg>`,
-        can: `<svg viewBox="0 0 24 24" fill="#ffb6c1"><path d="M12 2C6.48 2 2 4.24 2 7v10c0 2.76 4.48 5 10 5s10-2.24 10-5V7c0-2.76-4.48-5-10-5zm0 18c-4.42 0-8-1.79-8-4v-2.22C5.64 15.15 8.65 16 12 16s6.36-.85 8-2.22V16c0 2.21-3.58 4-8 4zm0-6c-4.42 0-8-1.79-8-4s3.58-4 8-4 8 1.79 8 4-3.58 4-8 4z"/></svg>`,
-        milk: `<svg viewBox="0 0 24 24" fill="#dfe6e9"><path d="M7 2v3h1v2.52c-2.31 1.25-4 3.73-4 6.48V20c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2v-6c0-2.75-1.69-5.23-4-6.48V5h1V2H7zm5 11c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3z"/></svg>`
+    // --- ITEM DATABASE (Using user PNGs) ---
+    const itemsDB = {
+        fish: { name: "Fresh Fish", img: "icon_fish.png", price: 10, hunger: 30 },
+        croissant: { name: "Croissant", img: "icon_croissant.png", price: 15, hunger: 20 },
+        can: { name: "Canned Food", img: "icon_can.png", price: 20, hunger: 25 },
+        milk: { name: "Warm Milk", img: "icon_milk.png", price: 15, hunger: 20 },
+        mash: { name: "Kitten Mash", img: "icon_mash.png", price: 25, hunger: 35 }
     };
 
+    // --- INITIALIZATION ---
+    function init() {
+        let saved = localStorage.getItem('ragdoll_save_v6');
+        if (saved) {
+            gameState = JSON.parse(saved);
+            document.querySelector('.opening-title').innerText = "WELCOME BACK";
+            document.getElementById('main-cat-name').style.display = 'none'; 
+            calculateTimeDrain();
+        }
+        setIdleState();
+    }
+
+    function startGame() {
+        let nameInput = document.getElementById('main-cat-name');
+        if (nameInput.style.display !== 'none' && nameInput.value.trim() !== "") {
+            gameState.name = nameInput.value;
+            gameState.startDate = Date.now();
+        }
+        gameState.lastPlayed = Date.now();
+        document.getElementById('start-modal').style.display = 'none';
+        
+        let bgm = document.getElementById('audio-bgm');
+        if(bgm) { bgm.volume = 0.3; bgm.play().catch(e => console.log(e)); }
+        
+        updateUI(); startFelineBrain();
+        showReaction(`${gameState.name} entered the room.`);
+    }
+
+    // --- CORE LOGIC ---
+    function calculateTimeDrain() {
+        if (!gameState.lastPlayed || !gameState.startDate) return;
+        let msPassed = Date.now() - gameState.lastPlayed;
+        let hoursPassed = msPassed / (1000 * 60 * 60);
+        
+        if (hoursPassed > 1) {
+            gameState.hunger = Math.max(0, Math.floor(gameState.hunger - (hoursPassed * 4)));
+            gameState.happy = Math.max(0, Math.floor(gameState.happy - (hoursPassed * 2)));
+            if (!gameState.isSleeping) gameState.energy = Math.max(0, Math.floor(gameState.energy - (hoursPassed * 3)));
+        }
+        
+        // 4 Years per 24 hours
+        let totalMs = Date.now() - gameState.startDate;
+        let yearsPassed = Math.floor(totalMs / (1000 * 60 * 60 * 6));
+        gameState.age = 1 + yearsPassed;
+        checkLifeEvents();
+    }
+
+    function saveData() {
+        gameState.lastPlayed = Date.now();
+        localStorage.setItem('ragdoll_save_v6', JSON.stringify(gameState));
+    }
+
+    function playAudio(id) {
+        let sound = document.getElementById(id);
+        if (sound) { sound.currentTime = 0; sound.play().catch(e => console.log(e)); }
+    }
+
+    function triggerAnimation(animClass) {
+        allSprites.forEach(sprite => {
+            if (!sprite.classList.contains('hidden')) sprite.className = `${sprite.id === 'cat-sprite' ? 'main-sprite' : 'kitten-sprite'} ${animClass}`;
+        });
+        clearTimeout(animationTimeout);
+        animationTimeout = setTimeout(() => { if (!gameState.isSleeping) setIdleState(); }, 2000);
+    }
+
+    // --- INTERACTION (Petting & Sleeping) ---
+    function petCat() {
+        if (gameState.isSleeping) return;
+        gameState.happy = Math.min(100, gameState.happy + 5);
+        showReaction(`You pet ${gameState.name}. Purrr...`);
+        playAudio('audio-purr');
+        triggerAnimation('anim-cuddle');
+        saveData(); updateUI();
+    }
+
+    function action(type) {
+        calculateTimeDrain();
+        if (type === 'sleep') {
+            gameState.isSleeping = !gameState.isSleeping;
+            if (gameState.isSleeping) {
+                showReaction("Falling asleep..."); 
+                document.getElementById('btn-sleep').innerHTML = "WAKE UP";
+                document.getElementById('bg-layer').style.filter = "brightness(0.2)";
+                triggerAnimation('anim-sleep');
+            } else {
+                gameState.energy = Math.min(100, gameState.energy + 50);
+                showReaction("Waking up!"); 
+                document.getElementById('btn-sleep').innerHTML = "SLEEP";
+                document.getElementById('bg-layer').style.filter = "brightness(1)";
+                setIdleState();
+            }
+        }
+        saveData(); updateUI();
+    }
+
+    // --- AUTONOMOUS BEHAVIOR (Roaming) ---
+    function startFelineBrain() {
+        clearInterval(behaviorInterval);
+        behaviorInterval = setInterval(() => {
+            if (gameState.isSleeping || document.getElementById('food-tray').classList.contains('hidden') === false) return;
+            
+            let chance = Math.random();
+            if (chance < 0.4) {
+                // Roam Left/Right
+                let newX = 20 + Math.random() * 60; 
+                let currentX = parseFloat(catGroup.style.left || 50);
+                let flip = newX < currentX ? -1 : 1;
+                
+                catGroup.style.transform = `translate(-50%, -50%) scaleX(${flip})`;
+                catGroup.style.left = newX + '%';
+                triggerAnimation('anim-walk');
+            } else if (chance < 0.6) {
+                triggerAnimation('anim-groom');
+            }
+        }, 5000);
+    }
+
+    // --- INVENTORY & DRAG FEEDING ---
     let activeDrag = null;
 
-    function startDrag(e, foodName, hungerValue, svgCode) {
+    function toggleFoodTray() {
         if (gameState.isSleeping) return;
-        e.preventDefault(); 
+        let tray = document.getElementById('food-tray');
+        tray.innerHTML = ""; 
         
+        let hasFood = false;
+        Object.keys(gameState.inventory).forEach(key => {
+            if (gameState.inventory[key] > 0) {
+                hasFood = true;
+                let div = document.createElement('div');
+                div.className = 'draggable-food';
+                div.innerHTML = `<img src="${itemsDB[key].img}" onerror="this.style.display='none'"> <span style="position:absolute; bottom:2px; right:2px; font-size:14px; background:#000; padding:2px; border-radius:4px;">${gameState.inventory[key]}</span>`;
+                div.onmousedown = (e) => startDrag(e, key);
+                div.ontouchstart = (e) => startDrag(e, key);
+                tray.appendChild(div);
+            }
+        });
+
+        if (!hasFood) tray.innerHTML = "<div style='padding:10px;'>No food! Buy some in the Shop.</div>";
+        tray.classList.toggle('hidden');
+    }
+
+    function startDrag(e, itemKey) {
+        e.preventDefault(); 
         activeDrag = document.createElement('div');
         activeDrag.className = 'flying-food';
-        activeDrag.innerHTML = svgCode; // Uses pure SVG code element!
-        activeDrag.dataset.name = foodName;
-        activeDrag.dataset.value = hungerValue;
+        activeDrag.style.backgroundImage = `url('${itemsDB[itemKey].img}')`;
+        activeDrag.dataset.key = itemKey;
         document.body.appendChild(activeDrag);
 
         moveDrag(e); 
@@ -273,7 +448,13 @@
         let catRect = catGroup.getBoundingClientRect();
         
         if (clientX >= catRect.left && clientX <= catRect.right && clientY >= catRect.top && clientY <= catRect.bottom) {
-            feedCat(activeDrag.dataset.name, parseInt(activeDrag.dataset.value));
+            let key = activeDrag.dataset.key;
+            gameState.inventory[key]--;
+            gameState.hunger = Math.min(100, gameState.hunger + itemsDB[key].hunger);
+            showReaction(`Eating ${itemsDB[key].name}...`);
+            playAudio('audio-eat'); triggerAnimation('anim-eat'); 
+            document.getElementById('food-tray').classList.add('hidden'); 
+            saveData(); updateUI();
         }
 
         activeDrag.remove(); activeDrag = null;
@@ -283,178 +464,105 @@
         document.removeEventListener('touchend', endDrag);
     }
 
-    function toggleFoodTray() {
-        if (gameState.isSleeping) { showReaction("Wake her up first."); return; }
-        let tray = document.getElementById('food-tray');
-        tray.innerHTML = ""; 
+    // --- SHOP SYSTEM ---
+    function openShop() {
+        if (gameState.isSleeping) return;
+        document.getElementById('shop-coins').innerText = gameState.coins;
+        let container = document.getElementById('shop-items-container');
+        container.innerHTML = "";
         
-        let foods = (gameState.phase === 4) 
-            ? [{n: "Warm Milk", v: 20, code: svgFood.milk}, {n: "Kitten Mash", v: 25, code: svgFood.can}]
-            : [{n: "Fresh Fish", v: 30, code: svgFood.fish}, {n: "Canned Food", v: 25, code: svgFood.can}];
-
-        foods.forEach(f => {
+        Object.keys(itemsDB).forEach(key => {
+            let item = itemsDB[key];
             let div = document.createElement('div');
-            div.className = 'draggable-food';
-            div.innerHTML = f.code;
-            div.onmousedown = (e) => startDrag(e, f.n, f.v, f.code);
-            div.ontouchstart = (e) => startDrag(e, f.n, f.v, f.code);
-            tray.appendChild(div);
+            div.className = 'shop-item';
+            div.innerHTML = `<img src="${item.img}" onerror="this.style.display='none'"><div>${item.price}c</div>`;
+            div.onclick = () => buyItem(key);
+            container.appendChild(div);
         });
-        tray.classList.toggle('hidden');
+        document.getElementById('shop-modal').style.display = 'flex';
     }
 
-    // --- AUTONOMOUS FELINE BEHAVIOR (Brain) ---
-    function startFelineBrain() {
-        clearInterval(behaviorInterval);
-        behaviorInterval = setInterval(() => {
-            if (gameState.isSleeping || document.getElementById('food-tray').classList.contains('hidden') === false) return;
-            
-            let chance = Math.random();
-            if (chance < 0.2) {
-                // Roam (Move to random X coordinate)
-                let newX = 20 + Math.random() * 60; // Between 20% and 80% screen width
-                if (newX < parseFloat(catGroup.style.left || 50)) {
-                    catGroup.style.transform = "translate(-50%, -50%) scaleX(-1)"; // Face left
-                } else {
-                    catGroup.style.transform = "translate(-50%, -50%) scaleX(1)"; // Face right
-                }
-                catGroup.style.left = newX + '%';
-                showReaction(`${gameState.name} is wandering around...`);
-            } 
-            else if (chance < 0.3) {
-                // Grooming
-                triggerAnimation('anim-groom');
-                showReaction(`${gameState.name} is grooming her fur.`);
-            }
-            else if (chance < 0.4) {
-                // Zoomies
-                triggerAnimation('anim-play');
-                catGroup.style.left = (10 + Math.random() * 80) + '%';
-                showReaction(`${gameState.name} got the sudden zoomies!`);
-            }
-            else if (chance < 0.5) {
-                // Stretching
-                triggerAnimation('anim-stretch');
-                showReaction(`${gameState.name} is doing a big stretch.`);
-            }
-            else {
-                // Just breathing/idle
-                setIdleState();
-                showReaction(`${gameState.name} is relaxing.`);
-            }
-        }, 6000); // Decides a new behavior every 6 seconds
-    }
-
-    // --- AGING MATH: 1 Real Day = 4 Cat Years ---
-    function calculateTimeDrain() {
-        if (!gameState.lastPlayed || !gameState.startDate) return;
-        let msPassed = Date.now() - gameState.lastPlayed;
-        let hoursPassed = msPassed / (1000 * 60 * 60);
-        
-        if (hoursPassed > 1) {
-            gameState.hunger = Math.max(0, Math.floor(gameState.hunger - (hoursPassed * 4)));
-            if (!gameState.isSleeping) gameState.energy = Math.max(0, Math.floor(gameState.energy - (hoursPassed * 3)));
+    function buyItem(key) {
+        let item = itemsDB[key];
+        if (gameState.coins >= item.price) {
+            gameState.coins -= item.price;
+            gameState.inventory[key]++;
+            document.getElementById('shop-coins').innerText = gameState.coins;
+            saveData(); updateUI();
+        } else {
+            alert("Not enough coins! Play the mini-game.");
         }
+    }
+
+    // --- MINI-GAME (Catch the Mouse) ---
+    let mgTimer, mgInterval;
+    let mgTime = 15; let mgScore = 0;
+
+    function openMiniGame() {
+        if (gameState.isSleeping) return;
+        document.getElementById('minigame-modal').style.display = 'flex';
+        document.getElementById('mg-start-btn').style.display = 'block';
+        document.getElementById('minigame-area').innerHTML = "";
+    }
+
+    function startMiniGame() {
+        mgTime = 15; mgScore = 0;
+        document.getElementById('mg-time').innerText = mgTime;
+        document.getElementById('mg-score').innerText = mgScore;
+        document.getElementById('mg-start-btn').style.display = 'none';
         
-        // 4 Years per 24 hours (1 year every 6 hours)
-        let totalMs = Date.now() - gameState.startDate;
-        let yearsPassed = Math.floor(totalMs / (1000 * 60 * 60 * 6));
-        gameState.age = 1 + yearsPassed;
+        clearInterval(mgInterval); clearInterval(mgTimer);
+        document.getElementById('minigame-area').innerHTML = "";
         
-        checkLifeEvents();
-    }
-
-    function init() {
-        let saved = localStorage.getItem('ragdoll_save_v5');
-        if (saved) {
-            gameState = JSON.parse(saved);
-            document.querySelector('.opening-title').innerText = "WELCOME BACK";
-            document.getElementById('main-cat-name').style.display = 'none'; 
-            calculateTimeDrain();
-        }
-        setIdleState();
-    }
-
-    function startGame() {
-        let nameInput = document.getElementById('main-cat-name');
-        if (nameInput.style.display !== 'none' && nameInput.value.trim() !== "") {
-            gameState.name = nameInput.value;
-            gameState.startDate = Date.now();
-        }
-        gameState.lastPlayed = Date.now();
-        document.getElementById('start-modal').style.display = 'none';
+        mgTimer = setInterval(() => {
+            mgTime--; document.getElementById('mg-time').innerText = mgTime;
+            if (mgTime <= 0) endMiniGame();
+        }, 1000);
         
-        let bgm = document.getElementById('audio-bgm');
-        if(bgm) { bgm.volume = 0.3; bgm.play().catch(e => console.log(e)); }
+        spawnTarget();
+    }
+
+    function spawnTarget() {
+        if (mgTime <= 0) return;
+        let area = document.getElementById('minigame-area');
+        area.innerHTML = "";
+        let target = document.createElement('div');
+        target.className = 'target-obj';
+        target.innerText = "🐭"; // Mini-game target
+        target.style.left = Math.random() * (area.clientWidth - 40) + 'px';
+        target.style.top = Math.random() * (area.clientHeight - 40) + 'px';
         
-        updateUI(); 
-        startFelineBrain(); // Start autonomous behavior
-        showReaction(`${gameState.name} entered the room.`);
+        target.onmousedown = hitTarget;
+        target.ontouchstart = hitTarget;
+        area.appendChild(target);
+        
+        mgInterval = setTimeout(spawnTarget, 800 + Math.random() * 500);
     }
 
-    function saveData() {
-        gameState.lastPlayed = Date.now();
-        localStorage.setItem('ragdoll_save_v5', JSON.stringify(gameState));
+    function hitTarget(e) {
+        e.preventDefault();
+        mgScore++; document.getElementById('mg-score').innerText = mgScore;
+        clearTimeout(mgInterval); spawnTarget();
     }
 
-    function playAudio(id) {
-        let sound = document.getElementById(id);
-        if (sound) { sound.currentTime = 0; sound.play().catch(e => console.log(e)); }
-    }
-
-    function triggerAnimation(animationClass) {
-        allSprites.forEach(sprite => {
-            if (!sprite.classList.contains('hidden')) {
-                sprite.className = `kitten-sprite ${animationClass}`;
-                if (sprite.id === 'cat-sprite') sprite.className = `main-sprite ${animationClass}`;
-            }
-        });
-        clearTimeout(animationTimeout);
-        animationTimeout = setTimeout(() => {
-            if (!gameState.isSleeping) setIdleState();
-        }, 2000);
-    }
-
-    function feedCat(foodName, hungerValue) {
-        gameState.hunger = Math.min(100, gameState.hunger + hungerValue);
-        showReaction(`Eating ${foodName}...`);
-        playAudio('audio-eat');
-        triggerAnimation('anim-eat'); 
-        document.getElementById('food-tray').classList.add('hidden'); 
+    function endMiniGame() {
+        clearInterval(mgTimer); clearTimeout(mgInterval);
+        document.getElementById('minigame-area').innerHTML = `<div style="color:#fff; margin-top:100px; font-size:24px;">Time's Up!<br>Earned: ${mgScore} Coins</div>`;
+        document.getElementById('mg-start-btn').innerText = "PLAY AGAIN";
+        document.getElementById('mg-start-btn').style.display = 'block';
+        gameState.coins += mgScore;
+        gameState.energy = Math.max(0, gameState.energy - 10);
         saveData(); updateUI();
     }
 
-    function action(type) {
-        if (gameState.isSleeping && type !== 'sleep') { showReaction("Shh... sleeping."); return; }
-        calculateTimeDrain();
-
-        if (type === 'play') {
-            if (gameState.energy < 15) { showReaction("Too tired to play."); return; }
-            gameState.energy -= 15;
-            showReaction("Playing! 🧶"); playAudio('audio-meow'); triggerAnimation('anim-play');
-        } else if (type === 'cuddle') {
-            showReaction("Purring happily."); triggerAnimation('anim-cuddle');
-        } else if (type === 'sleep') {
-            gameState.isSleeping = !gameState.isSleeping;
-            if (gameState.isSleeping) {
-                showReaction("Falling asleep..."); 
-                document.getElementById('btn-sleep').innerHTML = "Wake Up";
-                document.getElementById('bg-layer').style.filter = "brightness(0.2)";
-                triggerAnimation('anim-sleep');
-            } else {
-                gameState.energy = Math.min(100, gameState.energy + 50);
-                showReaction("Waking up!"); 
-                document.getElementById('btn-sleep').innerHTML = `<svg class="svg-icon" viewBox="0 0 24 24" fill="#a29bfe"><path d="M12 3a9 9 0 109 9c0-.46-.04-.92-.1-1.36a5.389 5.389 0 01-4.4 2.26 5.403 5.403 0 01-3.14-9.8c-.44-.06-.9-.1-1.36-.1z"/></svg> Sleep`;
-                document.getElementById('bg-layer').style.filter = "brightness(1)";
-                setIdleState();
-            }
-        }
-        saveData(); updateUI();
+    function closeModal(id) {
+        document.getElementById(id).style.display = 'none';
+        if(id === 'minigame-modal') { clearInterval(mgTimer); clearTimeout(mgInterval); }
     }
 
+    // --- LIFE EVENTS ---
     function checkLifeEvents() {
         if (gameState.phase === 4) return;
-        // Adjusted to Years based on the new 1 day = 4 years math
         if (gameState.age >= 16 && gameState.phase < 4) {
             document.getElementById('kitten-modal').style.display = 'flex';
         } else if (gameState.age >= 12 && gameState.phase < 3) {
@@ -475,8 +583,14 @@
     function updateUI() {
         document.getElementById('stat-food').innerText = gameState.hunger;
         document.getElementById('stat-energy').innerText = gameState.energy;
+        document.getElementById('stat-happy').innerText = gameState.happy;
+        document.getElementById('stat-coins').innerText = gameState.coins;
         let p = gameState.phase === 4 ? "Family" : "Adult";
-        document.getElementById('age-display').innerText = `${p} Era: ${gameState.age} Yrs`;
+        document.getElementById('age-display').innerText = `${p} Era: ${gameState.age} Yr`;
+    }
+
+    function showReaction(text) { 
+        document.getElementById('reaction-text').innerText = text; 
     }
 
     function setIdleState() {
@@ -492,10 +606,15 @@
         let anim = gameState.isSleeping ? 'anim-sleep' : 'anim-breathe';
         allSprites.forEach(sprite => {
             if (!sprite.classList.contains('hidden')) {
-                sprite.className = `kitten-sprite ${anim}`;
-                if (sprite.id === 'cat-sprite') sprite.className = `main-sprite ${anim}`;
+                sprite.className = `${sprite.id === 'cat-sprite' ? 'main-sprite' : 'kitten-sprite'} ${anim}`;
             }
         });
+    }
+
+    function hardReset() {
+        if(confirm("Are you sure? This deletes ALL progress forever.")) {
+            localStorage.removeItem('ragdoll_save_v6'); location.reload();
+        }
     }
 
     window.onload = init;
