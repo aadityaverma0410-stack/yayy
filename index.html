@@ -126,7 +126,7 @@
         .anim-pounce { animation: pounce 1s infinite ease-in-out; }
         .anim-watch { transform: rotate(-10deg) scale(1.02); }
 
-        .pink-blush { filter: drop-shadow(0 0 25px #ff3385) sepia(0.4) saturate(2) !important; }
+        .pink-blush { filter: drop-shadow(0 0 25px #ff3385) sepia(0.4) saturate(3) hue-rotate(-15deg) !important; }
 
         @keyframes breathe { 0%, 100% { transform: scale(1, 1); } 50% { transform: scale(1.04, 0.96); } }
         @keyframes walk { 0% { transform: translateY(0) rotate(-3deg); } 100% { transform: translateY(-8px) rotate(3deg); } }
@@ -190,12 +190,12 @@
         .act-btn { background: #2f3542; border: 2px solid #57606f; color: #fff; font-size: 20px; font-family: 'VT323'; padding: 10px; border-radius: 8px; cursor: pointer; }
         .act-btn:hover { background: #57606f; border-color: #ff6699; }
 
-        #minigame-area { width: 100%; height: 210px; background: #111216; border: 3px solid #ff6699; position: relative; overflow: hidden; border-radius: 10px; margin-bottom: 12px; box-shadow: inset 0 0 15px #000; display: flex; justify-content: center; align-items: center; }
+        #minigame-area { width: 100%; height: 210px; background: #111216; border: 3px solid #ff6699; position: relative; overflow: hidden; border-radius: 10px; margin-bottom: 12px; box-shadow: inset 0 0 15px #000; display: flex; justify-content: center; align-items: center; box-sizing: border-box;}
         
         /* Game Specific CSS */
         .target-obj { width: 30px; height: 30px; background: #d63031; border: 2px solid #fff; border-radius: 50%; position: absolute; cursor: pointer; display: flex; justify-content: center; align-items: center; box-shadow: 0 0 10px #d63031; }
         .tower-block { position: absolute; height: 24px; background: #ff7675; border: 2px solid #fff; box-sizing: border-box; }
-        #puzzle-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 2px; width: 190px; height: 190px; margin: 0 auto; background: #222; padding: 2px; border-radius: 6px; }
+        #puzzle-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 2px; width: 190px; height: 190px; margin: 0 auto; background: #222; padding: 2px; border-radius: 6px; box-sizing: border-box; }
         .puzzle-piece { background-color: #333; background-image: url('cat.png'); background-size: 190px 190px; cursor: pointer; }
         .puzzle-piece.selected { border: 2px solid #ff6699; box-shadow: 0 0 8px #ff6699; transform: scale(0.92); }
         
@@ -203,10 +203,10 @@
         #flappy-bird { position: absolute; width: 30px; height: 30px; background-image: url('cat.png'); background-size: contain; background-repeat: no-repeat; z-index: 5; }
         .flappy-pipe { position: absolute; width: 40px; background: #55efc4; border: 2px solid #00b894; z-index: 4; box-sizing: border-box; }
         
-        /* Memory Game - FIXED PROPORTIONS */
-        #memory-grid { display: grid; grid-template-columns: repeat(4, 1fr); grid-template-rows: repeat(3, 1fr); gap: 5px; width: 100%; height: 100%; padding: 5px; box-sizing: border-box; }
+        /* Memory Game - FIXED GRID OVERFLOW */
+        #memory-grid { display: grid; grid-template-columns: repeat(4, 1fr); grid-template-rows: repeat(2, 1fr); gap: 6px; width: 100%; height: 100%; padding: 6px; box-sizing: border-box; }
         .memory-card { background: #ff6699; border: 2px solid #fff; border-radius: 8px; cursor: pointer; display: flex; justify-content: center; align-items: center; transition: transform 0.2s; pointer-events: auto; width: 100%; height: 100%; box-sizing: border-box; }
-        .memory-card img { width: 80%; height: 80%; object-fit: contain; display: none; pointer-events: none; }
+        .memory-card img { width: 70%; height: 70%; object-fit: contain; display: none; pointer-events: none; }
         .memory-card.flipped { background: #222; transform: scale(0.95); }
         .memory-card.flipped img { display: block; }
 
@@ -215,7 +215,7 @@
 </head>
 <body>
 
-<div id="landscape-lock"><div style="font-size: 24px; padding: 20px;">Please rotate to landscape mode.</div></div>
+<div id="landscape-lock"><div style="font-size: 24px; padding: 20px;">📱 ➔ 🖥️ Please rotate to landscape mode.</div></div>
 
 <audio id="audio-bgm" src="bgm.mp3" loop></audio>
 <audio id="audio-meow" src="meow.mp3"></audio>
@@ -232,7 +232,7 @@
             <img id="cat-sprite" class="main-sprite anim-breathe" src="cat.png" onerror="this.src='cat.png'">
         </div>
         <div class="sprite-wrap hidden" id="akira-wrap">
-            <div id="akira-thought" class="thought-bubble">Hi!</div>
+            <div id="akira-thought" class="thought-bubble">Hi! 👋</div>
             <img id="akira-sprite" class="main-sprite anim-breathe" src="akira.png" onerror="this.onerror=null; this.src='cat.png'; this.style.filter='hue-rotate(280deg) brightness(1.2) drop-shadow(0 0 5px rgba(255,255,255,0.3))';">
         </div>
         
@@ -245,16 +245,16 @@
 
     <div id="hud-top" class="glass-panel">
         <div>
-            <button class="btn-small" onclick="openShop()">SHOP</button>
-            <button class="btn-small" onclick="openActivities()">ACTIVITIES</button>
-            <button class="btn-small" onclick="openMiniGameHub()">ARCADE</button>
+            <button class="btn-small" onclick="openShop()">SHOP 🛒</button>
+            <button class="btn-small" onclick="openActivities()">ACTIVITIES 💖</button>
+            <button class="btn-small" onclick="openMiniGameHub()">ARCADE 🎮</button>
         </div>
         <div id="hud-stats-right">
             <div id="age-container">
-                <span id="age-display">Age: 1 Yr</span>
+                <span id="age-display">Age: 1 Yr ⏳</span>
                 <div id="age-bar-bg"><div id="age-bar-fill"></div></div>
             </div>
-            <span id="coin-display">Coins: 0</span>
+            <span id="coin-display">Coins: 0 🪙</span>
         </div>
     </div>
 
@@ -266,93 +266,90 @@
     </div>
 
     <div id="controls">
-        <button class="stat-btn" onclick="toggleFoodTray()"><div class="stat-fill" id="fill-food"></div><div class="stat-text">FEED</div></button>
-        <button class="stat-btn" onclick="startBathMode()"><div class="stat-fill" id="fill-clean"></div><div class="stat-text">BATH</div></button>
-        <button class="stat-btn" onclick="action('play')"><div class="stat-fill" id="fill-happy"></div><div class="stat-text">PLAY</div></button>
-        <button class="stat-btn" onclick="action('sleep')"><div class="stat-fill" id="fill-energy"></div><div class="stat-text" id="text-sleep">SLEEP</div></button>
+        <button class="stat-btn" onclick="toggleFoodTray()"><div class="stat-fill" id="fill-food"></div><div class="stat-text">FEED 🍖</div></button>
+        <button class="stat-btn" onclick="startBathMode()"><div class="stat-fill" id="fill-clean"></div><div class="stat-text">BATH 🧼</div></button>
+        <button class="stat-btn" onclick="action('play')"><div class="stat-fill" id="fill-happy"></div><div class="stat-text">PLAY 🧶</div></button>
+        <button class="stat-btn" onclick="action('sleep')"><div class="stat-fill" id="fill-energy"></div><div class="stat-text" id="text-sleep">SLEEP 💤</div></button>
     </div>
 
-    <!-- Modals -->
     <div id="start-modal" class="modal" style="display: flex;">
         <div class="modal-content glass-panel">
-            <h1 style="color:#ff6699; margin-top:0;">RAGDOLL LIFE</h1>
+            <h1 style="color:#ff6699; margin-top:0;">RAGDOLL LIFE 🐾</h1>
             <input type="text" id="main-cat-name" placeholder="Name your cat...">
-            <button class="btn-small" style="width: 100%; padding: 12px; margin-top:10px; font-size:22px;" onclick="startGame()">START LIFE</button>
+            <button class="btn-small" style="width: 100%; padding: 12px; margin-top:10px; font-size:22px;" onclick="startGame()">START LIFE 🌟</button>
         </div>
     </div>
 
     <div id="activities-modal" class="modal">
         <div class="modal-content glass-panel">
-            <h2 style="margin-top:0; color:#ff6699;">SELECT ACTIVITY</h2>
+            <h2 style="margin-top:0; color:#ff6699;">SELECT ACTIVITY ✨</h2>
             <div id="activities-container" class="activities-grid"></div>
-            <button class="btn-small" style="width: 100%; margin-top:15px; background:#444;" onclick="closeModal('activities-modal')">CLOSE</button>
+            <button class="btn-small" style="width: 100%; margin-top:15px; background:#444;" onclick="closeModal('activities-modal')">CLOSE ❌</button>
         </div>
     </div>
 
     <div id="kitten-modal" class="modal">
         <div class="modal-content glass-panel">
-            <h2 style="color:#ff6699; margin-top:0;">KITTENS BORN!</h2>
+            <h2 style="color:#ff6699; margin-top:0;">KITTENS BORN! 🍼</h2>
             <input type="text" id="k1" placeholder="First Kitten Name">
             <input type="text" id="k2" placeholder="Second Kitten Name">
             <input type="text" id="k3" placeholder="Third Kitten Name">
-            <button class="btn-small" style="width: 100%; margin-top:10px;" onclick="saveKittens()">SAVE FAMILY</button>
+            <button class="btn-small" style="width: 100%; margin-top:10px;" onclick="saveKittens()">SAVE FAMILY 🏠</button>
         </div>
     </div>
 
     <div id="death-modal" class="modal">
         <div class="modal-content glass-panel" style="border-color:#fff;">
-            <h1 style="color:#fff; margin-top:0;">A BEAUTIFUL LIFE</h1>
+            <h1 style="color:#fff; margin-top:0;">A BEAUTIFUL LIFE 🕊️</h1>
             <p id="tribute-text" style="font-size:22px; line-height:1.5; color:#ccc;"></p>
-            <p style="font-size:24px; color:#ffb199;">Thank you for giving her a wonderful home.</p>
-            <button class="btn-small" style="width: 100%; margin-top:15px; background:#ff6699;" onclick="startCreditsRoll()">RESTART JOURNEY</button>
+            <p style="font-size:24px; color:#ffb199;">Thank you for giving her a wonderful home. ❤️</p>
+            <button class="btn-small" style="width: 100%; margin-top:15px; background:#ff6699;" onclick="startCreditsRoll()">RESTART JOURNEY 🔄</button>
         </div>
     </div>
 
     <div id="credits-layer">
         <div id="credits-container" class="credits-scroll">
-            <h1>RAGDOLL LIFE</h1>
-            <p>Created by Aaditya</p>
-            <p style="margin-top: 80px; font-size: 20px;">Thank you for playing.</p>
+            <h1>RAGDOLL LIFE 🐾</h1>
+            <p>Created by Aaditya ✨</p>
+            <p style="margin-top: 80px; font-size: 20px;">Thank you for playing. ❤️</p>
         </div>
     </div>
 
     <div id="shop-modal" class="modal">
         <div class="modal-content glass-panel">
-            <h2 style="margin-top:0; color:#ff6699;">SUPERMARKET</h2>
+            <h2 style="margin-top:0; color:#ff6699;">SUPERMARKET 🛒</h2>
             <div style="display:flex; flex-wrap:wrap; justify-content:center; gap:10px;" id="shop-items-container"></div>
-            <button class="btn-small" style="width: 100%; margin-top:25px; background:#444;" onclick="closeModal('shop-modal')">CLOSE SHOP</button>
+            <button class="btn-small" style="width: 100%; margin-top:25px; background:#444;" onclick="closeModal('shop-modal')">CLOSE SHOP ❌</button>
         </div>
     </div>
 
     <div id="minigame-hub" class="modal">
         <div class="modal-content glass-panel">
-            <h2 style="margin-top:0; color:#ff6699; font-size:28px;">ARCADE SYSTEM</h2>
+            <h2 style="margin-top:0; color:#ff6699; font-size:28px;">ARCADE SYSTEM 🕹️</h2>
             <div class="arcade-menu-grid">
-                <div class="arcade-card" onclick="launchGame('catch')"><div class="arcade-info"><div class="arcade-name">Catch Mouse</div><div class="arcade-score-tag">High Score: <span id="hs-catch">0</span></div></div></div>
-                <div class="arcade-card" onclick="launchGame('tower')"><div class="arcade-info"><div class="arcade-name">Build Tower</div><div class="arcade-score-tag">High Score: <span id="hs-tower">0</span></div></div></div>
-                <div class="arcade-card" onclick="launchGame('puzzle')"><div class="arcade-info"><div class="arcade-name">Cat Jigsaw</div><div class="arcade-score-tag">Best Time: <span id="hs-puzzle">--</span>s</div></div></div>
-                <div class="arcade-card" onclick="launchGame('flappy')"><div class="arcade-info"><div class="arcade-name">Flappy Cat</div><div class="arcade-score-tag">High Score: <span id="hs-flappy">0</span></div></div></div>
-                <div class="arcade-card" onclick="launchGame('memory')"><div class="arcade-info"><div class="arcade-name">Memory Match</div><div class="arcade-score-tag">Best Time: <span id="hs-memory">--</span>s</div></div></div>
+                <div class="arcade-card" onclick="launchGame('catch')"><div class="arcade-info"><div class="arcade-name">🐭 Catch Mouse</div><div class="arcade-score-tag">High Score: <span id="hs-catch">0</span> 🏆</div></div></div>
+                <div class="arcade-card" onclick="launchGame('tower')"><div class="arcade-info"><div class="arcade-name">🧱 Build Tower</div><div class="arcade-score-tag">High Score: <span id="hs-tower">0</span> 🏆</div></div></div>
+                <div class="arcade-card" onclick="launchGame('puzzle')"><div class="arcade-info"><div class="arcade-name">🧩 Cat Jigsaw</div><div class="arcade-score-tag">Best Time: <span id="hs-puzzle">--</span>s ⏱️</div></div></div>
+                <div class="arcade-card" onclick="launchGame('flappy')"><div class="arcade-info"><div class="arcade-name">🦅 Flappy Cat</div><div class="arcade-score-tag">High Score: <span id="hs-flappy">0</span> 🏆</div></div></div>
+                <div class="arcade-card" onclick="launchGame('memory')"><div class="arcade-info"><div class="arcade-name">🃏 Memory Match</div><div class="arcade-score-tag">Best Time: <span id="hs-memory">--</span>s ⏱️</div></div></div>
             </div>
-            <button class="btn-small" style="width: 100%; padding: 8px; background:#444;" onclick="closeModal('minigame-hub')">EXIT ARCADE</button>
+            <button class="btn-small" style="width: 100%; padding: 8px; background:#444;" onclick="closeModal('minigame-hub')">EXIT ARCADE 🚪</button>
         </div>
     </div>
 
     <div id="active-minigame-modal" class="modal">
         <div class="modal-content glass-panel">
-            <h2 id="mg-title" style="margin-top:0; margin-bottom: 5px; color:#ff6699;">Game Canvas</h2>
+            <h2 id="mg-title" style="margin-top:0; margin-bottom: 5px; color:#ff6699;">Game Canvas 🎮</h2>
             <div style="display:flex; justify-content:space-between; margin-bottom:8px; font-size:20px;">
-                <span style="color:#a8e6cf;">Score: <span id="mg-score">0</span></span>
+                <span style="color:#a8e6cf;">Score: <span id="mg-score">0</span> ⭐</span>
                 <span style="color:#ff8b94;">Time: <span id="mg-time">0</span></span>
             </div>
             <div id="minigame-area"></div>
-            <button id="mg-start-btn" class="btn-small" style="width: 100%; margin-bottom:10px; background:#ff6699; padding:8px;" onclick="startCurrentGame()">START GAME</button>
-            <button class="btn-small" style="width: 100%; background:#444;" onclick="closeActiveGame()">BACK</button>
+            <button id="mg-start-btn" class="btn-small" style="width: 100%; margin-bottom:10px; background:#ff6699; padding:8px;" onclick="startCurrentGame()">START GAME ▶️</button>
+            <button class="btn-small" style="width: 100%; background:#444;" onclick="closeActiveGame()">BACK 🔙</button>
         </div>
     </div>
 </div>
-<!-- ======================= END OF PART 1 ======================= -->
-<!-- ======================= START OF PART 2 ======================= -->
 <script>
     function playMeowSound() {
         let s = document.getElementById('audio-meow');
@@ -405,7 +402,7 @@
     };
 
     function init() {
-        let saved = localStorage.getItem('ragdoll_save_v16');
+        let saved = localStorage.getItem('ragdoll_save_v17');
         if (saved) {
             gameState = Object.assign(gameState, JSON.parse(saved)); 
             document.getElementById('main-cat-name').style.display = 'none'; 
@@ -416,7 +413,7 @@
         kittenHungerInterval = setInterval(() => {
             if(gameState.phase >= 4 && !gameState.isSleeping) {
                 gameState.kittenHunger = Math.max(0, gameState.kittenHunger - 8);
-                if(gameState.kittenHunger < 30) showReaction("Kittens are hungry! Drag them to mom.");
+                if(gameState.kittenHunger < 30) showReaction("Kittens are hungry! Drag them to mom. 🍼");
             }
         }, 60000);
 
@@ -428,7 +425,7 @@
         if (nameInput.style.display !== 'none' && nameInput.value.trim() !== "") { gameState.name = nameInput.value; gameState.startDate = Date.now(); }
         gameState.lastPlayed = Date.now(); document.getElementById('start-modal').style.display = 'none';
         let bgm = document.getElementById('audio-bgm'); if(bgm) { bgm.volume = 0.15; bgm.play().catch(e=>{}); }
-        updateMeters(); startFelineBrain(); showReaction(`${gameState.name} arrived.`);
+        updateMeters(); startFelineBrain(); showReaction(`${gameState.name} arrived. ✨`);
     }
 
     function calculateTimeDrain() {
@@ -445,11 +442,11 @@
         checkLifeEvents();
     }
     function addInteractionBonus() { if(gameState.phase === 5) return; gameState.interactionBonusMs += (1000 * 60 * 20); calculateTimeDrain(); }
-    function saveData() { if(gameState.phase !== 5) { gameState.lastPlayed = Date.now(); localStorage.setItem('ragdoll_save_v16', JSON.stringify(gameState)); } }
+    function saveData() { if(gameState.phase !== 5) { gameState.lastPlayed = Date.now(); localStorage.setItem('ragdoll_save_v17', JSON.stringify(gameState)); } }
 
     function updateMeters() {
-        document.getElementById('coin-display').innerText = `Coins: ${gameState.coins}`;
-        document.getElementById('age-display').innerText = `${gameState.name} | Age: ${gameState.age} Yr`;
+        document.getElementById('coin-display').innerText = `Coins: ${gameState.coins} 🪙`;
+        document.getElementById('age-display').innerText = `${gameState.name} | Age: ${gameState.age} Yr ⏳`;
         if(gameState.startDate && gameState.phase < 5) {
             let oneYearMs = 1000 * 60 * 60 * 6; let timeIntoCurrentYear = ((Date.now() - gameState.startDate) + gameState.interactionBonusMs) % oneYearMs;
             document.getElementById('age-bar-fill').style.width = ((timeIntoCurrentYear / oneYearMs) * 100) + '%';
@@ -525,7 +522,7 @@
                 activeCatDrag.style.top = (parseFloat(document.getElementById('main-cat-wrap').style.top) + 60) + 'px';
                 triggerAnimation('anim-nurse', [activeCatDrag]); 
                 gameState.kittenHunger = 100; gameState.happy = Math.min(100, gameState.happy + 15); gameState.coins += 12;
-                showReaction("Nursing milk! (+12c)"); playAudio('audio-purr'); triggerAnimation('anim-cuddle', [catSprite], true);
+                showReaction("Nursing milk! 🍼 (+12c)"); playAudio('audio-purr'); triggerAnimation('anim-cuddle', [catSprite], true);
                 addInteractionBonus(); updateMeters(); saveData();
             }
         }
@@ -537,7 +534,7 @@
 
     function petCat() {
         gameState.happy = Math.min(100, gameState.happy + 5); addInteractionBonus();
-        showReaction(`Purrr...`); playAudio('audio-purr'); 
+        showReaction(`Purrr... 💖`); playAudio('audio-purr'); 
         triggerAnimation('anim-cuddle', allSprites, true);
         saveData(); updateMeters();
     }
@@ -547,18 +544,18 @@
         if (type === 'sleep') {
             gameState.isSleeping = !gameState.isSleeping;
             if (gameState.isSleeping) {
-                showReaction("Sleeping..."); document.getElementById('text-sleep').innerHTML = "WAKE UP";
+                showReaction("Sleeping... 💤"); document.getElementById('text-sleep').innerHTML = "WAKE UP ☀️";
                 document.getElementById('bg-layer').style.filter = "brightness(0.25)"; document.getElementById('food-tray').classList.add('hidden');
                 triggerAnimation('anim-sleep');
             } else {
-                gameState.energy = Math.min(100, gameState.energy + 50); showReaction("Awake!"); 
-                document.getElementById('text-sleep').innerHTML = "SLEEP"; document.getElementById('bg-layer').style.filter = "brightness(1)";
+                gameState.energy = Math.min(100, gameState.energy + 50); showReaction("Awake! ☀️"); 
+                document.getElementById('text-sleep').innerHTML = "SLEEP 💤"; document.getElementById('bg-layer').style.filter = "brightness(1)";
                 setIdleState();
             }
         } else if (type === 'play') {
-            if (gameState.energy < 15) { showReaction("Too tired."); return; }
+            if (gameState.energy < 15) { showReaction("Too tired. 💤"); return; }
             gameState.energy -= 15; gameState.happy = Math.min(100, gameState.happy + 20); gameState.clean = Math.max(0, gameState.clean - 10);
-            showReaction("Playing!"); playMeowSound(); triggerAnimation('anim-play'); addInteractionBonus();
+            showReaction("Playing! 🧶"); playMeowSound(); triggerAnimation('anim-play'); addInteractionBonus();
         }
         saveData(); updateMeters();
     }
@@ -577,9 +574,9 @@
         document.getElementById('cat-group').appendChild(p); setTimeout(() => p.remove(), 2500);
     }
 
-    function runActivity(label, baseType, customAnim, propVisual) {
+    function runActivity(label, baseType, customAnim, propEmoji) {
         showReaction(label);
-        if(propVisual === 'hearts') spawnHearts(); else if(propVisual) spawnProp(propVisual, 'anim-play');
+        if(propEmoji === 'hearts') spawnHearts(); else if(propEmoji) spawnProp(propEmoji, 'anim-play');
         if(customAnim) triggerAnimation(customAnim); else triggerAnimation('anim-couple-cuddle', allSprites, true);
         if(baseType) setTimeout(() => { action(baseType); }, 500);
     }
@@ -589,23 +586,23 @@
         let cont = document.getElementById('activities-container'); cont.innerHTML = "";
         
         let acts = [
-            {n: "Scratch Post", f:()=>runActivity("Scratching!", 'play', 'anim-scratch')}, 
-            {n: "Watch Bird", f:()=>runActivity("Watching birds...", null, 'anim-watch', '🐦')}
+            {n: "Scratch Post 🪵", f:()=>runActivity("Scratching! 🐾", 'play', 'anim-scratch')}, 
+            {n: "Watch Bird 🐦", f:()=>runActivity("Watching birds... 🐦", null, 'anim-watch', '🐦')}
         ];
         if (gameState.phase >= 2) {
             acts.push(
-                {n: "Date Night", f:()=>runActivity("Snuggling on sofa!", 'play', 'anim-couple-cuddle', 'hearts')},
-                {n: "Groom Akira", f:()=>runActivity("Grooming session!", 'play', 'anim-groom')},
-                {n: "Backyard Hunt", f:()=>runActivity("Hunting mice together!", 'play', 'anim-pounce', '🐭')},
-                {n: "Share Fish Bowl", f:()=>runActivity("Sharing premium snack!", 'play', 'anim-eat', '🐟')}
+                {n: "Date Night 💖", f:()=>runActivity("Snuggling on sofa! 💖", 'play', 'anim-couple-cuddle', 'hearts')},
+                {n: "Groom Akira 👅", f:()=>runActivity("Grooming session! 🧼", 'play', 'anim-groom')},
+                {n: "Backyard Hunt 🐭", f:()=>runActivity("Hunting mice together! 🐾", 'play', 'anim-pounce', '🐭')},
+                {n: "Share Fish Bowl 🐟", f:()=>runActivity("Sharing premium snack! 🐟", 'play', 'anim-eat', '🐟')}
             );
         }
         if (gameState.phase >= 4) {
             acts.push(
-                {n: "Teach Pounce", f:()=>runActivity("Teaching the kids to hunt!", 'play', 'anim-pounce')},
-                {n: "Clean Kittens", f:()=>runActivity("Bath time for the babies!", 'play', 'anim-groom')},
-                {n: "Yarn Ball Chaos", f:()=>runActivity("Kittens playing with yarn!", 'play', 'anim-play', '🧶')},
-                {n: "Group Nap", f:()=>runActivity("Cozy family sleeping!", 'sleep', 'anim-sleep')}
+                {n: "Teach Pounce 🐾", f:()=>runActivity("Teaching the kids to hunt! 🐾", 'play', 'anim-pounce')},
+                {n: "Clean Kittens 🧼", f:()=>runActivity("Bath time for the babies! 🧼", 'play', 'anim-groom')},
+                {n: "Yarn Ball Chaos 🧶", f:()=>runActivity("Kittens playing with yarn! 🧶", 'play', 'anim-play', '🧶')},
+                {n: "Group Nap 💤", f:()=>runActivity("Cozy family sleeping! 💤", 'sleep', 'anim-sleep', '💤')}
             );
         }
         acts.forEach(a => {
@@ -619,7 +616,7 @@
     let isBathing = false; let soapDrag = null;
     function startBathMode() {
         if (gameState.isSleeping || gameState.phase === 5) return;
-        if (gameState.clean >= 100) { showReaction("Perfectly clean!"); return; }
+        if (gameState.clean >= 100) { showReaction("Perfectly clean! ✨"); return; }
         isBathing = true; document.getElementById('food-tray').classList.add('hidden'); document.getElementById('bath-overlay').style.display = 'flex';
         let soap = document.getElementById('soap-item'); soap.style.left = '50%'; soap.style.top = 'auto'; soap.style.bottom = '90px';
         soap.onmousedown = startSoapDrag; soap.ontouchstart = startSoapDrag;
@@ -639,7 +636,7 @@
             if(Math.random() < 0.1) triggerAnimation('anim-groom');
             if (gameState.clean >= 100) {
                 endSoapDrag(); document.getElementById('bath-overlay').style.display = 'none';
-                isBathing = false; showReaction("Clean!"); playMeowSound(); addInteractionBonus(); saveData();
+                isBathing = false; showReaction("Clean! ✨"); playMeowSound(); addInteractionBonus(); saveData();
             }
         }
     }
@@ -664,7 +661,7 @@
                 div.onmousedown = (e) => startFoodDrag(e, key); div.ontouchstart = (e) => startFoodDrag(e, key); tray.appendChild(div);
             }
         });
-        if (!hasFood) tray.innerHTML = "<div style='padding:5px; color:#fff;'>No food! Use the shop.</div>";
+        if (!hasFood) tray.innerHTML = "<div style='padding:5px; color:#fff;'>No food! Use the shop. 🛒</div>";
     }
     function startFoodDrag(e, key) {
         e.preventDefault(); activeFoodDrag = document.createElement('div'); activeFoodDrag.className = 'flying-item';
@@ -681,7 +678,7 @@
             let key = activeFoodDrag.dataset.key;
             if (gameState.inventory[key] > 0) {
                 gameState.inventory[key]--; gameState.hunger = Math.min(100, gameState.hunger + itemsDB[key].hunger);
-                gameState.clean = Math.max(0, gameState.clean - 5); showReaction(`Ate ${itemsDB[key].name}!`);
+                gameState.clean = Math.max(0, gameState.clean - 5); showReaction(`Ate ${itemsDB[key].name}! 🐟`);
                 playAudio('audio-eat'); triggerAnimation('anim-eat'); addInteractionBonus(); updateTrayUI(); saveData(); updateMeters();
             }
         }
@@ -713,7 +710,7 @@
             div.innerHTML = `<img src="${i.img}" onerror="this.style.display='none'"><div style="position:absolute; bottom:-22px; color:#ffeaa7; width:100%; text-align:center; font-size:18px;">${i.price}c</div>`;
             div.onclick = () => {
                 if (gameState.coins >= i.price) { gameState.coins -= i.price; gameState.inventory[key]++; playCoinSound(); saveData(); updateMeters(); updateTrayUI(); } 
-                else showReaction("Need more coins!");
+                else showReaction("Need more coins! 🪙");
             };
             container.appendChild(div);
         });
@@ -723,7 +720,7 @@
     // --- ARCADE HUB WITH PRECISE ISOLATED TIMERS ---
     let currentGame = ""; let mgTimer = null, mgInterval = null; let mgTime = 0, mgScore = 0; let gameActive = false;
     
-    function clearTimers() {
+    function killAllTimers() {
         if(mgTimer) { clearInterval(mgTimer); mgTimer = null; }
         if(mgInterval) { clearTimeout(mgInterval); mgInterval = null; }
     }
@@ -738,45 +735,45 @@
     
     function launchGame(id) {
         document.getElementById('minigame-hub').style.display = 'none'; currentGame = id;
-        let t = { 'catch': 'CATCH MOUSE', 'tower': 'BUILD TOWER', 'puzzle': 'CAT JIGSAW', 'flappy': 'FLAPPY CAT', 'memory': 'MEMORY MATCH' };
+        let t = { 'catch': 'CATCH MOUSE 🐭', 'tower': 'BUILD TOWER 🧱', 'puzzle': 'CAT JIGSAW 🧩', 'flappy': 'FLAPPY CAT 🦅', 'memory': 'MEMORY MATCH 🃏' };
         document.getElementById('mg-title').innerText = t[id];
         document.getElementById('active-minigame-modal').style.display = 'flex'; document.getElementById('mg-start-btn').style.display = 'block'; document.getElementById('minigame-area').innerHTML = "";
     }
     
     function startCurrentGame() {
         document.getElementById('mg-start-btn').style.display = 'none'; document.getElementById('minigame-area').innerHTML = "";
-        mgScore = 0; clearTimers(); gameActive = true;
+        mgScore = 0; killAllTimers(); gameActive = true;
         
         if (currentGame === 'catch') {
-            mgTime = 15; document.getElementById('mg-time').innerText = mgTime + "s";
-            mgTimer = setInterval(() => { mgTime--; document.getElementById('mg-time').innerText = mgTime + "s"; if (mgTime <= 0) finishMiniGame(); }, 1000); spawnTarget();
+            mgTime = 15; document.getElementById('mg-time').innerText = mgTime + "s ⏳";
+            mgTimer = setInterval(() => { mgTime--; document.getElementById('mg-time').innerText = mgTime + "s ⏳"; if (mgTime <= 0) finishMiniGame(); }, 1000); spawnTarget();
         } else if (currentGame === 'tower') {
-            tBlocks = []; tWidth = 100; tSpeed = 3.5; document.getElementById('mg-time').innerText = "Stacking...";
+            tBlocks = []; tWidth = 100; tSpeed = 3.5; document.getElementById('mg-time').innerText = "Stacking... 🧱";
             document.getElementById('minigame-area').onclick = placeBlock; spawnBaseBlock(); spawnMovingBlock(); mgTimer = setInterval(moveBlock, 20);
         } else if (currentGame === 'puzzle') {
-            mgTime = 0; document.getElementById('mg-time').innerText = mgTime + "s";
-            mgTimer = setInterval(() => { mgTime++; document.getElementById('mg-time').innerText = mgTime + "s"; }, 1000); initJigsawPuzzle();
+            mgTime = 0; document.getElementById('mg-time').innerText = mgTime + "s ⏳";
+            mgTimer = setInterval(() => { mgTime++; document.getElementById('mg-time').innerText = mgTime + "s ⏳"; }, 1000); initJigsawPuzzle();
         } else if (currentGame === 'flappy') {
-            mgTime = 0; document.getElementById('mg-time').innerText = mgTime + "s";
-            mgTimer = setInterval(() => { mgTime++; document.getElementById('mg-time').innerText = mgTime + "s"; }, 1000); initFlappyGame();
+            mgTime = 0; document.getElementById('mg-time').innerText = "Flying... 🦅";
+            mgTimer = setInterval(() => { mgTime++; }, 1000); initFlappyGame();
         } else if (currentGame === 'memory') {
-            mgTime = 0; document.getElementById('mg-time').innerText = mgTime + "s";
-            mgTimer = setInterval(() => { mgTime++; document.getElementById('mg-time').innerText = mgTime + "s"; }, 1000); initMemoryGame();
+            mgTime = 0; document.getElementById('mg-time').innerText = mgTime + "s ⏳";
+            mgTimer = setInterval(() => { mgTime++; document.getElementById('mg-time').innerText = mgTime + "s ⏳"; }, 1000); initMemoryGame();
         }
     }
     
     function finishMiniGame(wonPuzzle = false) {
-        gameActive = false; clearTimers(); document.getElementById('minigame-area').onclick = null; let reward = mgScore;
+        gameActive = false; killAllTimers(); document.getElementById('minigame-area').onclick = null; let reward = mgScore;
         if (currentGame === 'puzzle' || currentGame === 'memory') {
             reward = wonPuzzle ? Math.max(10, 65 - mgTime) : 0;
             if(wonPuzzle && mgTime < (gameState.highScores[currentGame]||999)) gameState.highScores[currentGame] = mgTime;
         } else { if(mgScore > (gameState.highScores[currentGame]||0)) gameState.highScores[currentGame] = mgScore; }
-        document.getElementById('minigame-area').innerHTML = `<div style="color:#a8e6cf; margin-top:70px; font-size:26px;">Game Over!<br>Earned: ${reward} Coins</div>`;
-        document.getElementById('mg-start-btn').innerText = "PLAY AGAIN"; document.getElementById('mg-start-btn').style.display = 'block';
+        document.getElementById('minigame-area').innerHTML = `<div style="color:#a8e6cf; margin-top:70px; font-size:26px;">Game Over!<br>Earned: ${reward} Coins 🪙</div>`;
+        document.getElementById('mg-start-btn').innerText = "PLAY AGAIN ▶️"; document.getElementById('mg-start-btn').style.display = 'block';
         gameState.coins += reward; gameState.energy = Math.max(0, gameState.energy - 8); saveData(); updateMeters();
     }
     
-    function closeActiveGame() { gameActive = false; clearTimers(); document.getElementById('active-minigame-modal').style.display = 'none'; openMiniGameHub(); }
+    function closeActiveGame() { gameActive = false; killAllTimers(); document.getElementById('active-minigame-modal').style.display = 'none'; openMiniGameHub(); }
     function closeModal(id) { document.getElementById(id).style.display = 'none'; }
 
     // Catch Mouse Minigame
@@ -784,7 +781,7 @@
         if (!gameActive) return; let area = document.getElementById('minigame-area'); area.innerHTML = "";
         let t = document.createElement('div'); t.className = 'target-obj'; t.innerHTML = '<div style="width:10px; height:10px; background:#fff; border-radius:50%;"></div>';
         t.style.left = Math.random() * (area.clientWidth - 45) + 'px'; t.style.top = Math.random() * (area.clientHeight - 45) + 'px';
-        t.onmousedown = (e) => { e.preventDefault(); mgScore+=2; document.getElementById('mg-score').innerText = mgScore; clearTimers(); spawnTarget(); };
+        t.onmousedown = (e) => { e.preventDefault(); mgScore+=2; document.getElementById('mg-score').innerText = mgScore; killAllTimers(); spawnTarget(); };
         t.ontouchstart = t.onmousedown; area.appendChild(t); mgInterval = setTimeout(spawnTarget, 750);
     }
 
@@ -811,16 +808,15 @@
             pSelected.dataset.correct = div.dataset.correct; pSelected.style.backgroundPosition = div.style.backgroundPosition; div.dataset.correct = tempC; div.style.backgroundPosition = tempBg; pSelected.classList.remove('selected'); pSelected = null; checkPuzzleWin();
         }
     }
-    function checkPuzzleWin() { let won = true; for(let i=0; i<25; i++) { if (parseInt(pPieces[i].dataset.correct) !== i) { won = false; break; } } if (won) { clearTimers(); document.getElementById('minigame-area').innerHTML = `<div style="color:#ff6699; margin-top:75px; font-size:32px; font-weight:bold;">PUZZLE SOLVED!</div>`; setTimeout(() => finishMiniGame(true), 1500); } }
+    function checkPuzzleWin() { let won = true; for(let i=0; i<25; i++) { if (parseInt(pPieces[i].dataset.correct) !== i) { won = false; break; } } if (won) { killAllTimers(); document.getElementById('minigame-area').innerHTML = `<div style="color:#ff6699; margin-top:75px; font-size:32px; font-weight:bold;">PUZZLE SOLVED! ✨</div>`; setTimeout(() => finishMiniGame(true), 1500); } }
 
     // Flappy Cat Minigame
     let birdY = 100, birdVel = 0, pipes = [];
     function initFlappyGame() {
         let area = document.getElementById('minigame-area'); area.innerHTML = '<div id="flappy-bird"></div>';
         birdY = 100; birdVel = 0; pipes = [];
-        area.onclick = () => { if(gameActive) birdVel = -6; };
-        area.ontouchstart = area.onclick;
-        mgTimer = setInterval(flappyLoop, 30);
+        area.onclick = () => { if(gameActive) birdVel = -6; }; area.ontouchstart = area.onclick;
+        mgInterval = setInterval(flappyLoop, 30);
     }
     function flappyLoop() {
         if(!gameActive) return;
@@ -854,15 +850,15 @@
         }
     }
 
-    // Memory Match Minigame
+    // Memory Match Minigame (4x2 Perfect Grid)
     let memCards = [], flippedCards = [], matchedPairs = 0;
     function initMemoryGame() {
         let area = document.getElementById('minigame-area'); area.innerHTML = '<div id="memory-grid"></div>';
         let grid = document.getElementById('memory-grid');
-        let icons = ['icon_fish.png', 'icon_croissant.png', 'icon_can.png', 'icon_milk.png', 'icon_mash.png', 'heart.png'];
+        let icons = ['icon_fish.png', 'icon_croissant.png', 'icon_can.png', 'icon_milk.png']; // Exactly 4 icons for an 8-card grid
         let deck = [...icons, ...icons].sort(() => Math.random() - 0.5);
         memCards = []; flippedCards = []; matchedPairs = 0;
-        deck.forEach((imgSrc, i) => {
+        deck.forEach((imgSrc) => {
             let card = document.createElement('div'); card.className = 'memory-card'; card.dataset.icon = imgSrc;
             card.innerHTML = `<img src="${imgSrc}">`; 
             card.onclick = () => flipCard(card); card.ontouchstart = () => flipCard(card);
@@ -875,7 +871,7 @@
         if(flippedCards.length === 2) {
             if(flippedCards[0].dataset.icon === flippedCards[1].dataset.icon) {
                 matchedPairs++; mgScore += 5; document.getElementById('mg-score').innerText = mgScore; flippedCards = [];
-                if(matchedPairs === 6) { clearTimers(); document.getElementById('minigame-area').innerHTML = `<div style="color:#ff6699; margin-top:75px; font-size:32px; font-weight:bold;">MATCHED ALL!</div>`; setTimeout(() => finishMiniGame(true), 1500); }
+                if(matchedPairs === 4) { killAllTimers(); document.getElementById('minigame-area').innerHTML = `<div style="color:#ff6699; margin-top:75px; font-size:32px; font-weight:bold;">MATCHED ALL! ✨</div>`; setTimeout(() => finishMiniGame(true), 1500); }
             } else { setTimeout(() => { flippedCards[0].classList.remove('flipped'); flippedCards[1].classList.remove('flipped'); flippedCards = []; }, 800); }
         }
     }
@@ -886,9 +882,9 @@
         if (gameState.age >= 22 && gameState.phase < 5) { triggerDeathSequence(); } 
         else if (gameState.age >= 14 && gameState.phase < 4) { document.getElementById('kitten-modal').style.display = 'flex'; } 
         else if (gameState.age >= 9 && gameState.phase < 3) { 
-            gameState.phase = 3; showReaction(`Married Akira!`); setIdleState(); spawnHearts(); showAkiraThought("I love you!");
+            gameState.phase = 3; showReaction(`Married Akira! 💍`); setIdleState(); spawnHearts(); showAkiraThought("I love you! 💖");
         } else if (gameState.age >= 5 && gameState.phase < 2) { 
-            gameState.phase = 2; showReaction(`Akira Joined!`); setIdleState(); showAkiraThought("Hi there!");
+            gameState.phase = 2; showReaction(`Akira Joined! 🧡`); setIdleState(); showAkiraThought("Hi there! 👋");
         }
     }
 
@@ -903,7 +899,7 @@
         
         playSadTune(); allSprites.forEach(sprite => { if(sprite) sprite.style.opacity = '0'; });
         let txt = `Across ${gameState.age} legendary years, ${gameState.name} lived a gorgeous, full life.<br><br>Final Gold Reserve: ${gameState.coins}c<br>Legacy: Raised a beautiful family with Akira.<br>`;
-        document.getElementById('tribute-text').innerHTML = txt; setTimeout(() => { document.getElementById('death-modal').style.display = 'flex'; }, 5500); localStorage.removeItem('ragdoll_save_v16');
+        document.getElementById('tribute-text').innerHTML = txt; setTimeout(() => { document.getElementById('death-modal').style.display = 'flex'; }, 5500); localStorage.removeItem('ragdoll_save_v17');
     }
 
     function startCreditsRoll() {
@@ -912,7 +908,7 @@
         setTimeout(() => { location.reload(); }, 8500); 
     }
 
-    function saveKittens() { gameState.phase = 4; document.getElementById('kitten-modal').style.display = 'none'; showReaction("Kittens arrived!"); saveData(); setIdleState(); updateMeters(); }
+    function saveKittens() { gameState.phase = 4; document.getElementById('kitten-modal').style.display = 'none'; showReaction("Kittens arrived! 🍼"); saveData(); setIdleState(); updateMeters(); }
 
     function setIdleState() {
         if (gameState.phase === 5) return;
@@ -934,4 +930,3 @@
 
     window.onload = init;
 </script>
-<!-- ======================= END OF PART 2 ======================= -->
