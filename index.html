@@ -4,76 +4,168 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ragdoll Life Simulation</title>
+    <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
     <style>
         body {
             margin: 0; padding: 0;
-            background-color: #121212;
-            color: #FFFFFF; font-family: Arial, sans-serif;
+            background-color: #0f0f15;
+            color: #FFFFFF; font-family: 'VT323', monospace;
             display: flex; justify-content: center; align-items: center;
-            height: 100vh; user-select: none;
+            height: 100vh; user-select: none; overflow: hidden;
+            touch-action: none; font-size: 20px; letter-spacing: 1px;
         }
         #game-container {
-            width: 100%; max-width: 400px; height: 100vh; max-height: 800px;
-            background-color: #000000; position: relative;
-            overflow: hidden; border: 1px solid #333;
+            width: 100%; max-width: 420px; height: 100vh; max-height: 850px;
+            background-color: #1a1a24; position: relative;
+            overflow: hidden; box-shadow: 0 0 30px rgba(0,0,0,0.8);
         }
         #bg-layer {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background-image: url('my_room.jpg'); 
             background-size: cover; background-position: center; z-index: 1;
+            transition: filter 1s ease;
         }
+
+        .glass-panel {
+            background: rgba(20, 20, 30, 0.7);
+            backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5); border-radius: 12px;
+        }
+
         #sprite-layer {
             position: absolute; top: 50%; left: 50%;
-            transform: translate(-50%, -50%);
-            width: 250px; height: 250px; z-index: 2;
+            width: 220px; height: 220px; z-index: 2;
+            transform: translate(-50%, -40%);
         }
-        #cat-sprite {
+        
+        /* Hardware acceleration added for smooth rendering */
+        .main-sprite {
             width: 100%; height: 100%; object-fit: contain;
-            image-rendering: pixelated;
+            transform-origin: bottom center; position: absolute; z-index: 3;
+            will-change: transform, filter; image-rendering: pixelated;
         }
+        .kitten-sprite {
+            width: 80px; height: 80px; object-fit: contain;
+            position: absolute; transform-origin: bottom center; z-index: 4;
+            will-change: transform; image-rendering: pixelated;
+        }
+        #kit1-sprite { bottom: -10px; left: -40px; animation-delay: 0.1s; }
+        #kit2-sprite { bottom: 10px; right: -30px; animation-delay: 0.3s; }
+        #kit3-sprite { bottom: -25px; left: 60px; animation-delay: 0.5s; z-index: 5; }
+        .hidden { display: none !important; }
+
+        /* --- Thought Cloud CSS --- */
+        #thought-bubble {
+            position: absolute; top: -30px; left: 140px;
+            width: 70px; height: 50px; background: rgba(255, 255, 255, 0.9);
+            border-radius: 50%; display: flex; justify-content: center; align-items: center;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3); z-index: 10;
+            animation: floatBubble 2s infinite ease-in-out;
+            opacity: 0; transition: opacity 0.3s ease; pointer-events: none;
+        }
+        #thought-bubble.visible { opacity: 1; }
+        #thought-bubble::after {
+            content: ''; position: absolute; bottom: -8px; left: 15px;
+            width: 12px; height: 12px; background: rgba(255, 255, 255, 0.9);
+            border-radius: 50%; box-shadow: -10px 8px 0 -4px rgba(255, 255, 255, 0.9);
+        }
+        #thought-img {
+            width: 35px; height: 35px; object-fit: contain; image-rendering: pixelated;
+        }
+
+        /* --- Smooth Pure Code Physics --- */
+        .anim-idle { animation: breathe 3.5s infinite ease-in-out; }
+        .anim-play { animation: bounce 0.6s infinite alternate ease-in-out; }
+        .anim-eat { animation: tilt 0.5s infinite ease-in-out; }
+        .anim-sleep { 
+            transform: rotate(-90deg) translateY(40px) !important; 
+            filter: brightness(0.5); animation: sleepBreathe 4.5s infinite ease-in-out; 
+            transform-origin: center center !important;
+        }
+        .anim-cuddle { 
+            animation: floatHeart 1.2s infinite alternate ease-in-out; filter: drop-shadow(0 0 15px #ff6699); 
+        }
+
+        @keyframes breathe { 0%, 100% { transform: scale(1, 1); } 50% { transform: scale(1.03, 0.97); } }
+        @keyframes bounce { 0% { transform: translateY(0) scale(1.02, 0.98); } 100% { transform: translateY(-40px) scale(0.98, 1.02); } }
+        @keyframes tilt { 0%, 100% { transform: rotate(0deg); } 25% { transform: rotate(-8deg); } 75% { transform: rotate(8deg); } }
+        @keyframes sleepBreathe { 0%, 100% { transform: rotate(-90deg) translateY(40px) scale(1, 1); } 50% { transform: rotate(-90deg) translateY(40px) scale(1.02, 0.98); } }
+        @keyframes floatHeart { 0% { transform: translateY(0); } 100% { transform: translateY(-10px); } }
+        @keyframes floatBubble { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+
         #hud-top {
-            position: absolute; top: 0; left: 0; width: 100%;
-            background: rgba(0, 0, 0, 0.7); padding: 15px; box-sizing: border-box;
-            display: flex; justify-content: space-between; z-index: 3; font-weight: bold;
+            position: absolute; top: 15px; left: 5%; width: 90%;
+            padding: 12px 20px; box-sizing: border-box;
+            display: flex; justify-content: space-between; z-index: 3; 
+            font-size: 22px; text-shadow: 2px 2px 0 #000;
         }
         #reaction-text {
-            position: absolute; bottom: 220px; left: 50%;
-            transform: translateX(-50%); background: rgba(0, 0, 0, 0.6);
-            padding: 10px 15px; border-radius: 8px; text-align: center;
-            width: 80%; z-index: 3;
+            position: absolute; bottom: 250px; left: 50%;
+            transform: translateX(-50%); padding: 10px 15px; 
+            text-align: center; width: 85%; z-index: 3; font-size: 22px;
+            transition: all 0.3s ease; text-shadow: 2px 2px 0 #000;
         }
+        
+        /* --- Image-based Drag and Drop --- */
+        #food-tray {
+            position: absolute; bottom: 150px; left: 50%; transform: translateX(-50%);
+            display: flex; gap: 15px; padding: 10px 20px; z-index: 5;
+            transition: opacity 0.3s, transform 0.3s;
+        }
+        .draggable-food {
+            width: 50px; height: 50px; cursor: grab; padding: 5px;
+            background: rgba(0,0,0,0.4); border-radius: 8px;
+            border: 2px solid rgba(255,255,255,0.4);
+            display: flex; justify-content: center; align-items: center;
+        }
+        .draggable-food img {
+            width: 100%; height: 100%; object-fit: contain; pointer-events: none;
+            image-rendering: pixelated;
+        }
+        .draggable-food:active { cursor: grabbing; transform: scale(0.9); }
+        
+        .flying-food {
+            position: fixed; width: 60px; height: 60px; z-index: 9999;
+            pointer-events: none; transform: translate(-50%, -50%); 
+            background-size: contain; background-repeat: no-repeat; background-position: center;
+            filter: drop-shadow(0 5px 10px rgba(0,0,0,0.6)); image-rendering: pixelated;
+        }
+
         #controls {
-            position: absolute; bottom: 0; left: 0; width: 100%;
-            background: rgba(0, 0, 0, 0.8); padding: 10px; box-sizing: border-box; z-index: 3;
+            position: absolute; bottom: 20px; left: 5%; width: 90%; z-index: 3;
         }
-        .btn-row { display: flex; gap: 8px; margin-bottom: 8px; }
+        .btn-row { display: flex; gap: 10px; margin-bottom: 10px; }
         button {
-            flex: 1; padding: 15px 5px; border: none; border-radius: 5px;
-            font-weight: bold; color: #FFF; cursor: pointer; font-size: 14px;
+            flex: 1; padding: 14px 5px; border: 2px solid rgba(0,0,0,0.5); border-radius: 8px;
+            color: #FFF; cursor: pointer; font-size: 22px; font-family: 'VT323', monospace;
+            text-transform: uppercase; text-shadow: 2px 2px 0 #000;
+            box-shadow: 0 4px 0 rgba(0,0,0,0.4); transition: transform 0.1s, box-shadow 0.1s;
         }
-        button:active { filter: brightness(0.8); }
+        button:active { transform: translateY(4px); box-shadow: 0 0 0 rgba(0,0,0,0.4); }
+        
         .btn-feed { background-color: #4CAF50; }
         .btn-play { background-color: #2196F3; }
         .btn-sleep { background-color: #9C27B0; }
         .btn-cuddle { background-color: #E91E63; }
         .btn-skip { background-color: #607D8B; }
+
         .modal {
             display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0, 0, 0, 0.85); z-index: 10;
             justify-content: center; align-items: center;
         }
-        .modal-content {
-            background: #212121; padding: 20px; border-radius: 10px;
-            width: 80%; text-align: center;
-        }
-        .food-item {
-            background: #333; padding: 15px; margin: 5px 0;
-            border-radius: 5px; cursor: pointer;
-        }
+        .modal-content { padding: 30px; width: 85%; text-align: center; box-sizing: border-box; }
+        .opening-title { font-size: 42px; margin-bottom: 5px; color: #ffb199; text-shadow: 3px 3px 0 #000; }
+        .opening-subtitle { font-size: 22px; margin-bottom: 25px; color: #ccc; }
+        
         input {
-            width: 90%; padding: 10px; margin: 5px 0;
-            border-radius: 5px; border: none; box-sizing: border-box;
+            width: 100%; padding: 12px; margin: 10px 0; border-radius: 8px; 
+            border: 2px solid #fff; background: rgba(0,0,0,0.5); 
+            color: #fff; font-family: 'VT323', monospace; font-size: 24px;
+            text-align: center; box-sizing: border-box; outline: none;
         }
+        input:focus { border-color: #ffb199; }
     </style>
 </head>
 <body>
@@ -87,106 +179,195 @@
     <div id="bg-layer"></div>
     
     <div id="sprite-layer">
-        <img id="cat-sprite" src="cat_idle.gif" alt="Cat Pixel Art">
+        <div id="thought-bubble">
+            <img id="thought-img" src="">
+        </div>
+
+        <img id="cat-sprite" class="main-sprite anim-idle" src="cat.png" alt="Pet">
+        <img id="kit1-sprite" class="kitten-sprite hidden anim-idle" src="kitten1.png">
+        <img id="kit2-sprite" class="kitten-sprite hidden anim-idle" src="kitten2.png">
+        <img id="kit3-sprite" class="kitten-sprite hidden anim-idle" src="kitten3.png">
     </div>
 
-    <div id="hud-top">
-        <span id="stats-display">Hunger: 100 | Energy: 100</span>
-        <span id="age-display" style="color: #FFD700;">Day 1</span>
+    <div id="hud-top" class="glass-panel">
+        <span id="stats-display">Food: 100 | Energy: 100</span>
+        <span id="age-display" style="color: #ffb199;">Day 1</span>
     </div>
 
-    <div id="reaction-text">Waiting to start...</div>
+    <div id="reaction-text" class="glass-panel">Waiting...</div>
+
+    <div id="food-tray" class="glass-panel hidden"></div>
 
     <div id="controls">
         <div class="btn-row">
-            <button class="btn-feed" onclick="openFoodMenu()">FEED 🍖</button>
-            <button class="btn-play" onclick="action('play')">PLAY 🧶</button>
-            <button class="btn-sleep" onclick="action('sleep')" id="btn-sleep">SLEEP 💤</button>
+            <button class="btn-feed" onclick="toggleFoodTray()">Feed</button>
+            <button class="btn-play" onclick="action('play')">Play</button>
+            <button class="btn-sleep" onclick="action('sleep')" id="btn-sleep">Sleep</button>
         </div>
         <div class="btn-row">
-            <button class="btn-cuddle" onclick="action('cuddle')">CUDDLE 🧡</button>
-            <button class="btn-skip" onclick="skipDay()">+1 DAY ⏳</button>
+            <button class="btn-cuddle" onclick="action('cuddle')">Cuddle</button>
+            <button class="btn-skip" onclick="skipDay()">+1 Day</button>
         </div>
     </div>
 
     <div id="start-modal" class="modal" style="display: flex;">
-        <div class="modal-content">
-            <h3>Name Your Cat 🐾</h3>
-            <input type="text" id="main-cat-name" placeholder="Enter name...">
-            <button style="background: #4CAF50; margin-top: 15px;" onclick="startGame()">Start Game</button>
-        </div>
-    </div>
-
-    <div id="food-modal" class="modal">
-        <div class="modal-content">
-            <h3>Choose Food</h3>
-            <div id="food-list"></div>
-            <button style="background: #D32F2F; margin-top: 15px;" onclick="closeModal('food-modal')">Cancel</button>
+        <div class="modal-content glass-panel">
+            <div class="opening-title">RAGDOLL LIFE</div>
+            <div class="opening-subtitle">Virtual Pet Sim</div>
+            <input type="text" id="main-cat-name" placeholder="Name your cat...">
+            <button class="btn-feed" style="width: 100%; margin-top: 15px;" onclick="startGame()">Start</button>
         </div>
     </div>
 
     <div id="kitten-modal" class="modal">
-        <div class="modal-content">
-            <h3>3 Kittens Born! 🐾</h3>
-            <input type="text" id="k1" placeholder="Kitten 1 Name">
-            <input type="text" id="k2" placeholder="Kitten 2 Name">
-            <input type="text" id="k3" placeholder="Kitten 3 Name">
-            <button style="background: #4CAF50; margin-top: 15px;" onclick="saveKittens()">Save Family</button>
+        <div class="modal-content glass-panel">
+            <h3 style="margin-top:0; color:#ffb199; font-size:32px;">3 KITTENS BORN!</h3>
+            <input type="text" id="k1" placeholder="First Kitten">
+            <input type="text" id="k2" placeholder="Second Kitten">
+            <input type="text" id="k3" placeholder="Third Kitten">
+            <button class="btn-feed" style="width: 100%; margin-top: 15px;" onclick="saveKittens()">Save</button>
         </div>
     </div>
 </div>
 
 <script>
     let gameState = {
-        mainCatName: "Kitty",
-        phase: 1, 
-        age: 1,
-        hunger: 100,
-        energy: 100,
-        isSleeping: false,
+        mainCatName: "Kitty", phase: 1, age: 1,
+        hunger: 100, energy: 100, isSleeping: false,
         lastPlayed: Date.now(),
         kittens: { k1: "Kit1", k2: "Kit2", k3: "Kit3" }
     };
 
     let animationTimeout;
+    let thoughtTimeout;
+    const catSprite = document.getElementById('cat-sprite');
+    const kitten1 = document.getElementById('kit1-sprite');
+    const kitten2 = document.getElementById('kit2-sprite');
+    const kitten3 = document.getElementById('kit3-sprite');
+    const allSprites = [catSprite, kitten1, kitten2, kitten3];
+    const thoughtBubble = document.getElementById('thought-bubble');
+    const thoughtImg = document.getElementById('thought-img');
+
+    let activeDrag = null;
+
+    function startDrag(e, foodName, hungerValue, imgSrc) {
+        if (gameState.isSleeping) return;
+        e.preventDefault(); 
+        
+        activeDrag = document.createElement('div');
+        activeDrag.className = 'flying-food';
+        activeDrag.style.backgroundImage = "url('" + imgSrc + "')";
+        activeDrag.dataset.name = foodName;
+        activeDrag.dataset.value = hungerValue;
+        document.body.appendChild(activeDrag);
+
+        moveDrag(e); 
+        document.addEventListener('mousemove', moveDrag);
+        document.addEventListener('touchmove', moveDrag, {passive: false});
+        document.addEventListener('mouseup', endDrag);
+        document.addEventListener('touchend', endDrag);
+    }
+
+    function moveDrag(e) {
+        if(!activeDrag) return;
+        e.preventDefault(); 
+        let clientX = e.clientX || (e.touches && e.touches[0].clientX);
+        let clientY = e.clientY || (e.touches && e.touches[0].clientY);
+        activeDrag.style.left = clientX + 'px';
+        activeDrag.style.top = clientY + 'px';
+    }
+
+    function endDrag(e) {
+        if(!activeDrag) return;
+        let clientX = e.clientX || (e.changedTouches && e.changedTouches[0].clientX);
+        let clientY = e.clientY || (e.changedTouches && e.changedTouches[0].clientY);
+        let catRect = document.getElementById('sprite-layer').getBoundingClientRect();
+        
+        if (clientX >= catRect.left && clientX <= catRect.right && clientY >= catRect.top && clientY <= catRect.bottom) {
+            feedCat(activeDrag.dataset.name, parseInt(activeDrag.dataset.value));
+        }
+
+        activeDrag.remove(); activeDrag = null;
+        document.removeEventListener('mousemove', moveDrag);
+        document.removeEventListener('touchmove', moveDrag);
+        document.removeEventListener('mouseup', endDrag);
+        document.removeEventListener('touchend', endDrag);
+    }
+
+    function toggleFoodTray() {
+        if (gameState.isSleeping) { showReaction("Wake her up first."); return; }
+        let tray = document.getElementById('food-tray');
+        tray.innerHTML = ""; 
+        
+        let foods = (gameState.phase === 4) 
+            ? [{n: "Warm Milk", v: 20, src: "icon_milk.png"}, {n: "Kitten Mash", v: 25, src: "icon_mash.png"}]
+            : [{n: "Fish", v: 30, src: "icon_fish.png"}, {n: "Croissant", v: 20, src: "icon_croissant.png"}, {n: "Can", v: 25, src: "icon_can.png"}];
+
+        foods.forEach(f => {
+            let div = document.createElement('div');
+            div.className = 'draggable-food';
+            let img = document.createElement('img');
+            img.src = f.src;
+            div.appendChild(img);
+            div.onmousedown = (e) => startDrag(e, f.n, f.v, f.src);
+            div.ontouchstart = (e) => startDrag(e, f.n, f.v, f.src);
+            tray.appendChild(div);
+        });
+        tray.classList.toggle('hidden');
+    }
+
+    function feedCat(foodName, hungerValue) {
+        gameState.hunger = Math.min(100, gameState.hunger + hungerValue);
+        showReaction(`Eating ${foodName}...`);
+        playSound('audio-eat');
+        triggerCSSAnimation('anim-eat'); 
+        document.getElementById('food-tray').classList.add('hidden'); 
+        saveData(); updateUI();
+    }
+
+    function triggerThought(imgSrc) {
+        if (gameState.isSleeping) return;
+        thoughtImg.src = imgSrc;
+        thoughtBubble.classList.add('visible');
+        clearTimeout(thoughtTimeout);
+        thoughtTimeout = setTimeout(() => {
+            thoughtBubble.classList.remove('visible');
+        }, 4000);
+    }
 
     function init() {
         let savedData = localStorage.getItem('ragdoll_data');
         if (savedData) {
             gameState = JSON.parse(savedData);
-            document.getElementById('start-modal').style.display = 'none';
-            startAudio();
-            calculateOfflineDrain();
-            updateUI();
-            setIdleAnimation();
+            document.querySelector('.opening-title').innerText = "WELCOME BACK";
+            document.querySelector('.opening-subtitle').innerText = "Your pets missed you.";
+            document.getElementById('main-cat-name').style.display = 'none'; 
         }
     }
 
     function startGame() {
-        let nameInput = document.getElementById('main-cat-name').value;
-        if (nameInput.trim() !== "") {
-            gameState.mainCatName = nameInput;
+        let nameInput = document.getElementById('main-cat-name');
+        if (nameInput.style.display !== 'none' && nameInput.value.trim() !== "") {
+            gameState.mainCatName = nameInput.value;
         }
         document.getElementById('start-modal').style.display = 'none';
-        startAudio();
-        saveData();
-        updateUI();
-        setIdleAnimation();
-        showReaction(`${gameState.mainCatName} is exploring the room.`);
+        startAudio(); calculateOfflineDrain(); saveData(); updateUI(); setIdleState();
+        showReaction(`${gameState.mainCatName} is exploring.`);
+        
+        // Randomly trigger Akira thought if married
+        if (gameState.phase >= 2) {
+            setTimeout(() => triggerThought('thought_akira.png'), 5000);
+        }
     }
 
     function startAudio() {
         let bgm = document.getElementById('audio-bgm');
-        bgm.volume = 0.3;
-        bgm.play().catch(() => console.log("Audio play blocked by browser until interaction."));
+        bgm.volume = 0.4; bgm.play().catch(() => console.log("BGM Blocked"));
     }
 
     function playSound(id) {
         let sound = document.getElementById(id);
-        if (sound) {
-            sound.currentTime = 0;
-            sound.play().catch(e => console.log(e));
-        }
+        if (sound) { sound.currentTime = 0; sound.play().catch(e => console.log(e)); }
     }
 
     function saveData() {
@@ -197,98 +378,77 @@
     function calculateOfflineDrain() {
         let now = Date.now();
         let hoursPassed = (now - gameState.lastPlayed) / (1000 * 60 * 60);
-        
         if (hoursPassed > 1) {
             gameState.hunger = Math.max(0, Math.floor(gameState.hunger - (hoursPassed * 5)));
-            if (!gameState.isSleeping) {
-                gameState.energy = Math.max(0, Math.floor(gameState.energy - (hoursPassed * 4)));
-            }
+            if (!gameState.isSleeping) gameState.energy = Math.max(0, Math.floor(gameState.energy - (hoursPassed * 4)));
         }
+    }
+
+    function triggerCSSAnimation(animationClass) {
+        allSprites.forEach(sprite => {
+            if (!sprite.classList.contains('hidden')) {
+                sprite.className = `kitten-sprite ${animationClass}`;
+                if (sprite.id === 'cat-sprite') sprite.className = `main-sprite ${animationClass}`;
+            }
+        });
+        clearTimeout(animationTimeout);
+        animationTimeout = setTimeout(() => {
+            if (!gameState.isSleeping) setIdleState();
+        }, 3000);
     }
 
     function action(type) {
         if (gameState.isSleeping && type !== 'sleep') {
-            showReaction("Shh... resting.");
-            return;
+            showReaction("Shh... resting."); return;
         }
-
-        clearTimeout(animationTimeout);
-
         if (type === 'play') {
             gameState.energy = Math.max(0, gameState.energy - 15);
-            showReaction(`${gameState.mainCatName} is chasing the toy! 🧶`);
-            playSound('audio-meow');
-            playAnimation('cat_play.gif', true);
-        } 
-        else if (type === 'cuddle') {
-            if (gameState.phase === 2) {
-                showReaction(`${gameState.mainCatName} is cuddling with Akira! 🧡`);
-                playSound('audio-purr');
-                playAnimation('meet_akira.gif', true);
-            } else if (gameState.phase === 4) {
-                showReaction(`The kittens pile up on ${gameState.mainCatName}.`);
-                playSound('audio-purr');
-                playAnimation('kitten_cuddle.gif', true);
-            } else {
-                showReaction(`${gameState.mainCatName} purrs happily. 🧡`);
-                playSound('audio-purr');
-                playAnimation('cat_cuddle.gif', true);
-            }
-        }
-        else if (type === 'sleep') {
+            showReaction(`${gameState.mainCatName} is playing!`);
+            playSound('audio-meow'); triggerCSSAnimation('anim-play');
+        } else if (type === 'cuddle') {
+            showReaction(`${gameState.mainCatName} purrs happily.`);
+            playSound('audio-purr'); triggerCSSAnimation('anim-cuddle');
+            triggerThought('thought_heart.png');
+        } else if (type === 'sleep') {
             gameState.isSleeping = !gameState.isSleeping;
             if (gameState.isSleeping) {
-                showReaction(`${gameState.mainCatName} is falling asleep... 💤`);
-                document.getElementById('btn-sleep').innerHTML = "WAKE ☀️";
-                playAnimation('cat_sleep.gif', false);
+                showReaction("Falling asleep...");
+                document.getElementById('btn-sleep').innerHTML = "WAKE";
+                document.getElementById('bg-layer').style.filter = "brightness(0.3)"; 
+                thoughtBubble.classList.remove('visible');
+                triggerCSSAnimation('anim-sleep');
             } else {
                 gameState.energy = Math.min(100, gameState.energy + 40);
-                showReaction(`${gameState.mainCatName} is waking up! ☀️`);
-                document.getElementById('btn-sleep').innerHTML = "SLEEP 💤";
-                setIdleAnimation();
+                showReaction("Waking up!");
+                document.getElementById('btn-sleep').innerHTML = "SLEEP";
+                document.getElementById('bg-layer').style.filter = "brightness(1)";
+                setIdleState();
             }
         }
-
-        saveData();
-        updateUI();
-    }
-
-    function feedCat(foodName, hungerValue) {
-        gameState.hunger = Math.min(100, gameState.hunger + hungerValue);
-        showReaction(`${gameState.mainCatName} is eating ${foodName}... 🍖`);
-        playSound('audio-eat');
-        playAnimation('cat_eat.gif', true);
-        closeModal('food-modal');
-        saveData();
-        updateUI();
+        saveData(); updateUI();
     }
 
     function skipDay() {
-        gameState.age++;
-        checkLifeEvents();
-        saveData();
-        updateUI();
+        gameState.age++; checkLifeEvents(); saveData(); updateUI();
     }
 
     function checkLifeEvents() {
         if (gameState.phase === 4) {
             showReaction(`Raising ${gameState.kittens.k1}, ${gameState.kittens.k2}, & ${gameState.kittens.k3}.`);
-            setIdleAnimation();
-            return;
+            setIdleState(); return;
         }
-
         if (gameState.age === 8) {
-            gameState.phase = 2;
-            showReaction(`${gameState.mainCatName} met an orange Persian named Akira! 🧡`);
+            gameState.phase = 2; showReaction(`${gameState.mainCatName} met Akira!`);
+            triggerThought('thought_akira.png');
         } else if (gameState.age === 12) {
-            gameState.phase = 3;
-            showReaction(`💍 Marriage Day for ${gameState.mainCatName} and Akira!`);
+            gameState.phase = 3; showReaction(`Marriage Day!`);
+            triggerThought('thought_heart.png');
         } else if (gameState.age === 16) {
             document.getElementById('kitten-modal').style.display = 'flex';
         } else {
             showReaction("A day has passed.");
         }
-        setIdleAnimation();
+        setIdleState();
     }
 
     function saveKittens() {
@@ -296,73 +456,40 @@
         gameState.kittens.k2 = document.getElementById('k2').value || "Kit2";
         gameState.kittens.k3 = document.getElementById('k3').value || "Kit3";
         gameState.phase = 4;
-        
-        closeModal('kitten-modal');
+        document.getElementById('kitten-modal').style.display = 'none';
         showReaction("Welcome to the family!");
-        saveData();
-        setIdleAnimation();
-        updateUI();
+        saveData(); setIdleState(); updateUI();
     }
 
     function updateUI() {
-        document.getElementById('stats-display').innerText = `Hunger: ${gameState.hunger} | Energy: ${gameState.energy}`;
-        let prefix = (gameState.phase === 4) ? "Family Era - " : "Adult Era - ";
-        document.getElementById('age-display').innerText = prefix + "Day " + gameState.age;
+        document.getElementById('stats-display').innerHTML = `Food: ${gameState.hunger} | Eng: ${gameState.energy}`;
+        let prefix = (gameState.phase === 4) ? "Family" : "Adult";
+        document.getElementById('age-display').innerText = `${prefix} - Day ${gameState.age}`;
     }
 
     function showReaction(text) {
         document.getElementById('reaction-text').innerText = text;
     }
 
-    function playAnimation(gifName, revertToIdle) {
-        document.getElementById('cat-sprite').src = gifName;
-        if (revertToIdle) {
-            animationTimeout = setTimeout(() => {
-                if (!gameState.isSleeping) setIdleAnimation();
-            }, 3000);
-        }
-    }
-
-    function setIdleAnimation() {
-        if (gameState.isSleeping) {
-            playAnimation('cat_sleep.gif', false);
-        } else if (gameState.phase === 4) {
-            playAnimation('family_idle.gif', false); 
-        } else if (gameState.phase === 3) {
-            playAnimation('cats_wedding.gif', false);
-        } else if (gameState.phase === 2) {
-            playAnimation('akira_idle.gif', false);
-        } else {
-            playAnimation('cat_idle.gif', false);
-        }
-    }
-
-    function openFoodMenu() {
-        if (gameState.isSleeping) { showReaction("Wake her up first."); return; }
+    function setIdleState() {
+        if (gameState.phase >= 2) catSprite.src = 'akira.png';
+        else catSprite.src = 'cat.png';
         
-        let foodList = document.getElementById('food-list');
-        foodList.innerHTML = "";
-        
-        let foods = (gameState.phase === 4) 
-            ? [{n: "Warm Milk 🍼", v: 20}, {n: "Kitten Mash 🥣", v: 25}]
-            : [{n: "Fresh Fish 🐟", v: 30}, {n: "Chicken Bone 🍗", v: 20}, {n: "Canned Food 🥫", v: 25}, {n: "Dry Kibble 🧆", v: 15}];
+        if (gameState.phase === 4) {
+            kitten1.classList.remove('hidden'); kitten2.classList.remove('hidden'); kitten3.classList.remove('hidden');
+        }
 
-        foods.forEach(f => {
-            let div = document.createElement('div');
-            div.className = 'food-item';
-            div.innerText = f.n;
-            div.onclick = () => feedCat(f.n, f.v);
-            foodList.appendChild(div);
+        let anim = gameState.isSleeping ? 'anim-sleep' : 'anim-idle';
+        allSprites.forEach(sprite => {
+            if (!sprite.classList.contains('hidden')) {
+                sprite.className = `kitten-sprite ${anim}`;
+                if (sprite.id === 'cat-sprite') sprite.className = `main-sprite ${anim}`;
+            }
         });
-
-        document.getElementById('food-modal').style.display = 'flex';
-    }
-
-    function closeModal(id) {
-        document.getElementById(id).style.display = 'none';
     }
 
     window.onload = init;
 </script>
 </body>
 </html>
+('kitten-modal')
