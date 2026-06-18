@@ -8,29 +8,28 @@
     <style>
         body {
             margin: 0; padding: 0;
-            background-color: #0f0f15;
-            color: #FFFFFF; font-family: 'VT323', monospace;
+            background-color: #ffc0cb; /* Cute pink fallback */
+            color: #ff3385; /* Dark pink text */
+            font-family: 'VT323', monospace;
             display: flex; justify-content: center; align-items: center;
             height: 100vh; user-select: none; overflow: hidden;
-            touch-action: none; font-size: 20px; letter-spacing: 1px;
+            touch-action: none; font-size: 22px; letter-spacing: 1px;
         }
         #game-container {
             width: 100%; max-width: 420px; height: 100vh; max-height: 850px;
-            background-color: #1a1a24; position: relative;
-            overflow: hidden; box-shadow: 0 0 30px rgba(0,0,0,0.8);
-        }
-        #bg-layer {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background-image: url('my_room.jpg'); 
-            background-size: cover; background-position: center; z-index: 1;
-            transition: filter 1s ease;
+            /* Pure CSS Cute Background (Pink Sky, Green Grass) */
+            background: linear-gradient(to bottom, #ffe6f0 0%, #ffc6d9 55%, #a8e6cf 55%, #dcedc1 100%);
+            position: relative; overflow: hidden; 
+            border: 4px solid #ff99cc; box-sizing: border-box;
         }
 
-        .glass-panel {
-            background: rgba(20, 20, 30, 0.7);
-            backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
-            border: 2px solid rgba(255, 255, 255, 0.2);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5); border-radius: 12px;
+        /* Cute Panel Styling */
+        .cute-panel {
+            background: rgba(255, 255, 255, 0.85);
+            border: 4px solid #ff99cc;
+            border-radius: 16px;
+            box-shadow: 0 4px 0 #ff99cc;
+            color: #ff3385;
         }
 
         #sprite-layer {
@@ -39,7 +38,6 @@
             transform: translate(-50%, -40%);
         }
         
-        /* Hardware acceleration added for smooth rendering */
         .main-sprite {
             width: 100%; height: 100%; object-fit: contain;
             transform-origin: bottom center; position: absolute; z-index: 3;
@@ -55,36 +53,35 @@
         #kit3-sprite { bottom: -25px; left: 60px; animation-delay: 0.5s; z-index: 5; }
         .hidden { display: none !important; }
 
-        /* --- Thought Cloud CSS --- */
+        /* Thought Cloud */
         #thought-bubble {
             position: absolute; top: -30px; left: 140px;
-            width: 70px; height: 50px; background: rgba(255, 255, 255, 0.9);
-            border-radius: 50%; display: flex; justify-content: center; align-items: center;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.3); z-index: 10;
+            width: 70px; height: 50px; background: #ffffff;
+            border: 3px solid #ff99cc; border-radius: 50%; 
+            display: flex; justify-content: center; align-items: center;
+            box-shadow: 0 4px 0 #ff99cc; z-index: 10;
             animation: floatBubble 2s infinite ease-in-out;
             opacity: 0; transition: opacity 0.3s ease; pointer-events: none;
         }
         #thought-bubble.visible { opacity: 1; }
         #thought-bubble::after {
-            content: ''; position: absolute; bottom: -8px; left: 15px;
-            width: 12px; height: 12px; background: rgba(255, 255, 255, 0.9);
-            border-radius: 50%; box-shadow: -10px 8px 0 -4px rgba(255, 255, 255, 0.9);
+            content: ''; position: absolute; bottom: -10px; left: 15px;
+            width: 12px; height: 12px; background: #ffffff;
+            border: 3px solid #ff99cc; border-radius: 50%; 
         }
-        #thought-img {
-            width: 35px; height: 35px; object-fit: contain; image-rendering: pixelated;
-        }
+        #thought-img { width: 35px; height: 35px; object-fit: contain; image-rendering: pixelated; }
 
-        /* --- Smooth Pure Code Physics --- */
+        /* Animations */
         .anim-idle { animation: breathe 3.5s infinite ease-in-out; }
         .anim-play { animation: bounce 0.6s infinite alternate ease-in-out; }
         .anim-eat { animation: tilt 0.5s infinite ease-in-out; }
         .anim-sleep { 
             transform: rotate(-90deg) translateY(40px) !important; 
-            filter: brightness(0.5); animation: sleepBreathe 4.5s infinite ease-in-out; 
+            filter: brightness(0.8); animation: sleepBreathe 4.5s infinite ease-in-out; 
             transform-origin: center center !important;
         }
         .anim-cuddle { 
-            animation: floatHeart 1.2s infinite alternate ease-in-out; filter: drop-shadow(0 0 15px #ff6699); 
+            animation: floatHeart 1.2s infinite alternate ease-in-out; filter: drop-shadow(0 0 10px #ff99cc); 
         }
 
         @keyframes breathe { 0%, 100% { transform: scale(1, 1); } 50% { transform: scale(1.03, 0.97); } }
@@ -94,20 +91,22 @@
         @keyframes floatHeart { 0% { transform: translateY(0); } 100% { transform: translateY(-10px); } }
         @keyframes floatBubble { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
 
+        /* UI Layout matching the minimalist reference */
         #hud-top {
             position: absolute; top: 15px; left: 5%; width: 90%;
-            padding: 12px 20px; box-sizing: border-box;
-            display: flex; justify-content: space-between; z-index: 3; 
-            font-size: 22px; text-shadow: 2px 2px 0 #000;
+            display: flex; flex-direction: column; align-items: center; z-index: 3; 
+            font-size: 26px; font-weight: bold; text-align: center;
         }
+        #stats-display { color: #ff3385; margin-bottom: 5px; }
+        #age-display { font-size: 20px; color: #ff66a3; }
+
         #reaction-text {
             position: absolute; bottom: 250px; left: 50%;
-            transform: translateX(-50%); padding: 10px 15px; 
-            text-align: center; width: 85%; z-index: 3; font-size: 22px;
-            transition: all 0.3s ease; text-shadow: 2px 2px 0 #000;
+            transform: translateX(-50%); text-align: center; width: 90%; 
+            z-index: 3; font-size: 24px; color: #ff3385;
+            transition: all 0.3s ease;
         }
         
-        /* --- Image-based Drag and Drop --- */
         #food-tray {
             position: absolute; bottom: 150px; left: 50%; transform: translateX(-50%);
             display: flex; gap: 15px; padding: 10px 20px; z-index: 5;
@@ -115,57 +114,49 @@
         }
         .draggable-food {
             width: 50px; height: 50px; cursor: grab; padding: 5px;
-            background: rgba(0,0,0,0.4); border-radius: 8px;
-            border: 2px solid rgba(255,255,255,0.4);
-            display: flex; justify-content: center; align-items: center;
+            background: #ffffff; border-radius: 12px;
+            border: 3px solid #ff99cc; display: flex; justify-content: center; align-items: center;
         }
-        .draggable-food img {
-            width: 100%; height: 100%; object-fit: contain; pointer-events: none;
-            image-rendering: pixelated;
-        }
+        .draggable-food img { width: 100%; height: 100%; object-fit: contain; pointer-events: none; image-rendering: pixelated; }
         .draggable-food:active { cursor: grabbing; transform: scale(0.9); }
         
         .flying-food {
             position: fixed; width: 60px; height: 60px; z-index: 9999;
             pointer-events: none; transform: translate(-50%, -50%); 
             background-size: contain; background-repeat: no-repeat; background-position: center;
-            filter: drop-shadow(0 5px 10px rgba(0,0,0,0.6)); image-rendering: pixelated;
+            filter: drop-shadow(0 5px 10px rgba(0,0,0,0.3)); image-rendering: pixelated;
         }
 
+        /* Cute Pink Buttons */
         #controls {
             position: absolute; bottom: 20px; left: 5%; width: 90%; z-index: 3;
         }
-        .btn-row { display: flex; gap: 10px; margin-bottom: 10px; }
+        .btn-row { display: flex; gap: 10px; margin-bottom: 10px; justify-content: center; }
         button {
-            flex: 1; padding: 14px 5px; border: 2px solid rgba(0,0,0,0.5); border-radius: 8px;
-            color: #FFF; cursor: pointer; font-size: 22px; font-family: 'VT323', monospace;
-            text-transform: uppercase; text-shadow: 2px 2px 0 #000;
-            box-shadow: 0 4px 0 rgba(0,0,0,0.4); transition: transform 0.1s, box-shadow 0.1s;
+            padding: 12px 20px; border: 4px solid #ff99cc; border-radius: 12px;
+            background-color: #ffb6c1; color: #ffffff; cursor: pointer; 
+            font-size: 26px; font-family: 'VT323', monospace; text-transform: uppercase; 
+            box-shadow: 0 4px 0 #ff99cc; transition: transform 0.1s, box-shadow 0.1s;
+            text-shadow: 2px 2px 0px #ff66a3;
         }
-        button:active { transform: translateY(4px); box-shadow: 0 0 0 rgba(0,0,0,0.4); }
-        
-        .btn-feed { background-color: #4CAF50; }
-        .btn-play { background-color: #2196F3; }
-        .btn-sleep { background-color: #9C27B0; }
-        .btn-cuddle { background-color: #E91E63; }
-        .btn-skip { background-color: #607D8B; }
+        button:active { transform: translateY(4px); box-shadow: 0 0 0 #ff99cc; }
 
         .modal {
             display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.85); z-index: 10;
+            background: rgba(255, 230, 240, 0.9); z-index: 10;
             justify-content: center; align-items: center;
         }
         .modal-content { padding: 30px; width: 85%; text-align: center; box-sizing: border-box; }
-        .opening-title { font-size: 42px; margin-bottom: 5px; color: #ffb199; text-shadow: 3px 3px 0 #000; }
-        .opening-subtitle { font-size: 22px; margin-bottom: 25px; color: #ccc; }
+        .opening-title { font-size: 50px; margin-bottom: 5px; color: #ff3385; text-shadow: 2px 2px 0 #ffb6c1; }
+        .opening-subtitle { font-size: 24px; margin-bottom: 25px; color: #ff66a3; }
         
         input {
             width: 100%; padding: 12px; margin: 10px 0; border-radius: 8px; 
-            border: 2px solid #fff; background: rgba(0,0,0,0.5); 
-            color: #fff; font-family: 'VT323', monospace; font-size: 24px;
+            border: 3px solid #ff99cc; background: #ffffff; 
+            color: #ff3385; font-family: 'VT323', monospace; font-size: 24px;
             text-align: center; box-sizing: border-box; outline: none;
         }
-        input:focus { border-color: #ffb199; }
+        input:focus { border-color: #ff3385; }
     </style>
 </head>
 <body>
@@ -176,65 +167,67 @@
 <audio id="audio-purr" src="purr.mp3"></audio>
 
 <div id="game-container">
-    <div id="bg-layer"></div>
     
     <div id="sprite-layer">
         <div id="thought-bubble">
             <img id="thought-img" src="">
         </div>
-
         <img id="cat-sprite" class="main-sprite anim-idle" src="cat.png" alt="Pet">
         <img id="kit1-sprite" class="kitten-sprite hidden anim-idle" src="kitten1.png">
         <img id="kit2-sprite" class="kitten-sprite hidden anim-idle" src="kitten2.png">
         <img id="kit3-sprite" class="kitten-sprite hidden anim-idle" src="kitten3.png">
     </div>
 
-    <div id="hud-top" class="glass-panel">
-        <span id="stats-display">Food: 100 | Energy: 100</span>
-        <span id="age-display" style="color: #ffb199;">Day 1</span>
+    <div id="hud-top">
+        <div id="stats-display">Food: 100 | Energy: 100</div>
+        <div id="age-display">Adult Era - Day 1</div>
     </div>
 
-    <div id="reaction-text" class="glass-panel">Waiting...</div>
+    <div id="reaction-text">Waiting...</div>
 
-    <div id="food-tray" class="glass-panel hidden"></div>
+    <div id="food-tray" class="cute-panel hidden"></div>
 
     <div id="controls">
         <div class="btn-row">
-            <button class="btn-feed" onclick="toggleFoodTray()">Feed</button>
-            <button class="btn-play" onclick="action('play')">Play</button>
-            <button class="btn-sleep" onclick="action('sleep')" id="btn-sleep">Sleep</button>
+            <button onclick="toggleFoodTray()">FEED</button>
+            <button onclick="action('play')">PLAY</button>
+            <button onclick="action('cuddle')">CUDDLE</button>
         </div>
         <div class="btn-row">
-            <button class="btn-cuddle" onclick="action('cuddle')">Cuddle</button>
-            <button class="btn-skip" onclick="skipDay()">+1 Day</button>
+            <button onclick="action('sleep')" id="btn-sleep">SLEEP</button>
         </div>
     </div>
 
     <div id="start-modal" class="modal" style="display: flex;">
-        <div class="modal-content glass-panel">
+        <div class="modal-content cute-panel">
             <div class="opening-title">RAGDOLL LIFE</div>
-            <div class="opening-subtitle">Virtual Pet Sim</div>
+            <div class="opening-subtitle">Virtual Pet Sim ✨</div>
             <input type="text" id="main-cat-name" placeholder="Name your cat...">
-            <button class="btn-feed" style="width: 100%; margin-top: 15px;" onclick="startGame()">Start</button>
+            <button style="width: 100%; margin-top: 15px;" onclick="startGame()">START</button>
         </div>
     </div>
 
     <div id="kitten-modal" class="modal">
-        <div class="modal-content glass-panel">
-            <h3 style="margin-top:0; color:#ffb199; font-size:32px;">3 KITTENS BORN!</h3>
+        <div class="modal-content cute-panel">
+            <h3 style="margin-top:0; color:#ff3385; font-size:36px;">3 KITTENS BORN!</h3>
             <input type="text" id="k1" placeholder="First Kitten">
             <input type="text" id="k2" placeholder="Second Kitten">
             <input type="text" id="k3" placeholder="Third Kitten">
-            <button class="btn-feed" style="width: 100%; margin-top: 15px;" onclick="saveKittens()">Save</button>
+            <button style="width: 100%; margin-top: 15px;" onclick="saveKittens()">SAVE</button>
         </div>
     </div>
 </div>
 
 <script>
     let gameState = {
-        mainCatName: "Kitty", phase: 1, age: 1,
-        hunger: 100, energy: 100, isSleeping: false,
-        lastPlayed: Date.now(),
+        mainCatName: "Kitty", 
+        phase: 1, 
+        age: 1,
+        hunger: 100, 
+        energy: 100, 
+        isSleeping: false,
+        startDate: null, // Tracks real-world time progression
+        lastPlayed: null,
         kittens: { k1: "Kit1", k2: "Kit2", k3: "Kit3" }
     };
 
@@ -318,7 +311,7 @@
 
     function feedCat(foodName, hungerValue) {
         gameState.hunger = Math.min(100, gameState.hunger + hungerValue);
-        showReaction(`Eating ${foodName}...`);
+        showReaction(`Eating ${foodName}... 💖`);
         playSound('audio-eat');
         triggerCSSAnimation('anim-eat'); 
         document.getElementById('food-tray').classList.add('hidden'); 
@@ -335,26 +328,43 @@
         }, 4000);
     }
 
+    function calculateRealTimeAge() {
+        if (!gameState.startDate) return;
+        let msPassed = Date.now() - gameState.startDate;
+        // Calculate age based on 24 hour real-world intervals
+        gameState.age = Math.floor(msPassed / (1000 * 60 * 60 * 24)) + 1;
+        checkLifeEvents();
+    }
+
     function init() {
         let savedData = localStorage.getItem('ragdoll_data');
         if (savedData) {
             gameState = JSON.parse(savedData);
             document.querySelector('.opening-title').innerText = "WELCOME BACK";
-            document.querySelector('.opening-subtitle').innerText = "Your pets missed you.";
+            document.querySelector('.opening-subtitle').innerText = "Your pets missed you. ✨";
             document.getElementById('main-cat-name').style.display = 'none'; 
+            
+            // Calculate offline drain and update age based on real world time
+            calculateOfflineDrain();
+            calculateRealTimeAge();
         }
     }
 
     function startGame() {
         let nameInput = document.getElementById('main-cat-name');
-        if (nameInput.style.display !== 'none' && nameInput.value.trim() !== "") {
-            gameState.mainCatName = nameInput.value;
+        if (nameInput.style.display !== 'none') {
+            if (nameInput.value.trim() !== "") {
+                gameState.mainCatName = nameInput.value;
+            }
+            // Set the start date for real-time calculation if this is a new game
+            gameState.startDate = Date.now();
+            gameState.lastPlayed = Date.now();
         }
+        
         document.getElementById('start-modal').style.display = 'none';
-        startAudio(); calculateOfflineDrain(); saveData(); updateUI(); setIdleState();
+        startAudio(); saveData(); updateUI(); setIdleState();
         showReaction(`${gameState.mainCatName} is exploring.`);
         
-        // Randomly trigger Akira thought if married
         if (gameState.phase >= 2) {
             setTimeout(() => triggerThought('thought_akira.png'), 5000);
         }
@@ -376,11 +386,14 @@
     }
 
     function calculateOfflineDrain() {
+        if (!gameState.lastPlayed) return;
         let now = Date.now();
         let hoursPassed = (now - gameState.lastPlayed) / (1000 * 60 * 60);
         if (hoursPassed > 1) {
             gameState.hunger = Math.max(0, Math.floor(gameState.hunger - (hoursPassed * 5)));
-            if (!gameState.isSleeping) gameState.energy = Math.max(0, Math.floor(gameState.energy - (hoursPassed * 4)));
+            if (!gameState.isSleeping) {
+                gameState.energy = Math.max(0, Math.floor(gameState.energy - (hoursPassed * 4)));
+            }
         }
     }
 
@@ -401,6 +414,10 @@
         if (gameState.isSleeping && type !== 'sleep') {
             showReaction("Shh... resting."); return;
         }
+        
+        // Before executing an action, update the real-world age
+        calculateRealTimeAge();
+
         if (type === 'play') {
             gameState.energy = Math.max(0, gameState.energy - 15);
             showReaction(`${gameState.mainCatName} is playing!`);
@@ -414,41 +431,32 @@
             if (gameState.isSleeping) {
                 showReaction("Falling asleep...");
                 document.getElementById('btn-sleep').innerHTML = "WAKE";
-                document.getElementById('bg-layer').style.filter = "brightness(0.3)"; 
+                document.getElementById('game-container').style.background = "linear-gradient(to bottom, #1a1a2e 0%, #16213e 55%, #0f3460 55%, #2a3d66 100%)";
                 thoughtBubble.classList.remove('visible');
                 triggerCSSAnimation('anim-sleep');
             } else {
                 gameState.energy = Math.min(100, gameState.energy + 40);
                 showReaction("Waking up!");
                 document.getElementById('btn-sleep').innerHTML = "SLEEP";
-                document.getElementById('bg-layer').style.filter = "brightness(1)";
+                document.getElementById('game-container').style.background = "linear-gradient(to bottom, #ffe6f0 0%, #ffc6d9 55%, #a8e6cf 55%, #dcedc1 100%)";
                 setIdleState();
             }
         }
         saveData(); updateUI();
     }
 
-    function skipDay() {
-        gameState.age++; checkLifeEvents(); saveData(); updateUI();
-    }
-
     function checkLifeEvents() {
-        if (gameState.phase === 4) {
-            showReaction(`Raising ${gameState.kittens.k1}, ${gameState.kittens.k2}, & ${gameState.kittens.k3}.`);
-            setIdleState(); return;
-        }
-        if (gameState.age === 8) {
-            gameState.phase = 2; showReaction(`${gameState.mainCatName} met Akira!`);
-            triggerThought('thought_akira.png');
-        } else if (gameState.age === 12) {
+        if (gameState.phase === 4) return;
+        
+        if (gameState.age >= 16 && gameState.phase < 4) {
+            document.getElementById('kitten-modal').style.display = 'flex';
+        } else if (gameState.age >= 12 && gameState.phase < 3) {
             gameState.phase = 3; showReaction(`Marriage Day!`);
             triggerThought('thought_heart.png');
-        } else if (gameState.age === 16) {
-            document.getElementById('kitten-modal').style.display = 'flex';
-        } else {
-            showReaction("A day has passed.");
+        } else if (gameState.age >= 8 && gameState.phase < 2) {
+            gameState.phase = 2; showReaction(`${gameState.mainCatName} met Akira!`);
+            triggerThought('thought_akira.png');
         }
-        setIdleState();
     }
 
     function saveKittens() {
@@ -462,8 +470,8 @@
     }
 
     function updateUI() {
-        document.getElementById('stats-display').innerHTML = `Food: ${gameState.hunger} | Eng: ${gameState.energy}`;
-        let prefix = (gameState.phase === 4) ? "Family" : "Adult";
+        document.getElementById('stats-display').innerHTML = `Food: ${gameState.hunger} &nbsp;|&nbsp; Energy: ${gameState.energy}`;
+        let prefix = (gameState.phase === 4) ? "Family Era" : "Adult Era";
         document.getElementById('age-display').innerText = `${prefix} - Day ${gameState.age}`;
     }
 
@@ -492,4 +500,3 @@
 </script>
 </body>
 </html>
-('kitten-modal')
