@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Ragdoll Life - Landscape Edition</title>
+    <title>Ragdoll Life - Premium Landscape Edition</title>
     <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
     <style>
-        /* --- CORE SETUP --- */
+        /* --- CORE FULLSCREEN SETUP --- */
         body {
-            margin: 0; padding: 0; background-color: #0f0f15;
+            margin: 0; padding: 0; background-color: #000;
             font-family: 'VT323', monospace; display: flex; justify-content: center; align-items: center;
             height: 100vh; width: 100vw; user-select: none; overflow: hidden; touch-action: none;
         }
@@ -27,7 +27,7 @@
         /* --- PORTRAIT LOCK OVERLAY --- */
         #landscape-lock {
             display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-            background: #000; z-index: 99999; color: #fff; flex-direction: column;
+            background: #111; z-index: 99999; color: #fff; flex-direction: column;
             justify-content: center; align-items: center; text-align: center; font-size: 32px;
         }
         @media screen and (orientation: portrait) {
@@ -37,7 +37,7 @@
 
         /* --- UI GLASSMORPHISM --- */
         .glass-panel {
-            background: rgba(15, 15, 25, 0.7); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+            background: rgba(15, 15, 25, 0.85); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
             border: 2px solid rgba(255, 255, 255, 0.2); border-radius: 12px;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5); color: #fff; text-shadow: 1px 1px 0 #000;
         }
@@ -46,8 +46,7 @@
         #cat-group {
             position: absolute; top: 55%; left: 50%; width: 200px; height: 200px; 
             z-index: 2; transform: translate(-50%, -50%);
-            transition: left 3s linear; 
-            cursor: pointer;
+            transition: left 3s linear; cursor: pointer;
         }
         .main-sprite {
             width: 100%; height: 100%; object-fit: contain;
@@ -69,30 +68,36 @@
         .anim-groom { animation: groom 1s infinite alternate ease-in-out; }
         .anim-play { animation: bounce 0.4s infinite alternate ease-in-out; }
         .anim-cuddle { filter: drop-shadow(0 0 20px #ff6699); transform: scale(1.05); }
-        .anim-eat { animation: tilt 0.3s infinite alternate ease-in-out; }
-        .anim-sleep { filter: brightness(0.5); animation: breathe 4s infinite ease-in-out; }
+        .anim-eat { animation: bounce 0.2s infinite alternate ease-in-out; }
+        .anim-sleep { filter: brightness(0.4); animation: breathe 4s infinite ease-in-out; }
 
         @keyframes breathe { 0%, 100% { transform: scale(1, 1); } 50% { transform: scale(1.03, 0.97); } }
         @keyframes walk { 0% { transform: translateY(0) rotate(-2deg); } 100% { transform: translateY(-10px) rotate(2deg); } }
         @keyframes bounce { 0% { transform: translateY(0); } 100% { transform: translateY(-30px); } }
-        @keyframes tilt { 0%, 100% { transform: rotate(0deg); } 25% { transform: rotate(-8deg); } 75% { transform: rotate(8deg); } }
         @keyframes groom { 0% { transform: rotate(0deg) scale(1); } 100% { transform: rotate(-10deg) scaleY(0.9); } }
 
-        /* --- HUD --- */
+        /* --- TOP HUD (Streamlined) --- */
         #hud-top {
             position: absolute; top: 15px; left: 2%; width: 96%;
             display: flex; justify-content: space-between; align-items: center; z-index: 3; 
-            font-size: 22px; padding: 10px 15px; box-sizing: border-box;
+            font-size: 24px; padding: 10px 15px; box-sizing: border-box;
         }
-        .stat-group { display: flex; gap: 15px; flex-wrap: wrap; }
-        .stat-item { color: #a8e6cf; display: flex; align-items: center; gap: 5px; }
-        .stat-item span { color: #fff; }
-        #age-display { color: #ffb199; font-size: 20px; }
+        .btn-small {
+            background: rgba(255,255,255,0.1); border: 2px solid #fff; border-radius: 8px; color: #fff;
+            font-family: 'VT323'; font-size: 20px; padding: 5px 15px; cursor: pointer; text-shadow: 1px 1px 0 #000;
+        }
+        .btn-small:hover { background: rgba(255,255,255,0.3); }
+        .btn-danger { border-color: #ff8b94; color: #ff8b94; }
+        
+        #hud-stats-right { display: flex; gap: 20px; align-items: center; }
+        #age-display { color: #ffb199; }
+        #coin-display { color: #ffeaa7; font-size: 28px; }
 
+        /* --- REACTION TEXT (Moved off face to Top Right) --- */
         #reaction-text {
-            position: absolute; bottom: 160px; left: 50%; transform: translateX(-50%);
-            text-align: center; padding: 10px 20px; z-index: 3; font-size: 24px; 
-            color: #fff; transition: opacity 0.3s ease; pointer-events: none;
+            position: absolute; top: 70px; right: 2%; padding: 8px 15px; z-index: 3; 
+            font-size: 22px; color: #fff; opacity: 0; transition: opacity 0.3s ease; pointer-events: none;
+            background: rgba(0,0,0,0.6); border-radius: 8px; border: 2px solid #555;
         }
 
         /* --- DRAG & DROP FOOD TRAY --- */
@@ -107,14 +112,11 @@
             border: 2px solid rgba(255,255,255,0.4); display: flex; justify-content: center; align-items: center;
         }
         .draggable-food img { width: 100%; height: 100%; object-fit: contain; pointer-events: none; }
-        
-        /* The Notification Bubble showing stock amount */
         .food-badge {
             position: absolute; bottom: -8px; right: -8px; font-size: 16px; 
             background: #ff3385; color: #fff; padding: 2px 6px; 
             border-radius: 10px; border: 2px solid #fff; z-index: 2;
         }
-        
         .flying-food {
             position: fixed; width: 60px; height: 60px; z-index: 9999;
             pointer-events: none; transform: translate(-50%, -50%); 
@@ -122,49 +124,90 @@
             background-size: contain; background-repeat: no-repeat; background-position: center;
         }
 
-        /* --- CONTROLS --- */
+        /* --- DYNAMIC METER BUTTONS --- */
         #controls {
             position: absolute; bottom: 15px; left: 5%; width: 90%; z-index: 3;
             display: flex; gap: 10px; justify-content: center;
         }
-        button {
-            padding: 10px 20px; border: 2px solid rgba(255,255,255,0.4); border-radius: 8px;
-            background: rgba(20, 20, 30, 0.8); color: #ffffff; cursor: pointer; 
-            font-size: 20px; font-family: 'VT323', monospace; text-transform: uppercase; 
-            backdrop-filter: blur(5px); transition: transform 0.1s, background 0.2s;
-            box-shadow: 0 4px 0 rgba(0,0,0,0.5); display: flex; align-items: center; gap: 5px;
+        .stat-btn {
+            position: relative; overflow: hidden; width: 150px; height: 50px;
+            background: rgba(20, 20, 30, 0.8); border: 2px solid rgba(255,255,255,0.4); border-radius: 8px;
+            color: #ffffff; cursor: pointer; font-size: 22px; font-family: 'VT323', monospace; text-transform: uppercase; 
+            box-shadow: 0 4px 0 rgba(0,0,0,0.5);
         }
-        button:active { transform: translateY(4px); box-shadow: 0 0 0 rgba(0,0,0,0.5); }
+        .stat-btn:active { transform: translateY(4px); box-shadow: 0 0 0 rgba(0,0,0,0.5); }
+        .stat-fill {
+            position: absolute; bottom: 0; left: 0; height: 100%; width: 100%;
+            z-index: 1; transition: width 0.3s ease, background-color 0.3s ease;
+        }
+        .stat-text {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            z-index: 2; width: 100%; text-align: center; text-shadow: 1px 1px 0 #000;
+        }
 
-        /* --- MODALS --- */
+        /* Specific Meter Colors */
+        #fill-food { background: rgba(85, 239, 196, 0.5); }
+        #fill-clean { background: rgba(116, 185, 255, 0.5); }
+        #fill-happy { background: rgba(255, 118, 117, 0.5); }
+        #fill-energy { background: rgba(162, 155, 254, 0.5); }
+
+        /* --- CUSTOM MODALS & ALERTS --- */
         .modal {
             display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.85); z-index: 10; justify-content: center; align-items: center;
+            background: rgba(0, 0, 0, 0.85); z-index: 100; justify-content: center; align-items: center;
         }
         .modal-content { padding: 30px; width: 500px; text-align: center; position: relative; }
         
-        .shop-items { display: flex; justify-content: space-around; margin-top: 20px; flex-wrap: wrap; }
+        .alert-box { width: 350px; padding: 25px; }
+        .alert-text { font-size: 24px; margin-bottom: 20px; line-height: 1.2; }
+
+        /* --- SHOP UI --- */
+        .shop-items { display: flex; justify-content: space-around; margin-top: 20px; flex-wrap: wrap; gap: 10px; }
         .shop-item {
             background: rgba(0,0,0,0.4); padding: 10px; border-radius: 8px; border: 1px solid #555;
-            cursor: pointer; width: 80px; transition: background 0.2s; margin-bottom: 10px;
+            cursor: pointer; width: 80px; transition: background 0.2s;
         }
         .shop-item:hover { background: rgba(255,255,255,0.1); }
         .shop-item img { width: 50px; height: 50px; object-fit: contain; margin-bottom: 5px; }
 
-        #minigame-area {
-            width: 100%; height: 250px; background: #222; border: 2px solid #555;
-            position: relative; overflow: hidden; border-radius: 8px; cursor: crosshair;
+        /* --- MINIGAMES UI --- */
+        .mg-menu-btn {
+            display: block; width: 100%; padding: 15px; margin-bottom: 10px;
+            background: #2d3436; border: 2px solid #636e72; color: #fff; font-size: 24px;
+            font-family: 'VT323'; cursor: pointer; border-radius: 8px;
         }
+        .mg-menu-btn:hover { background: #636e72; }
+
+        #minigame-area {
+            width: 100%; height: 260px; background: #222; border: 2px solid #555;
+            position: relative; overflow: hidden; border-radius: 8px; cursor: crosshair; margin-bottom: 10px;
+        }
+        
+        /* Catch Mouse Target */
         .target-obj {
             width: 40px; height: 40px; background: #ff6699; border-radius: 50%;
-            position: absolute; cursor: pointer; display: flex; justify-content: center; align-items: center;
-            font-size: 20px; color: #fff;
+            position: absolute; cursor: pointer; display: flex; justify-content: center; align-items: center; color: #fff;
         }
+
+        /* Tower Blocks */
+        .tower-block {
+            position: absolute; height: 30px; background: #a8e6cf; border: 2px solid #fff; box-sizing: border-box;
+        }
+
+        /* 8x8 Puzzle Grid */
+        #puzzle-grid {
+            display: grid; grid-template-columns: repeat(8, 1fr); gap: 2px;
+            width: 256px; height: 256px; margin: 0 auto; background: #111; padding: 2px;
+        }
+        .puzzle-cell {
+            background: #333; display: flex; justify-content: center; align-items: center; cursor: pointer;
+        }
+        .puzzle-cell img { width: 90%; height: 90%; object-fit: contain; pointer-events: none; }
 
         input {
             width: 80%; padding: 12px; margin: 10px 0; border-radius: 8px; 
             border: 2px solid rgba(255,255,255,0.3); background: rgba(0,0,0,0.5); 
-            color: #fff; font-family: 'VT323', monospace; font-size: 22px; text-align: center;
+            color: #fff; font-family: 'VT323'; font-size: 22px; text-align: center;
         }
     </style>
 </head>
@@ -179,7 +222,8 @@
 <audio id="audio-meow" src="meow.mp3"></audio>
 <audio id="audio-eat" src="eat.mp3"></audio>
 <audio id="audio-purr" src="purr.mp3"></audio>
-<audio id="audio-coin" src="coin.mp3"></audio> <div id="game-container">
+
+<div id="game-container">
     <div id="bg-layer"></div>
     
     <div id="cat-group" onclick="petCat()">
@@ -189,57 +233,46 @@
         <img id="kit3-sprite" class="kitten-sprite hidden anim-breathe" src="kitten3.png" onerror="this.src='cat.png'">
     </div>
 
-    <div id="hud-top" class="glass-panel">
-        <div class="stat-group">
-            <div class="stat-item">FOOD: <span id="stat-food">100</span></div>
-            <div class="stat-item">ENERGY: <span id="stat-energy">100</span></div>
-            <div class="stat-item">HAPPY: <span id="stat-happy">100</span></div>
-            <div class="stat-item" style="color:#ffeaa7;">COINS: <span id="stat-coins">50</span></div>
-        </div>
-        <div id="age-display">Age: 1 Yr</div>
-    </div>
+    <div id="reaction-text">Waiting...</div>
 
-    <div id="reaction-text" class="glass-panel">Waiting...</div>
+    <div id="hud-top" class="glass-panel">
+        <div>
+            <button class="btn-small btn-danger" onclick="confirmReset()">RESET</button>
+            <button class="btn-small" onclick="openShop()">SHOP 🛒</button>
+            <button class="btn-small" onclick="openMiniGameHub()">ARCADE 🎮</button>
+        </div>
+        <div id="hud-stats-right">
+            <span id="age-display">Age: 1 Yr</span>
+            <span id="coin-display">Coins: 0</span>
+        </div>
+    </div>
 
     <div id="food-tray" class="glass-panel hidden"></div>
 
     <div id="controls">
-        <button onclick="toggleFoodTray()">FEED</button>
-        <button onclick="openMiniGame()">MINI-GAME</button>
-        <button onclick="openShop()">SHOP</button>
-        <button onclick="action('sleep')" id="btn-sleep">SLEEP</button>
-        <button onclick="hardReset()" style="background: #e6737b;">RESET</button>
+        <button class="stat-btn" onclick="toggleFoodTray()">
+            <div class="stat-fill" id="fill-food"></div>
+            <div class="stat-text">FEED</div>
+        </button>
+        <button class="stat-btn" onclick="action('bath')">
+            <div class="stat-fill" id="fill-clean"></div>
+            <div class="stat-text">BATH</div>
+        </button>
+        <button class="stat-btn" onclick="action('play')">
+            <div class="stat-fill" id="fill-happy"></div>
+            <div class="stat-text">PLAY</div>
+        </button>
+        <button class="stat-btn" onclick="action('sleep')" id="btn-sleep">
+            <div class="stat-fill" id="fill-energy"></div>
+            <div class="stat-text" id="text-sleep">SLEEP</div>
+        </button>
     </div>
 
     <div id="start-modal" class="modal" style="display: flex;">
         <div class="modal-content glass-panel">
             <h1 style="color:#a8e6cf; margin-top:0;">RAGDOLL LIFE</h1>
-            <p>Landscape Edition</p>
             <input type="text" id="main-cat-name" placeholder="Name your cat...">
-            <button style="width: 100%; justify-content: center; margin-top:10px;" onclick="startGame()">START</button>
-        </div>
-    </div>
-
-    <div id="shop-modal" class="modal">
-        <div class="modal-content glass-panel">
-            <h2 style="margin-top:0;">SUPERMARKET</h2>
-            <div style="color:#ffeaa7;">Coins: <span id="shop-coins"></span></div>
-            <div class="shop-items" id="shop-items-container">
-                </div>
-            <button style="width: 100%; justify-content: center; margin-top:20px;" onclick="closeModal('shop-modal')">LEAVE</button>
-        </div>
-    </div>
-
-    <div id="minigame-modal" class="modal">
-        <div class="modal-content glass-panel">
-            <h2 style="margin-top:0;">CATCH THE MOUSE</h2>
-            <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
-                <span style="color:#a8e6cf;">Score: <span id="mg-score">0</span></span>
-                <span style="color:#ff8b94;">Time: <span id="mg-time">15</span>s</span>
-            </div>
-            <div id="minigame-area"></div>
-            <button id="mg-start-btn" style="width: 100%; justify-content: center; margin-top:15px;" onclick="startMiniGame()">START GAME</button>
-            <button style="width: 100%; justify-content: center; margin-top:10px; background:#444;" onclick="closeModal('minigame-modal')">CLOSE</button>
+            <button class="btn-small" style="width: 100%; padding: 15px; margin-top:10px;" onclick="startGame()">START LIFE</button>
         </div>
     </div>
 
@@ -249,27 +282,99 @@
             <input type="text" id="k1" placeholder="First Kitten">
             <input type="text" id="k2" placeholder="Second Kitten">
             <input type="text" id="k3" placeholder="Third Kitten">
-            <button style="width: 100%; justify-content: center; margin-top:10px;" onclick="saveKittens()">SAVE FAMILY</button>
+            <button class="btn-small" style="width: 100%; margin-top:10px;" onclick="saveKittens()">SAVE FAMILY</button>
         </div>
     </div>
+
+    <div id="alert-modal" class="modal">
+        <div class="modal-content glass-panel alert-box">
+            <div class="alert-text" id="alert-text">Message</div>
+            <div style="display:flex; gap:10px; justify-content:center;">
+                <button class="btn-small" id="alert-btn-cancel" style="background:#555;">CANCEL</button>
+                <button class="btn-small" id="alert-btn-ok" style="background:#ff6699;">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="shop-modal" class="modal">
+        <div class="modal-content glass-panel">
+            <h2 style="margin-top:0;">SUPERMARKET</h2>
+            <div class="shop-items" id="shop-items-container"></div>
+            <button class="btn-small" style="width: 100%; margin-top:20px;" onclick="closeModal('shop-modal')">CLOSE SHOP</button>
+        </div>
+    </div>
+
+    <div id="minigame-hub" class="modal">
+        <div class="modal-content glass-panel">
+            <h2 style="margin-top:0;">ARCADE (Earn Coins)</h2>
+            <button class="mg-menu-btn" onclick="launchGame('catch')">1. Catch the Mouse</button>
+            <button class="mg-menu-btn" onclick="launchGame('tower')">2. Build the Tower</button>
+            <button class="mg-menu-btn" onclick="launchGame('puzzle')">3. 8x8 Icon Pop</button>
+            <button class="btn-small" style="width: 100%; margin-top:10px;" onclick="closeModal('minigame-hub')">EXIT ARCADE</button>
+        </div>
+    </div>
+
+    <div id="active-minigame-modal" class="modal">
+        <div class="modal-content glass-panel">
+            <h2 id="mg-title" style="margin-top:0;">Game</h2>
+            <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+                <span style="color:#a8e6cf;">Score: <span id="mg-score">0</span></span>
+                <span style="color:#ff8b94;">Time/Moves: <span id="mg-time">0</span></span>
+            </div>
+            
+            <div id="minigame-area"></div>
+            
+            <button id="mg-start-btn" class="btn-small" style="width: 100%; margin-bottom:10px;" onclick="startCurrentGame()">START GAME</button>
+            <button class="btn-small" style="width: 100%; background:#444;" onclick="closeActiveGame()">BACK TO HUB</button>
+        </div>
+    </div>
+
 </div>
 
 <script>
+    // --- VENDING MACHINE COIN SOUND SYNTHESIZER ---
+    function playCoinSound() {
+        try {
+            let ctx = new (window.AudioContext || window.webkitAudioContext)();
+            let osc1 = ctx.createOscillator(); osc1.type = 'square'; osc1.frequency.setValueAtTime(150, ctx.currentTime);
+            let gain1 = ctx.createGain(); gain1.gain.setValueAtTime(0.3, ctx.currentTime); gain1.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.1);
+            osc1.connect(gain1); gain1.connect(ctx.destination); osc1.start(); osc1.stop(ctx.currentTime + 0.1);
+            
+            setTimeout(() => {
+                let osc2 = ctx.createOscillator(); osc2.type = 'sine'; osc2.frequency.setValueAtTime(1400, ctx.currentTime);
+                let gain2 = ctx.createGain(); gain2.gain.setValueAtTime(0.2, ctx.currentTime); gain2.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.4);
+                osc2.connect(gain2); gain2.connect(ctx.destination); osc2.start(); osc2.stop(ctx.currentTime + 0.4);
+            }, 100);
+        } catch(e) { console.log("Audio API blocked"); }
+    }
+
+    // --- CUSTOM ALERTS ---
+    function showAlert(msg) {
+        document.getElementById('alert-text').innerText = msg;
+        document.getElementById('alert-btn-cancel').style.display = 'none';
+        document.getElementById('alert-btn-ok').onclick = () => { document.getElementById('alert-modal').style.display = 'none'; };
+        document.getElementById('alert-modal').style.display = 'flex';
+    }
+    function showConfirm(msg, callback) {
+        document.getElementById('alert-text').innerText = msg;
+        document.getElementById('alert-btn-cancel').style.display = 'block';
+        document.getElementById('alert-btn-cancel').onclick = () => { document.getElementById('alert-modal').style.display = 'none'; };
+        document.getElementById('alert-btn-ok').onclick = () => { document.getElementById('alert-modal').style.display = 'none'; callback(); };
+        document.getElementById('alert-modal').style.display = 'flex';
+    }
+
+    // --- STATE MANAGEMENT ---
     let gameState = {
         name: "Kitty", phase: 1, age: 1, 
-        hunger: 100, energy: 100, happy: 100, coins: 50,
+        hunger: 100, energy: 100, happy: 100, clean: 100, coins: 50,
         isSleeping: false, startDate: null, lastPlayed: null,
         inventory: { fish: 2, croissant: 1, can: 1, milk: 0, mash: 0 },
         kittens: { k1: "Kit1", k2: "Kit2", k3: "Kit3" }
     };
 
-    let behaviorInterval;
-    let animationTimeout;
+    let behaviorInterval, animationTimeout;
     const catGroup = document.getElementById('cat-group');
-    const allSprites = [
-        document.getElementById('cat-sprite'), document.getElementById('kit1-sprite'), 
-        document.getElementById('kit2-sprite'), document.getElementById('kit3-sprite')
-    ];
+    const allSprites = [document.getElementById('cat-sprite'), document.getElementById('kit1-sprite'), document.getElementById('kit2-sprite'), document.getElementById('kit3-sprite')];
 
     const itemsDB = {
         fish: { name: "Fresh Fish", img: "icon_fish.png", price: 10, hunger: 30 },
@@ -280,14 +385,15 @@
     };
 
     function init() {
-        let saved = localStorage.getItem('ragdoll_save_v7');
+        let saved = localStorage.getItem('ragdoll_save_v8');
         if (saved) {
             gameState = JSON.parse(saved);
+            if(gameState.clean === undefined) gameState.clean = 100; // Legacy support
             document.querySelector('.opening-title').innerText = "WELCOME BACK";
             document.getElementById('main-cat-name').style.display = 'none'; 
             calculateTimeDrain();
         }
-        setIdleState();
+        setIdleState(); updateMeters();
     }
 
     function startGame() {
@@ -300,38 +406,60 @@
         document.getElementById('start-modal').style.display = 'none';
         
         let bgm = document.getElementById('audio-bgm');
-        if(bgm) { bgm.volume = 0.3; bgm.play().catch(e => console.log(e)); }
+        if(bgm) { bgm.volume = 0.2; bgm.play().catch(e=>console.log(e)); }
         
-        updateUI(); startFelineBrain();
+        updateMeters(); startFelineBrain();
         showReaction(`${gameState.name} entered the room.`);
     }
 
+    // --- TIME MATH ---
     function calculateTimeDrain() {
         if (!gameState.lastPlayed || !gameState.startDate) return;
-        let msPassed = Date.now() - gameState.lastPlayed;
-        let hoursPassed = msPassed / (1000 * 60 * 60);
+        let hoursPassed = (Date.now() - gameState.lastPlayed) / (1000 * 60 * 60);
         
         if (hoursPassed > 1) {
             gameState.hunger = Math.max(0, Math.floor(gameState.hunger - (hoursPassed * 4)));
             gameState.happy = Math.max(0, Math.floor(gameState.happy - (hoursPassed * 2)));
+            gameState.clean = Math.max(0, Math.floor(gameState.clean - (hoursPassed * 1.5)));
             if (!gameState.isSleeping) gameState.energy = Math.max(0, Math.floor(gameState.energy - (hoursPassed * 3)));
         }
         
-        let totalMs = Date.now() - gameState.startDate;
-        let yearsPassed = Math.floor(totalMs / (1000 * 60 * 60 * 6));
+        let yearsPassed = Math.floor((Date.now() - gameState.startDate) / (1000 * 60 * 60 * 6));
         gameState.age = 1 + yearsPassed;
+        
         checkLifeEvents();
     }
 
     function saveData() {
         gameState.lastPlayed = Date.now();
-        localStorage.setItem('ragdoll_save_v7', JSON.stringify(gameState));
+        localStorage.setItem('ragdoll_save_v8', JSON.stringify(gameState));
     }
 
-    function playAudio(id) {
-        let sound = document.getElementById(id);
-        if (sound) { sound.currentTime = 0; sound.play().catch(e => console.log(e)); }
+    // --- UPDATE DYNAMIC METERS ---
+    function updateMeters() {
+        document.getElementById('coin-display').innerText = `Coins: ${gameState.coins}`;
+        document.getElementById('age-display').innerText = `Age: ${gameState.age} Yr`;
+        
+        let mFood = document.getElementById('fill-food');
+        let mClean = document.getElementById('fill-clean');
+        let mHappy = document.getElementById('fill-happy');
+        let mEnergy = document.getElementById('fill-energy');
+
+        mFood.style.width = gameState.hunger + '%';
+        mFood.style.background = gameState.hunger < 30 ? 'rgba(255, 0, 0, 0.6)' : 'rgba(85, 239, 196, 0.5)';
+        
+        mClean.style.width = gameState.clean + '%';
+        mHappy.style.width = gameState.happy + '%';
+        mEnergy.style.width = gameState.energy + '%';
     }
+
+    function showReaction(text) { 
+        let box = document.getElementById('reaction-text');
+        box.innerText = text; box.style.opacity = '1';
+        setTimeout(() => box.style.opacity = '0', 3000);
+    }
+
+    function playAudio(id) { let s = document.getElementById(id); if (s) { s.currentTime = 0; s.play().catch(e=>{}); } }
 
     function triggerAnimation(animClass) {
         allSprites.forEach(sprite => {
@@ -341,12 +469,12 @@
         animationTimeout = setTimeout(() => { if (!gameState.isSleeping) setIdleState(); }, 2000);
     }
 
+    // --- ACTIONS ---
     function petCat() {
         if (gameState.isSleeping) return;
         gameState.happy = Math.min(100, gameState.happy + 5);
-        showReaction(`You pet ${gameState.name}. Purrr...`);
-        playAudio('audio-purr'); triggerAnimation('anim-cuddle');
-        saveData(); updateUI();
+        showReaction(`Purrr...`); playAudio('audio-purr'); triggerAnimation('anim-cuddle');
+        saveData(); updateMeters();
     }
 
     function action(type) {
@@ -355,289 +483,328 @@
             gameState.isSleeping = !gameState.isSleeping;
             if (gameState.isSleeping) {
                 showReaction("Falling asleep..."); 
-                document.getElementById('btn-sleep').innerHTML = "WAKE UP";
+                document.getElementById('text-sleep').innerHTML = "WAKE UP";
                 document.getElementById('bg-layer').style.filter = "brightness(0.2)";
                 document.getElementById('food-tray').classList.add('hidden');
                 triggerAnimation('anim-sleep');
             } else {
                 gameState.energy = Math.min(100, gameState.energy + 50);
                 showReaction("Waking up!"); 
-                document.getElementById('btn-sleep').innerHTML = "SLEEP";
+                document.getElementById('text-sleep').innerHTML = "SLEEP";
                 document.getElementById('bg-layer').style.filter = "brightness(1)";
                 setIdleState();
             }
+        } else if (type === 'play') {
+            if (gameState.energy < 15) { showAlert("Too tired to play. Let her sleep."); return; }
+            gameState.energy -= 15; gameState.happy = Math.min(100, gameState.happy + 20);
+            showReaction("Playing! 🧶"); playAudio('audio-meow'); triggerAnimation('anim-play');
+        } else if (type === 'bath') {
+            gameState.clean = 100; gameState.happy = Math.max(0, gameState.happy - 10);
+            showReaction("All clean! 🧼"); triggerAnimation('anim-play');
         }
-        saveData(); updateUI();
+        saveData(); updateMeters();
     }
 
+    // --- ROAMING ---
     function startFelineBrain() {
         clearInterval(behaviorInterval);
         behaviorInterval = setInterval(() => {
             if (gameState.isSleeping || document.getElementById('food-tray').classList.contains('hidden') === false) return;
-            
-            let chance = Math.random();
-            if (chance < 0.4) {
+            if (Math.random() < 0.4) {
                 let newX = 20 + Math.random() * 60; 
                 let currentX = parseFloat(catGroup.style.left || 50);
-                let flip = newX < currentX ? -1 : 1;
-                
-                catGroup.style.transform = `translate(-50%, -50%) scaleX(${flip})`;
+                catGroup.style.transform = `translate(-50%, -50%) scaleX(${newX < currentX ? -1 : 1})`;
                 catGroup.style.left = newX + '%';
                 triggerAnimation('anim-walk');
-            } else if (chance < 0.6) {
-                triggerAnimation('anim-groom');
-            }
+            } else if (Math.random() < 0.6) triggerAnimation('anim-groom');
         }, 5000);
     }
 
-    // --- INVENTORY & DRAG FEEDING REWORKED ---
+    // --- DRAG FEEDING ---
     let activeDrag = null;
-
-    function updateTrayUI() {
-        let tray = document.getElementById('food-tray');
-        if (tray.classList.contains('hidden')) return; // Do nothing if closed
-
-        tray.innerHTML = ""; 
-        let hasFood = false;
-        
-        Object.keys(gameState.inventory).forEach(key => {
-            if (gameState.inventory[key] > 0) {
-                hasFood = true;
-                let div = document.createElement('div');
-                div.className = 'draggable-food';
-                div.innerHTML = `<img src="${itemsDB[key].img}" onerror="this.style.display='none'"> 
-                                 <span class="food-badge">${gameState.inventory[key]}</span>`;
-                div.onmousedown = (e) => startDrag(e, key);
-                div.ontouchstart = (e) => startDrag(e, key);
-                tray.appendChild(div);
-            }
-        });
-
-        if (!hasFood) tray.innerHTML = "<div style='padding:10px;'>No food! Buy some in the Shop.</div>";
-    }
-
     function toggleFoodTray() {
         if (gameState.isSleeping) return;
         let tray = document.getElementById('food-tray');
-        if (tray.classList.contains('hidden')) {
-            tray.classList.remove('hidden');
-            updateTrayUI();
-        } else {
-            tray.classList.add('hidden');
-        }
+        if (tray.classList.contains('hidden')) { tray.classList.remove('hidden'); updateTrayUI(); }
+        else tray.classList.add('hidden');
     }
-
-    function startDrag(e, itemKey) {
+    function updateTrayUI() {
+        let tray = document.getElementById('food-tray');
+        tray.innerHTML = ""; let hasFood = false;
+        Object.keys(gameState.inventory).forEach(key => {
+            if (gameState.inventory[key] > 0) {
+                hasFood = true;
+                let div = document.createElement('div'); div.className = 'draggable-food';
+                div.innerHTML = `<img src="${itemsDB[key].img}" onerror="this.style.display='none'"> <span class="food-badge">${gameState.inventory[key]}</span>`;
+                div.onmousedown = (e) => startDrag(e, key); div.ontouchstart = (e) => startDrag(e, key);
+                tray.appendChild(div);
+            }
+        });
+        if (!hasFood) tray.innerHTML = "<div style='padding:10px;'>Empty! Buy food in Shop.</div>";
+    }
+    function startDrag(e, key) {
         e.preventDefault(); 
-        activeDrag = document.createElement('div');
-        activeDrag.className = 'flying-food';
-        activeDrag.style.backgroundImage = `url('${itemsDB[itemKey].img}')`;
-        activeDrag.dataset.key = itemKey;
+        activeDrag = document.createElement('div'); activeDrag.className = 'flying-food';
+        activeDrag.style.backgroundImage = `url('${itemsDB[key].img}')`; activeDrag.dataset.key = key;
         document.body.appendChild(activeDrag);
-
         moveDrag(e); 
-        document.addEventListener('mousemove', moveDrag);
-        document.addEventListener('touchmove', moveDrag, {passive: false});
-        document.addEventListener('mouseup', endDrag);
-        document.addEventListener('touchend', endDrag);
+        document.addEventListener('mousemove', moveDrag); document.addEventListener('touchmove', moveDrag, {passive: false});
+        document.addEventListener('mouseup', endDrag); document.addEventListener('touchend', endDrag);
     }
-
     function moveDrag(e) {
-        if(!activeDrag) return;
-        e.preventDefault(); 
-        let clientX = e.clientX || (e.touches && e.touches[0].clientX);
-        let clientY = e.clientY || (e.touches && e.touches[0].clientY);
-        activeDrag.style.left = clientX + 'px';
-        activeDrag.style.top = clientY + 'px';
+        if(!activeDrag) return; e.preventDefault(); 
+        activeDrag.style.left = (e.clientX || (e.touches && e.touches[0].clientX)) + 'px';
+        activeDrag.style.top = (e.clientY || (e.touches && e.touches[0].clientY)) + 'px';
     }
-
     function endDrag(e) {
         if(!activeDrag) return;
-        let clientX = e.clientX || (e.changedTouches && e.changedTouches[0].clientX);
-        let clientY = e.clientY || (e.changedTouches && e.changedTouches[0].clientY);
-        let catRect = catGroup.getBoundingClientRect();
+        let cx = e.clientX || (e.changedTouches && e.changedTouches[0].clientX);
+        let cy = e.clientY || (e.changedTouches && e.changedTouches[0].clientY);
+        let rect = catGroup.getBoundingClientRect();
         
-        // Checks if dropped on cat
-        if (clientX >= catRect.left && clientX <= catRect.right && clientY >= catRect.top && clientY <= catRect.bottom) {
+        if (cx >= rect.left && cx <= rect.right && cy >= rect.top && cy <= rect.bottom) {
             let key = activeDrag.dataset.key;
-            feedCat(key);
+            if (gameState.inventory[key] > 0) {
+                gameState.inventory[key]--; gameState.hunger = Math.min(100, gameState.hunger + itemsDB[key].hunger);
+                gameState.clean = Math.max(0, gameState.clean - 5); // Eating makes slight mess
+                showReaction(`Eating ${itemsDB[key].name}...`);
+                playAudio('audio-eat'); triggerAnimation('anim-eat'); 
+                updateTrayUI(); saveData(); updateMeters();
+            }
         }
-
         activeDrag.remove(); activeDrag = null;
-        document.removeEventListener('mousemove', moveDrag);
-        document.removeEventListener('touchmove', moveDrag);
-        document.removeEventListener('mouseup', endDrag);
-        document.removeEventListener('touchend', endDrag);
+        document.removeEventListener('mousemove', moveDrag); document.removeEventListener('touchmove', moveDrag);
+        document.removeEventListener('mouseup', endDrag); document.removeEventListener('touchend', endDrag);
     }
 
-    function feedCat(key) {
-        if (gameState.inventory[key] <= 0) return; // Failsafe
-        
-        gameState.inventory[key]--; // Decreases Stock!
-        gameState.hunger = Math.min(100, gameState.hunger + itemsDB[key].hunger);
-        
-        showReaction(`Eating ${itemsDB[key].name}...`);
-        playAudio('audio-eat'); 
-        triggerAnimation('anim-eat'); 
-        
-        updateTrayUI(); // Dynamically updates the numbers without closing the tray
-        saveData(); updateUI();
-    }
-
-    // --- SHOP SYSTEM ---
+    // --- SHOP ---
     function openShop() {
-        if (gameState.isSleeping) return;
-        document.getElementById('shop-coins').innerText = gameState.coins;
-        let container = document.getElementById('shop-items-container');
-        container.innerHTML = "";
-        
+        if (gameState.isSleeping) { showAlert("Wake up to shop."); return; }
+        let container = document.getElementById('shop-items-container'); container.innerHTML = "";
         Object.keys(itemsDB).forEach(key => {
-            let item = itemsDB[key];
-            let div = document.createElement('div');
-            div.className = 'shop-item';
-            div.innerHTML = `<img src="${item.img}" onerror="this.style.display='none'"><div>${item.price}c</div>`;
-            div.onclick = () => buyItem(key);
+            let i = itemsDB[key]; let div = document.createElement('div'); div.className = 'shop-item';
+            div.innerHTML = `<img src="${i.img}" onerror="this.style.display='none'"><div>${i.price}c</div>`;
+            div.onclick = () => {
+                if (gameState.coins >= i.price) {
+                    gameState.coins -= i.price; gameState.inventory[key]++;
+                    playCoinSound(); saveData(); updateMeters(); updateTrayUI();
+                } else showAlert("Not enough coins! Play Minigames.");
+            };
             container.appendChild(div);
         });
         document.getElementById('shop-modal').style.display = 'flex';
     }
 
-    function buyItem(key) {
-        let item = itemsDB[key];
-        if (gameState.coins >= item.price) {
-            gameState.coins -= item.price;
-            gameState.inventory[key]++;
-            playAudio('audio-coin'); // Vending Machine sound!
-            
-            document.getElementById('shop-coins').innerText = gameState.coins;
-            saveData(); updateUI(); updateTrayUI();
-        } else {
-            alert("Not enough coins! Play the mini-game.");
+    // --- MINIGAME ARCADE SYSTEM ---
+    let currentGame = ""; let mgTimer, mgInterval; let mgTime = 0, mgScore = 0;
+    
+    // Tower Game Variables
+    let tBlocks = []; let tCurrent; let tDir = 1; let tWidth = 100; let tSpeed = 5;
+
+    function openMiniGameHub() {
+        if (gameState.isSleeping) { showAlert("Wake up to play."); return; }
+        document.getElementById('minigame-hub').style.display = 'flex';
+    }
+    
+    function launchGame(gameID) {
+        document.getElementById('minigame-hub').style.display = 'none';
+        currentGame = gameID;
+        document.getElementById('mg-title').innerText = gameID === 'catch' ? 'CATCH THE MOUSE' : gameID === 'tower' ? 'BUILD THE TOWER' : '8x8 ICON POP';
+        document.getElementById('active-minigame-modal').style.display = 'flex';
+        document.getElementById('mg-start-btn').style.display = 'block';
+        document.getElementById('minigame-area').innerHTML = "";
+        document.getElementById('mg-time').innerText = "0";
+        document.getElementById('mg-score').innerText = "0";
+    }
+
+    function startCurrentGame() {
+        document.getElementById('mg-start-btn').style.display = 'none';
+        document.getElementById('minigame-area').innerHTML = "";
+        mgScore = 0; clearInterval(mgTimer); clearTimeout(mgInterval);
+        
+        if (currentGame === 'catch') {
+            mgTime = 15; document.getElementById('mg-time').innerText = mgTime + "s";
+            mgTimer = setInterval(() => {
+                mgTime--; document.getElementById('mg-time').innerText = mgTime + "s";
+                if (mgTime <= 0) finishMiniGame();
+            }, 1000);
+            spawnTarget();
+        } else if (currentGame === 'tower') {
+            mgTime = 0; tBlocks = []; tWidth = 100; tSpeed = 3;
+            document.getElementById('mg-time').innerText = "Stacking...";
+            document.getElementById('minigame-area').onclick = placeBlock;
+            spawnBaseBlock(); spawnMovingBlock();
+            mgTimer = setInterval(moveBlock, 20);
+        } else if (currentGame === 'puzzle') {
+            mgTime = 15; document.getElementById('mg-time').innerText = mgTime + " moves";
+            buildPuzzleGrid();
         }
     }
 
-    // --- MINI-GAME ---
-    let mgTimer, mgInterval;
-    let mgTime = 15; let mgScore = 0;
-
-    function openMiniGame() {
-        if (gameState.isSleeping) return;
-        document.getElementById('minigame-modal').style.display = 'flex';
-        document.getElementById('mg-start-btn').style.display = 'block';
-        document.getElementById('minigame-area').innerHTML = "";
-    }
-
-    function startMiniGame() {
-        mgTime = 15; mgScore = 0;
-        document.getElementById('mg-time').innerText = mgTime;
-        document.getElementById('mg-score').innerText = mgScore;
-        document.getElementById('mg-start-btn').style.display = 'none';
-        
-        clearInterval(mgInterval); clearInterval(mgTimer);
-        document.getElementById('minigame-area').innerHTML = "";
-        
-        mgTimer = setInterval(() => {
-            mgTime--; document.getElementById('mg-time').innerText = mgTime;
-            if (mgTime <= 0) endMiniGame();
-        }, 1000);
-        
-        spawnTarget();
-    }
-
-    function spawnTarget() {
-        if (mgTime <= 0) return;
-        let area = document.getElementById('minigame-area');
-        area.innerHTML = "";
-        let target = document.createElement('div');
-        target.className = 'target-obj';
-        target.innerText = "🐭";
-        target.style.left = Math.random() * (area.clientWidth - 40) + 'px';
-        target.style.top = Math.random() * (area.clientHeight - 40) + 'px';
-        
-        target.onmousedown = hitTarget;
-        target.ontouchstart = hitTarget;
-        area.appendChild(target);
-        
-        mgInterval = setTimeout(spawnTarget, 800 + Math.random() * 500);
-    }
-
-    function hitTarget(e) {
-        e.preventDefault();
-        mgScore++; document.getElementById('mg-score').innerText = mgScore;
-        clearTimeout(mgInterval); spawnTarget();
-    }
-
-    function endMiniGame() {
+    function finishMiniGame() {
         clearInterval(mgTimer); clearTimeout(mgInterval);
-        document.getElementById('minigame-area').innerHTML = `<div style="color:#fff; margin-top:100px; font-size:24px;">Time's Up!<br>Earned: ${mgScore} Coins</div>`;
+        document.getElementById('minigame-area').onclick = null;
+        document.getElementById('minigame-area').innerHTML = `<div style="color:#fff; margin-top:100px; font-size:24px;">Game Over!<br>Earned: ${mgScore} Coins</div>`;
         document.getElementById('mg-start-btn').innerText = "PLAY AGAIN";
         document.getElementById('mg-start-btn').style.display = 'block';
-        gameState.coins += mgScore;
-        gameState.energy = Math.max(0, gameState.energy - 10);
-        saveData(); updateUI();
+        gameState.coins += mgScore; gameState.energy = Math.max(0, gameState.energy - 10);
+        saveData(); updateMeters();
     }
 
-    function closeModal(id) {
-        document.getElementById(id).style.display = 'none';
-        if(id === 'minigame-modal') { clearInterval(mgTimer); clearTimeout(mgInterval); }
+    function closeActiveGame() {
+        clearInterval(mgTimer); clearTimeout(mgInterval);
+        document.getElementById('active-minigame-modal').style.display = 'none';
+        document.getElementById('minigame-hub').style.display = 'flex';
+    }
+    function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+
+    // -- Catch Mouse Logic --
+    function spawnTarget() {
+        if (mgTime <= 0) return;
+        let area = document.getElementById('minigame-area'); area.innerHTML = "";
+        let t = document.createElement('div'); t.className = 'target-obj'; t.innerText = "🐭";
+        t.style.left = Math.random() * (area.clientWidth - 40) + 'px';
+        t.style.top = Math.random() * (area.clientHeight - 40) + 'px';
+        t.onmousedown = (e) => { e.preventDefault(); mgScore+=2; document.getElementById('mg-score').innerText = mgScore; clearTimeout(mgInterval); spawnTarget(); };
+        t.ontouchstart = t.onmousedown;
+        area.appendChild(t);
+        mgInterval = setTimeout(spawnTarget, 700 + Math.random() * 400);
     }
 
+    // -- Tower Logic --
+    function spawnBaseBlock() {
+        let area = document.getElementById('minigame-area');
+        let b = document.createElement('div'); b.className = 'tower-block';
+        b.style.width = '100px'; b.style.bottom = '0px'; b.style.left = (area.clientWidth/2 - 50) + 'px';
+        area.appendChild(b); tBlocks.push({left: area.clientWidth/2 - 50, width: 100});
+    }
+    function spawnMovingBlock() {
+        let area = document.getElementById('minigame-area');
+        tCurrent = document.createElement('div'); tCurrent.className = 'tower-block';
+        tCurrent.style.width = tWidth + 'px'; tCurrent.style.bottom = (tBlocks.length * 30) + 'px';
+        tCurrent.style.left = '0px'; tDir = 1;
+        area.appendChild(tCurrent);
+        // Scroll down visually if tower gets tall
+        if(tBlocks.length > 5) area.style.transform = `translateY(${ (tBlocks.length - 5) * 30 }px)`;
+    }
+    function moveBlock() {
+        let area = document.getElementById('minigame-area');
+        let currentLeft = parseFloat(tCurrent.style.left);
+        if (currentLeft <= 0) tDir = 1;
+        if (currentLeft + tWidth >= area.clientWidth) tDir = -1;
+        tCurrent.style.left = (currentLeft + (tSpeed * tDir)) + 'px';
+    }
+    function placeBlock() {
+        let last = tBlocks[tBlocks.length - 1];
+        let currentLeft = parseFloat(tCurrent.style.left);
+        
+        let diff = currentLeft - last.left;
+        let overlap = tWidth - Math.abs(diff);
+        
+        if (overlap <= 0) { finishMiniGame(); return; } // Missed
+        
+        tWidth = overlap; // Cut block
+        let newLeft = diff > 0 ? currentLeft : last.left;
+        tCurrent.style.width = tWidth + 'px';
+        tCurrent.style.left = newLeft + 'px';
+        
+        tBlocks.push({left: newLeft, width: tWidth});
+        mgScore += 3; document.getElementById('mg-score').innerText = mgScore;
+        tSpeed += 0.5; spawnMovingBlock();
+    }
+
+    // -- 8x8 Puzzle Logic (Pop/Collapse) --
+    let pGrid = []; const pIcons = ['icon_fish.png', 'icon_croissant.png', 'icon_can.png', 'icon_milk.png'];
+    function buildPuzzleGrid() {
+        let area = document.getElementById('minigame-area');
+        area.innerHTML = '<div id="puzzle-grid"></div>';
+        let gridDiv = document.getElementById('puzzle-grid');
+        pGrid = [];
+        for(let r=0; r<8; r++) {
+            pGrid[r] = [];
+            for(let c=0; c<8; c++) {
+                let val = Math.floor(Math.random() * 4);
+                pGrid[r][c] = val;
+                let cell = document.createElement('div'); cell.className = 'puzzle-cell';
+                cell.id = `p-${r}-${c}`;
+                cell.innerHTML = `<img src="${pIcons[val]}" onerror="this.style.display='none'">`;
+                cell.onclick = () => popCell(r, c);
+                gridDiv.appendChild(cell);
+            }
+        }
+    }
+    function popCell(r, c) {
+        if(mgTime <= 0) return;
+        let val = pGrid[r][c]; if(val === -1) return;
+        let toClear = [];
+        // Simple flood fill to find adjacent matches
+        let queue = [{r:r, c:c}]; let visited = new Set();
+        while(queue.length > 0) {
+            let curr = queue.shift();
+            let key = curr.r + "," + curr.c;
+            if(visited.has(key)) continue; visited.add(key);
+            
+            if(pGrid[curr.r][curr.c] === val) {
+                toClear.push(curr);
+                if(curr.r > 0) queue.push({r: curr.r-1, c: curr.c});
+                if(curr.r < 7) queue.push({r: curr.r+1, c: curr.c});
+                if(curr.c > 0) queue.push({r: curr.r, c: curr.c-1});
+                if(curr.c < 7) queue.push({r: curr.r, c: curr.c+1});
+            }
+        }
+        
+        if(toClear.length >= 2) {
+            toClear.forEach(cell => { pGrid[cell.r][cell.c] = -1; document.getElementById(`p-${cell.r}-${cell.c}`).innerHTML = ""; });
+            mgScore += toClear.length; document.getElementById('mg-score').innerText = mgScore;
+            mgTime--; document.getElementById('mg-time').innerText = mgTime + " moves";
+            applyPuzzleGravity();
+            if(mgTime <= 0) finishMiniGame();
+        }
+    }
+    function applyPuzzleGravity() {
+        for(let c=0; c<8; c++) {
+            let emptySpaces = 0;
+            for(let r=7; r>=0; r--) {
+                if(pGrid[r][c] === -1) emptySpaces++;
+                else if(emptySpaces > 0) {
+                    pGrid[r+emptySpaces][c] = pGrid[r][c]; pGrid[r][c] = -1;
+                    document.getElementById(`p-${r+emptySpaces}-${c}`).innerHTML = `<img src="${pIcons[pGrid[r+emptySpaces][c]]}">`;
+                    document.getElementById(`p-${r}-${c}`).innerHTML = "";
+                }
+            }
+            for(let r=0; r<emptySpaces; r++) {
+                pGrid[r][c] = Math.floor(Math.random() * 4);
+                document.getElementById(`p-${r}-${c}`).innerHTML = `<img src="${pIcons[pGrid[r][c]]}">`;
+            }
+        }
+    }
+
+    // --- LIFE EVENTS ---
     function checkLifeEvents() {
         if (gameState.phase === 4) return;
-        if (gameState.age >= 16 && gameState.phase < 4) {
-            document.getElementById('kitten-modal').style.display = 'flex';
-        } else if (gameState.age >= 12 && gameState.phase < 3) {
-            gameState.phase = 3; showReaction(`Marriage Day!`);
-        } else if (gameState.age >= 8 && gameState.phase < 2) {
-            gameState.phase = 2; showReaction(`Met Akira!`);
-        }
+        if (gameState.age >= 16 && gameState.phase < 4) { document.getElementById('kitten-modal').style.display = 'flex'; } 
+        else if (gameState.age >= 12 && gameState.phase < 3) { gameState.phase = 3; showReaction(`Marriage Day!`); } 
+        else if (gameState.age >= 8 && gameState.phase < 2) { gameState.phase = 2; showReaction(`Met Akira!`); }
     }
 
     function saveKittens() {
-        gameState.kittens.k1 = document.getElementById('k1').value || "Kit1";
-        gameState.kittens.k2 = document.getElementById('k2').value || "Kit2";
-        gameState.kittens.k3 = document.getElementById('k3').value || "Kit3";
         gameState.phase = 4; document.getElementById('kitten-modal').style.display = 'none';
-        showReaction("Welcome to the family!"); saveData(); setIdleState(); updateUI();
-    }
-
-    function updateUI() {
-        document.getElementById('stat-food').innerText = gameState.hunger;
-        document.getElementById('stat-energy').innerText = gameState.energy;
-        document.getElementById('stat-happy').innerText = gameState.happy;
-        document.getElementById('stat-coins').innerText = gameState.coins;
-        let p = gameState.phase === 4 ? "Family" : "Adult";
-        document.getElementById('age-display').innerText = `${p} Era: ${gameState.age} Yr`;
-    }
-
-    function showReaction(text) { 
-        document.getElementById('reaction-text').innerText = text; 
+        showReaction("Welcome to the family!"); saveData(); setIdleState(); updateMeters();
     }
 
     function setIdleState() {
         if (gameState.phase >= 2) catSprite.src = 'akira.png';
         else catSprite.src = 'cat.png';
-        
         if (gameState.phase === 4) {
-            allSprites[1].classList.remove('hidden'); 
-            allSprites[2].classList.remove('hidden'); 
-            allSprites[3].classList.remove('hidden');
+            allSprites[1].classList.remove('hidden'); allSprites[2].classList.remove('hidden'); allSprites[3].classList.remove('hidden');
         }
-
         let anim = gameState.isSleeping ? 'anim-sleep' : 'anim-breathe';
         allSprites.forEach(sprite => {
-            if (!sprite.classList.contains('hidden')) {
-                sprite.className = `${sprite.id === 'cat-sprite' ? 'main-sprite' : 'kitten-sprite'} ${anim}`;
-            }
+            if (!sprite.classList.contains('hidden')) sprite.className = `${sprite.id === 'cat-sprite' ? 'main-sprite' : 'kitten-sprite'} ${anim}`;
         });
     }
 
-    function hardReset() {
-        if(confirm("Are you sure? This deletes ALL progress forever.")) {
-            localStorage.removeItem('ragdoll_save_v7'); location.reload();
-        }
-    }
-
+    function confirmReset() { showConfirm("Are you sure? This deletes ALL progress forever.", () => { localStorage.removeItem('ragdoll_save_v8'); location.reload(); }); }
     window.onload = init;
 </script>
 </body>
