@@ -3,52 +3,96 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ragdoll Life - Premium Edition</title>
+    <title>Ragdoll Life Simulation</title>
     <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
     <style>
-        /* --- GLOBAL & CSS BACKGROUND --- */
         body {
             margin: 0; padding: 0; background-color: #ffb6c1; color: #ff3385;
             font-family: 'VT323', monospace; display: flex; justify-content: center; align-items: center;
-            height: 100vh; user-select: none; overflow: hidden; touch-action: none;
+            height: 100vh; user-select: none; overflow: hidden; touch-action: none; font-size: 22px;
         }
         #game-container {
             width: 100%; max-width: 450px; height: 100vh; max-height: 850px;
-            background: linear-gradient(to bottom, #ffe6f0 0%, #ffb6c1 40%, #a8e6cf 40%, #dcedc1 100%);
-            position: relative; overflow: hidden; border: 4px solid #ff99cc; box-sizing: border-box;
-            transition: background 2s ease;
+            background-color: #1a1a24; position: relative; overflow: hidden; 
+            border: 4px solid #ff99cc; box-sizing: border-box;
         }
-        #game-container.night-mode {
-            background: linear-gradient(to bottom, #1a1a2e 0%, #16213e 40%, #0f3460 40%, #2a3d66 100%);
+        
+        #bg-layer {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background-image: url('my_room.jpg'); 
+            background-size: cover; background-position: center; z-index: 1;
+            transition: filter 1s ease;
         }
 
-        /* --- UI ELEMENTS --- */
         .cute-panel {
-            background: rgba(255, 255, 255, 0.9); border: 4px solid #ff99cc;
+            background: rgba(255, 255, 255, 0.85); border: 4px solid #ff99cc;
             border-radius: 16px; box-shadow: 0 4px 0 #ff99cc; color: #ff3385;
         }
-        .night-mode .cute-panel {
-            background: rgba(20, 20, 40, 0.9); border-color: #4a4e69; 
-            box-shadow: 0 4px 0 #4a4e69; color: #c9ada7;
+
+        #sprite-layer {
+            position: absolute; top: 50%; left: 50%; width: 220px; height: 220px; 
+            z-index: 2; transform: translate(-50%, -40%);
+        }
+        .main-sprite {
+            width: 100%; height: 100%; object-fit: contain;
+            position: absolute; z-index: 3; image-rendering: pixelated;
+            transition: filter 0.5s ease, transform 0.3s ease;
+        }
+        .kitten-sprite {
+            width: 80px; height: 80px; object-fit: contain;
+            position: absolute; z-index: 4; image-rendering: pixelated;
+        }
+        #kit1-sprite { bottom: -10px; left: -40px; }
+        #kit2-sprite { bottom: 10px; right: -30px; }
+        #kit3-sprite { bottom: -25px; left: 60px; z-index: 5; }
+        .hidden { display: none !important; }
+
+        .anim-play { animation: bounce 0.4s infinite alternate ease-in-out; }
+        .anim-cuddle { filter: drop-shadow(0 0 15px #ff6699); transform: scale(1.05); }
+        .anim-eat { animation: bounce 0.2s infinite alternate ease-in-out; }
+        .anim-sleep { filter: brightness(0.4); }
+
+        @keyframes bounce { 
+            0% { transform: translateY(0); } 
+            100% { transform: translateY(-30px); } 
         }
 
         #hud-top {
             position: absolute; top: 15px; left: 5%; width: 90%;
             display: flex; flex-direction: column; align-items: center; z-index: 3; 
-            font-size: 22px; font-weight: bold; text-align: center;
+            font-size: 26px; font-weight: bold; text-align: center;
+            text-shadow: 2px 2px 0px #fff;
         }
-        .stat-bar { display: flex; gap: 15px; margin-bottom: 5px; }
-        #age-display { font-size: 18px; color: #ff66a3; }
-        .night-mode #age-display { color: #9a8c98; }
+        #age-display { font-size: 20px; color: #ff66a3; }
 
         #reaction-text {
-            position: absolute; bottom: 270px; left: 50%; transform: translateX(-50%);
+            position: absolute; bottom: 250px; left: 50%; transform: translateX(-50%);
             text-align: center; width: 90%; z-index: 3; font-size: 26px; color: #ff3385;
             text-shadow: 2px 2px 0 #fff; transition: all 0.3s ease;
         }
-        .night-mode #reaction-text { color: #f2e9e4; text-shadow: 2px 2px 0 #222; }
 
-        /* --- CONTROLS --- */
+        #food-tray {
+            position: absolute; bottom: 130px; left: 50%; transform: translateX(-50%);
+            display: flex; gap: 15px; padding: 10px 20px; z-index: 5;
+            background: rgba(255, 255, 255, 0.9); border-radius: 16px;
+            border: 4px solid #ff99cc; box-shadow: 0 4px 0 #ff99cc;
+            transition: opacity 0.3s, transform 0.3s;
+        }
+        .draggable-food {
+            width: 55px; height: 55px; cursor: grab; padding: 5px;
+            background: rgba(255, 182, 193, 0.4); border-radius: 12px;
+            border: 2px solid #ff99cc; display: flex; justify-content: center; align-items: center;
+        }
+        .draggable-food img { width: 100%; height: 100%; object-fit: contain; pointer-events: none; }
+        .draggable-food:active { cursor: grabbing; transform: scale(0.9); }
+        
+        .flying-food {
+            position: fixed; width: 70px; height: 70px; z-index: 9999;
+            pointer-events: none; transform: translate(-50%, -50%); 
+            background-size: contain; background-repeat: no-repeat; background-position: center;
+            filter: drop-shadow(0 5px 10px rgba(0,0,0,0.4));
+        }
+
         #controls {
             position: absolute; bottom: 15px; left: 5%; width: 90%; z-index: 3;
         }
@@ -56,7 +100,7 @@
         button {
             flex: 1; padding: 12px 5px; border: 3px solid #ff99cc; border-radius: 12px;
             background-color: #ffb6c1; color: #ffffff; cursor: pointer; 
-            font-size: 22px; font-family: 'VT323', monospace; text-transform: uppercase; 
+            font-size: 24px; font-family: 'VT323', monospace; text-transform: uppercase; 
             box-shadow: 0 4px 0 #ff99cc; transition: transform 0.1s, box-shadow 0.1s;
             text-shadow: 2px 2px 0px #ff66a3;
         }
@@ -65,28 +109,10 @@
         .btn-action { background-color: #a8e6cf; border-color: #88d4b4; box-shadow: 0 4px 0 #88d4b4; text-shadow: 2px 2px 0 #6ebf9f; }
         .btn-danger { background-color: #ff8b94; border-color: #e6737b; box-shadow: 0 4px 0 #e6737b; }
 
-        /* --- SHOP & TRAY --- */
-        #shop-tray {
-            position: absolute; bottom: 150px; left: 5%; width: 90%;
-            display: flex; flex-direction: column; padding: 15px; z-index: 5;
-            box-sizing: border-box; transition: opacity 0.3s;
-        }
-        .shop-items { display: flex; justify-content: space-around; margin-top: 10px; }
-        .shop-item {
-            display: flex; flex-direction: column; align-items: center; cursor: pointer;
-            padding: 5px; border-radius: 8px; transition: background 0.2s;
-        }
-        .shop-item:hover { background: rgba(255, 153, 204, 0.3); }
-        .item-icon { font-size: 32px; margin-bottom: 5px; }
-        .item-cost { font-size: 16px; font-weight: bold; }
-
-        /* --- MODALS --- */
         .modal {
             display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(255, 230, 240, 0.95); z-index: 10;
-            justify-content: center; align-items: center;
+            background: rgba(255, 230, 240, 0.95); z-index: 10; justify-content: center; align-items: center;
         }
-        .night-mode .modal { background: rgba(20, 20, 30, 0.95); }
         .modal-content { padding: 30px; width: 85%; text-align: center; box-sizing: border-box; }
         .opening-title { font-size: 48px; margin-bottom: 5px; color: #ff3385; text-shadow: 2px 2px 0 #ffb6c1; }
         .opening-subtitle { font-size: 22px; margin-bottom: 25px; color: #ff66a3; }
@@ -97,68 +123,41 @@
             color: #ff3385; font-family: 'VT323', monospace; font-size: 24px;
             text-align: center; box-sizing: border-box; outline: none;
         }
-        
-        /* --- CANVAS RENDERING --- */
-        #render-engine {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 2; pointer-events: none;
-        }
-        
-        /* --- CSS WEATHER/NIGHT --- */
-        .stars {
-            position: absolute; width: 4px; height: 4px; background: white; border-radius: 50%;
-            box-shadow: 50px 50px white, 100px 20px white, 150px 80px white, 200px 10px white, 250px 60px white, 300px 30px white, 350px 90px white, 400px 40px white;
-            animation: twinkle 2s infinite alternate; opacity: 0; transition: opacity 2s; z-index: 1;
-        }
-        .night-mode .stars { opacity: 1; }
-        @keyframes twinkle { 0% { opacity: 0.5; } 100% { opacity: 1; } }
     </style>
 </head>
 <body>
 
+<audio id="audio-bgm" src="bgm.mp3" loop></audio>
+<audio id="audio-meow" src="meow.mp3"></audio>
+<audio id="audio-eat" src="eat.mp3"></audio>
+
 <div id="game-container">
-    <div class="stars"></div>
+    <div id="bg-layer"></div>
     
-    <canvas id="render-engine"></canvas>
+    <div id="sprite-layer">
+        <img id="cat-sprite" class="main-sprite" src="cat.png" onerror="this.src='cat.png'">
+        
+        <img id="kit1-sprite" class="kitten-sprite hidden" src="kitten1.png" onerror="this.src='cat.png'">
+        <img id="kit2-sprite" class="kitten-sprite hidden" src="kitten2.png" onerror="this.src='cat.png'">
+        <img id="kit3-sprite" class="kitten-sprite hidden" src="kitten3.png" onerror="this.src='cat.png'">
+    </div>
 
     <div id="hud-top">
-        <div class="stat-bar">
-            <span id="stat-food">🍖 100</span>
-            <span id="stat-energy">⚡ 100</span>
-            <span id="stat-happy">💖 100</span>
-        </div>
-        <div class="stat-bar" style="font-size: 18px;">
-            <span id="stat-clean">🧼 100</span>
-            <span id="stat-coins">🪙 50</span>
-        </div>
+        <div>Food: <span id="stat-food">100</span> | Energy: <span id="stat-energy">100</span></div>
         <div id="age-display">Adult Era - Day 1</div>
     </div>
 
     <div id="reaction-text">Waiting...</div>
 
-    <div id="shop-tray" class="cute-panel" style="display: none;">
-        <div style="text-align: center; font-size: 20px; border-bottom: 2px solid #ff99cc; padding-bottom: 5px;">Marketplace</div>
-        <div class="shop-items">
-            <div class="shop-item" onclick="buyItem('Fish', 30, 10, 'food')">
-                <span class="item-icon">🐟</span><span class="item-cost">10 🪙</span>
-            </div>
-            <div class="shop-item" onclick="buyItem('Canned Food', 50, 20, 'food')">
-                <span class="item-icon">🥫</span><span class="item-cost">20 🪙</span>
-            </div>
-            <div class="shop-item" onclick="buyItem('Yarn Toy', 30, 15, 'toy')">
-                <span class="item-icon">🧶</span><span class="item-cost">15 🪙</span>
-            </div>
-        </div>
-        <button style="margin-top: 10px; font-size: 18px; padding: 5px;" class="btn-danger" onclick="toggleShop()">Close Shop</button>
-    </div>
+    <div id="food-tray" class="hidden"></div>
 
     <div id="controls">
         <div class="btn-row">
-            <button onclick="toggleShop()">SHOP 🛒</button>
+            <button onclick="toggleFoodTray()">FEED 🍽️</button>
             <button class="btn-action" onclick="action('play')">PLAY 🧶</button>
             <button class="btn-action" onclick="action('cuddle')">CUDDLE 💖</button>
         </div>
         <div class="btn-row">
-            <button class="btn-action" onclick="action('bath')">BATH 🧼</button>
             <button onclick="action('sleep')" id="btn-sleep">SLEEP 💤</button>
             <button class="btn-danger" onclick="hardReset()">RESET ⚠️</button>
         </div>
@@ -167,7 +166,7 @@
     <div id="start-modal" class="modal" style="display: flex;">
         <div class="modal-content cute-panel">
             <div class="opening-title">RAGDOLL LIFE</div>
-            <div class="opening-subtitle">Premium Edition ✨</div>
+            <div class="opening-subtitle">Virtual Pet Sim ✨</div>
             <input type="text" id="main-cat-name" placeholder="Name your cat...">
             <button style="width: 100%; margin-top: 15px;" class="btn-action" onclick="startGame()">START</button>
         </div>
@@ -185,52 +184,100 @@
 </div>
 
 <script>
-    // --- AUDIO SYNTHESIZER (No MP3s Needed) ---
-    const AudioContext = window.AudioContext || window.webkitAudioContext;
-    let audioCtx;
-    
-    function initAudio() {
-        if (!audioCtx) audioCtx = new AudioContext();
-    }
-    
-    function playTone(freq, type, duration, vol=0.1) {
-        if (!audioCtx) return;
-        let osc = audioCtx.createOscillator();
-        let gain = audioCtx.createGain();
-        osc.type = type; osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-        gain.gain.setValueAtTime(vol, audioCtx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
-        osc.connect(gain); gain.connect(audioCtx.destination);
-        osc.start(); osc.stop(audioCtx.currentTime + duration);
-    }
-    
-    function sfxMeow() { playTone(600, 'sine', 0.2); setTimeout(()=>playTone(800, 'sine', 0.4), 100); }
-    function sfxEat() { playTone(300, 'square', 0.1); setTimeout(()=>playTone(250, 'square', 0.1), 150); }
-    function sfxCoin() { playTone(1200, 'sine', 0.1, 0.2); setTimeout(()=>playTone(1600, 'sine', 0.3, 0.2), 100); }
-    function sfxError() { playTone(150, 'sawtooth', 0.3); }
-
-    // --- GAME LOGIC & STATE ---
     let gameState = {
-        name: "Kitty", phase: 1, age: 1,
-        hunger: 100, energy: 100, happy: 100, clean: 100, coins: 50,
+        name: "Kitty", phase: 1, age: 1, hunger: 100, energy: 100,
         isSleeping: false, startDate: null, lastPlayed: null,
         kittens: { k1: "Kit1", k2: "Kit2", k3: "Kit3" }
     };
 
+    let animationTimeout;
+    const catSprite = document.getElementById('cat-sprite');
+    const kitten1 = document.getElementById('kit1-sprite');
+    const kitten2 = document.getElementById('kit2-sprite');
+    const kitten3 = document.getElementById('kit3-sprite');
+    const allSprites = [catSprite, kitten1, kitten2, kitten3];
+
+    let activeDrag = null;
+
+    function startDrag(e, foodName, hungerValue, imgSrc) {
+        if (gameState.isSleeping) return;
+        e.preventDefault(); 
+        
+        activeDrag = document.createElement('div');
+        activeDrag.className = 'flying-food';
+        activeDrag.style.backgroundImage = "url('" + imgSrc + "')";
+        activeDrag.dataset.name = foodName;
+        activeDrag.dataset.value = hungerValue;
+        document.body.appendChild(activeDrag);
+
+        moveDrag(e); 
+        document.addEventListener('mousemove', moveDrag);
+        document.addEventListener('touchmove', moveDrag, {passive: false});
+        document.addEventListener('mouseup', endDrag);
+        document.addEventListener('touchend', endDrag);
+    }
+
+    function moveDrag(e) {
+        if(!activeDrag) return;
+        e.preventDefault(); 
+        let clientX = e.clientX || (e.touches && e.touches[0].clientX);
+        let clientY = e.clientY || (e.touches && e.touches[0].clientY);
+        activeDrag.style.left = clientX + 'px';
+        activeDrag.style.top = clientY + 'px';
+    }
+
+    function endDrag(e) {
+        if(!activeDrag) return;
+        let clientX = e.clientX || (e.changedTouches && e.changedTouches[0].clientX);
+        let clientY = e.clientY || (e.changedTouches && e.changedTouches[0].clientY);
+        let catRect = document.getElementById('sprite-layer').getBoundingClientRect();
+        
+        if (clientX >= catRect.left && clientX <= catRect.right && clientY >= catRect.top && clientY <= catRect.bottom) {
+            feedCat(activeDrag.dataset.name, parseInt(activeDrag.dataset.value));
+        }
+
+        activeDrag.remove(); activeDrag = null;
+        document.removeEventListener('mousemove', moveDrag);
+        document.removeEventListener('touchmove', moveDrag);
+        document.removeEventListener('mouseup', endDrag);
+        document.removeEventListener('touchend', endDrag);
+    }
+
+    function toggleFoodTray() {
+        if (gameState.isSleeping) { showReaction("Wake her up first."); return; }
+        let tray = document.getElementById('food-tray');
+        tray.innerHTML = ""; 
+        
+        let foods = (gameState.phase === 4) 
+            ? [{n: "Warm Milk", v: 20, src: "icon_milk.png"}, {n: "Kitten Mash", v: 25, src: "icon_mash.png"}]
+            : [{n: "Fish", v: 30, src: "icon_fish.png"}, {n: "Croissant", v: 20, src: "icon_croissant.png"}, {n: "Can", v: 25, src: "icon_can.png"}];
+
+        foods.forEach(f => {
+            let div = document.createElement('div');
+            div.className = 'draggable-food';
+            let img = document.createElement('img');
+            img.src = f.src;
+            img.onerror = function() { this.style.display='none'; };
+            div.appendChild(img);
+            div.onmousedown = (e) => startDrag(e, f.n, f.v, f.src);
+            div.ontouchstart = (e) => startDrag(e, f.n, f.v, f.src);
+            tray.appendChild(div);
+        });
+        tray.classList.toggle('hidden');
+    }
+
     function init() {
-        let saved = localStorage.getItem('ragdoll_save_v2');
+        let saved = localStorage.getItem('ragdoll_save_v4');
         if (saved) {
             gameState = JSON.parse(saved);
             document.querySelector('.opening-title').innerText = "WELCOME BACK";
             document.getElementById('main-cat-name').style.display = 'none'; 
             calculateTimeDrain();
         }
-        setupCanvas();
-        requestAnimationFrame(renderLoop);
+        setIdleState();
     }
 
     function startGame() {
-        initAudio();
         let nameInput = document.getElementById('main-cat-name');
         if (nameInput.style.display !== 'none' && nameInput.value.trim() !== "") {
             gameState.name = nameInput.value;
@@ -238,13 +285,16 @@
         }
         gameState.lastPlayed = Date.now();
         document.getElementById('start-modal').style.display = 'none';
-        sfxCoin(); updateUI(); checkTimeOfDay();
-        showReaction(`${gameState.name} is exploring.`);
+        
+        let bgm = document.getElementById('audio-bgm');
+        if(bgm) { bgm.volume = 0.4; bgm.play().catch(e => console.log(e)); }
+        
+        updateUI(); showReaction(`${gameState.name} is exploring.`);
     }
 
     function hardReset() {
-        if(confirm("Are you sure? This deletes ALL progress, coins, and kittens forever.")) {
-            localStorage.removeItem('ragdoll_save_v2');
+        if(confirm("Are you sure? This deletes ALL progress forever.")) {
+            localStorage.removeItem('ragdoll_save_v4');
             location.reload();
         }
     }
@@ -256,90 +306,72 @@
         
         if (hoursPassed > 1) {
             gameState.hunger = Math.max(0, Math.floor(gameState.hunger - (hoursPassed * 4)));
-            gameState.clean = Math.max(0, Math.floor(gameState.clean - (hoursPassed * 2)));
-            gameState.happy = Math.max(0, Math.floor(gameState.happy - (hoursPassed * 3)));
             if (!gameState.isSleeping) gameState.energy = Math.max(0, Math.floor(gameState.energy - (hoursPassed * 3)));
         }
         
         if (gameState.startDate) {
             let totalDays = Math.floor((Date.now() - gameState.startDate) / (1000 * 60 * 60 * 24)) + 1;
-            if (totalDays > gameState.age) {
-                gameState.age = totalDays;
-                gameState.coins += 20; // Daily reward
-            }
+            if (totalDays > gameState.age) gameState.age = totalDays;
         }
         checkLifeEvents();
     }
 
     function saveData() {
         gameState.lastPlayed = Date.now();
-        localStorage.setItem('ragdoll_save_v2', JSON.stringify(gameState));
+        localStorage.setItem('ragdoll_save_v4', JSON.stringify(gameState));
     }
 
-    // --- ACTIONS & SHOP ---
+    function playAudio(id) {
+        let sound = document.getElementById(id);
+        if (sound) { sound.currentTime = 0; sound.play().catch(e => console.log(e)); }
+    }
+
+    function triggerAnimation(animationClass) {
+        allSprites.forEach(sprite => {
+            if (!sprite.classList.contains('hidden')) {
+                sprite.className = `kitten-sprite ${animationClass}`;
+                if (sprite.id === 'cat-sprite') sprite.className = `main-sprite ${animationClass}`;
+            }
+        });
+        clearTimeout(animationTimeout);
+        animationTimeout = setTimeout(() => {
+            if (!gameState.isSleeping) setIdleState();
+        }, 2000);
+    }
+
+    function feedCat(foodName, hungerValue) {
+        gameState.hunger = Math.min(100, gameState.hunger + hungerValue);
+        showReaction(`Eating ${foodName}...`);
+        playAudio('audio-eat');
+        triggerAnimation('anim-eat'); 
+        document.getElementById('food-tray').classList.add('hidden'); 
+        saveData(); updateUI();
+    }
+
     function action(type) {
-        initAudio();
         if (gameState.isSleeping && type !== 'sleep') { showReaction("Shh... sleeping."); return; }
-        
         calculateTimeDrain();
 
         if (type === 'play') {
-            if (gameState.energy < 15) { showReaction("Too tired to play."); sfxError(); return; }
-            gameState.energy -= 15; gameState.happy = Math.min(100, gameState.happy + 20);
-            gameState.coins += Math.floor(Math.random() * 5) + 1; // Earn coins
-            showReaction("Playing! Found some coins! 🪙"); sfxMeow();
-            animState = 'play'; setTimeout(()=> animState = 'idle', 2000);
-            
+            if (gameState.energy < 15) { showReaction("Too tired to play."); return; }
+            gameState.energy -= 15;
+            showReaction("Playing! 🧶"); playAudio('audio-meow'); triggerAnimation('anim-play');
         } else if (type === 'cuddle') {
-            gameState.happy = Math.min(100, gameState.happy + 15);
-            showReaction("Purring happily. 💖"); sfxMeow();
-            animState = 'cuddle'; setTimeout(()=> animState = 'idle', 2000);
-
-        } else if (type === 'bath') {
-            gameState.clean = 100; gameState.happy = Math.max(0, gameState.happy - 10);
-            showReaction("All clean! But annoyed. 🧼"); sfxEat();
-            animState = 'play'; setTimeout(()=> animState = 'idle', 1000);
-
+            showReaction("Purring happily. 💖"); triggerAnimation('anim-cuddle');
         } else if (type === 'sleep') {
             gameState.isSleeping = !gameState.isSleeping;
             if (gameState.isSleeping) {
                 showReaction("Falling asleep... 💤"); document.getElementById('btn-sleep').innerHTML = "WAKE";
-                document.getElementById('game-container').classList.add('night-mode');
+                document.getElementById('bg-layer').style.filter = "brightness(0.3)";
+                triggerAnimation('anim-sleep');
             } else {
                 gameState.energy = Math.min(100, gameState.energy + 50);
                 showReaction("Waking up! ☀️"); document.getElementById('btn-sleep').innerHTML = "SLEEP 💤";
-                checkTimeOfDay();
+                document.getElementById('bg-layer').style.filter = "brightness(1)";
+                setIdleState();
             }
         }
         saveData(); updateUI();
-    }
-
-    function toggleShop() {
-        initAudio();
-        if (gameState.isSleeping) { showReaction("Wake up to shop."); return; }
-        let tray = document.getElementById('shop-tray');
-        tray.style.display = tray.style.display === 'none' ? 'flex' : 'none';
-    }
-
-    function buyItem(name, statBoost, cost, type) {
-        if (gameState.coins < cost) { showReaction("Not enough coins! Play to earn."); sfxError(); return; }
-        gameState.coins -= cost;
-        if (type === 'food') {
-            gameState.hunger = Math.min(100, gameState.hunger + statBoost);
-            showReaction(`Ate ${name}. Yum!`); sfxEat();
-            animState = 'eat'; setTimeout(()=> animState = 'idle', 2000);
-        } else if (type === 'toy') {
-            gameState.happy = Math.min(100, gameState.happy + statBoost);
-            showReaction(`Played with ${name}!`); sfxMeow();
-            animState = 'play'; setTimeout(()=> animState = 'idle', 2000);
-        }
-        toggleShop(); saveData(); updateUI(); sfxCoin();
-    }
-
-    function checkTimeOfDay() {
-        let hour = new Date().getHours();
-        if (hour >= 19 || hour <= 6) document.getElementById('game-container').classList.add('night-mode');
-        else document.getElementById('game-container').classList.remove('night-mode');
     }
 
     function checkLifeEvents() {
@@ -358,111 +390,32 @@
         gameState.kittens.k2 = document.getElementById('k2').value || "Kit2";
         gameState.kittens.k3 = document.getElementById('k3').value || "Kit3";
         gameState.phase = 4; document.getElementById('kitten-modal').style.display = 'none';
-        showReaction("Welcome to the family!"); saveData(); updateUI();
+        showReaction("Welcome to the family!"); saveData(); setIdleState(); updateUI();
     }
 
     function updateUI() {
-        document.getElementById('stat-food').innerText = `🍖 ${gameState.hunger}`;
-        document.getElementById('stat-energy').innerText = `⚡ ${gameState.energy}`;
-        document.getElementById('stat-happy').innerText = `💖 ${gameState.happy}`;
-        document.getElementById('stat-clean').innerText = `🧼 ${gameState.clean}`;
-        document.getElementById('stat-coins').innerText = `🪙 ${gameState.coins}`;
+        document.getElementById('stat-food').innerText = gameState.hunger;
+        document.getElementById('stat-energy').innerText = gameState.energy;
         let p = gameState.phase === 4 ? "Family" : "Adult";
         document.getElementById('age-display').innerText = `${p} Era - Day ${gameState.age}`;
     }
     function showReaction(text) { document.getElementById('reaction-text').innerText = text; }
 
-    // --- CANVAS GRAPHICS ENGINE (Zero External Files) ---
-    const canvas = document.getElementById('render-engine');
-    const ctx = canvas.getContext('2d');
-    let animState = 'idle'; // idle, play, eat, cuddle
-    let frameTimer = 0;
-
-    function setupCanvas() {
-        canvas.width = document.getElementById('game-container').clientWidth;
-        canvas.height = document.getElementById('game-container').clientHeight;
-    }
-
-    // A 10x10 Matrix representing a cute Cat Sprite
-    // 0=Clear, 1=Outline, 2=Body(White), 3=Accent(Pink/Brown), 4=Eye
-    const catMatrix = [
-        [0,1,1,0,0,0,0,1,1,0],
-        [1,3,3,1,0,0,1,3,3,1],
-        [1,3,2,2,1,1,2,2,3,1],
-        [1,2,4,2,2,2,2,4,2,1],
-        [1,2,2,2,3,3,2,2,2,1],
-        [0,1,2,2,2,2,2,2,1,0],
-        [0,1,2,2,2,2,2,2,1,0],
-        [1,3,3,2,2,2,2,3,3,1],
-        [1,3,3,1,2,2,1,3,3,1],
-        [0,1,1,0,1,1,0,1,1,0]
-    ];
-
-    function drawPixelMatrix(matrix, startX, startY, pixelSize, palette) {
-        for (let r = 0; r < matrix.length; r++) {
-            for (let c = 0; c < matrix[r].length; c++) {
-                let val = matrix[r][c];
-                if (val !== 0) {
-                    ctx.fillStyle = palette[val];
-                    ctx.fillRect(startX + (c * pixelSize), startY + (r * pixelSize), pixelSize, pixelSize);
-                }
-            }
-        }
-    }
-
-    function renderLoop() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        frameTimer++;
+    function setIdleState() {
+        if (gameState.phase >= 2) catSprite.src = 'akira.png';
+        else catSprite.src = 'cat.png';
         
-        let cx = canvas.width / 2 - 50;
-        let cy = canvas.height / 2;
-        
-        // Animation Physics Math
-        let bounceOffset = 0;
-        if (animState === 'play') bounceOffset = Math.sin(frameTimer * 0.2) * 20;
-        if (animState === 'eat') bounceOffset = Math.sin(frameTimer * 0.5) * 5;
-        if (animState === 'idle') bounceOffset = Math.sin(frameTimer * 0.05) * 3;
-        
-        if (gameState.isSleeping) {
-            ctx.save();
-            ctx.translate(cx + 50, cy + 50);
-            ctx.rotate(Math.PI / 2); // Sleep on side
-            ctx.translate(-(cx + 50), -(cy + 50));
-            bounceOffset = Math.sin(frameTimer * 0.03) * 5; // Slow breathing
-        }
-
-        // Draw Main Cat (Ragdoll Colors)
-        const ragdollPalette = {1: '#2d3436', 2: '#dfe6e9', 3: '#636e72', 4: '#74b9ff'};
-        drawPixelMatrix(catMatrix, cx, cy + bounceOffset, 10, ragdollPalette);
-
-        // Draw Akira if Phase 2+
-        if (gameState.phase >= 2) {
-            const akiraPalette = {1: '#2d3436', 2: '#ffeaa7', 3: '#fdcb6e', 4: '#55efc4'};
-            drawPixelMatrix(catMatrix, cx + 70, cy + 20 + bounceOffset, 8, akiraPalette);
-        }
-
-        // Draw Kittens if Phase 4
         if (gameState.phase === 4) {
-            const kitPalettes = [
-                {1: '#2d3436', 2: '#ffffff', 3: '#b2bec3', 4: '#74b9ff'},
-                {1: '#2d3436', 2: '#ffeaa7', 3: '#e17055', 4: '#55efc4'},
-                {1: '#2d3436', 2: '#dfe6e9', 3: '#2d3436', 4: '#74b9ff'}
-            ];
-            drawPixelMatrix(catMatrix, cx - 40, cy + 60 + bounceOffset, 5, kitPalettes[0]);
-            drawPixelMatrix(catMatrix, cx + 40, cy + 80 + bounceOffset, 5, kitPalettes[1]);
-            drawPixelMatrix(catMatrix, cx + 100, cy + 60 + bounceOffset, 5, kitPalettes[2]);
-        }
-        
-        if (gameState.isSleeping) ctx.restore();
-
-        // Hearts Animation
-        if (animState === 'cuddle') {
-            ctx.fillStyle = '#ff7675';
-            ctx.font = '30px Arial';
-            ctx.fillText('💖', cx + 30, cy - 20 + (Math.sin(frameTimer * 0.1) * 10));
+            kitten1.classList.remove('hidden'); kitten2.classList.remove('hidden'); kitten3.classList.remove('hidden');
         }
 
-        requestAnimationFrame(renderLoop);
+        let anim = gameState.isSleeping ? 'anim-sleep' : '';
+        allSprites.forEach(sprite => {
+            if (!sprite.classList.contains('hidden')) {
+                sprite.className = `kitten-sprite ${anim}`;
+                if (sprite.id === 'cat-sprite') sprite.className = `main-sprite ${anim}`;
+            }
+        });
     }
 
     window.onload = init;
