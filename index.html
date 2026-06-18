@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Ragdoll Life - Complete Journey</title>
+    <title>Ragdoll Life - Perfected Journey</title>
     <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
     <style>
-        /* --- CORE SETUP --- */
+        /* --- CORE CONFIGURATION --- */
         body {
             margin: 0; padding: 0; background-color: #000;
             font-family: 'VT323', monospace; display: flex; justify-content: center; align-items: center;
@@ -30,176 +30,161 @@
         }
 
         .glass-panel {
-            background: rgba(15, 15, 25, 0.85); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
-            border: 2px solid rgba(255, 255, 255, 0.2); border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5); color: #fff; text-shadow: 1px 1px 0 #000;
+            background: rgba(15, 15, 25, 0.9); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.25); border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.7); color: #fff; text-shadow: 1px 1px 0 #000;
         }
 
-        /* --- WEATHER (Rain for the ending) --- */
-        #weather-layer {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            pointer-events: none; z-index: 5; display: none; overflow: hidden;
-        }
-        .rain-drop {
-            position: absolute; background: rgba(255, 255, 255, 0.4); width: 2px; height: 30px;
-            animation: rainFall linear infinite;
-        }
+        /* --- WEATHER EFFECTS --- */
+        #weather-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 5; display: none; overflow: hidden; }
+        .rain-drop { position: absolute; background: rgba(255, 255, 255, 0.4); width: 2px; height: 30px; animation: rainFall linear infinite; }
         @keyframes rainFall { to { transform: translateY(100vh); } }
 
-        /* --- SPRITE LAYER & DRAGGING KITTENS --- */
+        /* --- HEART PARTICLES --- */
+        .heart-particle {
+            position: absolute; color: #ff6699; font-size: 24px; pointer-events: none; z-index: 99;
+            animation: floatUpHeart 1.5s forwards ease-out; text-shadow: 1px 1px 2px #000;
+        }
+        @keyframes floatUpHeart {
+            0% { transform: translateY(0) scale(0.5); opacity: 1; }
+            100% { transform: translateY(-80px) scale(1.2); opacity: 0; }
+        }
+
+        /* --- MULTI-SPRITE SYSTEM --- */
         #cat-group {
-            position: absolute; top: 55%; left: 50%; width: 200px; height: 200px; 
-            z-index: 2; transform: translate(-50%, -50%); transition: left 3s linear; cursor: pointer;
+            position: absolute; top: 60%; left: 50%; width: 320px; height: 180px; 
+            z-index: 2; transform: translate(-50%, -50%); transition: left 2.5s cubic-bezier(0.25, 1, 0.5, 1);
+            display: flex; justify-content: center; align-items: flex-end; gap: 10px;
         }
-        .main-sprite {
-            width: 100%; height: 100%; object-fit: contain; position: absolute; z-index: 3; 
-            image-rendering: pixelated; transform-origin: bottom center; transition: filter 0.5s ease, opacity 3s ease;
-        }
+        .sprite-wrap { position: relative; width: 130px; height: 130px; display: flex; justify-content: center; align-items: flex-end; }
+        .main-sprite { width: 100%; height: 100%; object-fit: contain; image-rendering: pixelated; transform-origin: bottom center; transition: all 0.5s ease; }
+        
         .kitten-sprite {
-            width: 70px; height: 70px; object-fit: contain; position: absolute; cursor: grab;
-            z-index: 4; image-rendering: pixelated; transform-origin: bottom center; transition: opacity 3s ease;
+            width: 55px; height: 55px; object-fit: contain; position: absolute; cursor: grab;
+            z-index: 10; image-rendering: pixelated; transform-origin: bottom center; transition: opacity 2s ease;
         }
-        .kitten-sprite:active { cursor: grabbing; }
-        #kit1-sprite { bottom: -10px; left: -30px; }
-        #kit2-sprite { bottom: 10px; right: -20px; }
-        #kit3-sprite { bottom: -25px; left: 50px; z-index: 5; }
-        .hidden { display: none !important; }
+        #kit1-sprite { bottom: -20px; left: -20px; }
+        #kit2-sprite { bottom: 0px; left: 40px; }
+        #kit3-sprite { bottom: -15px; right: -20px; }
 
-        /* --- ANIMATIONS --- */
+        /* --- REWORKED GAME ANIMATIONS --- */
         .anim-breathe { animation: breathe 3s infinite ease-in-out; }
-        .anim-walk { animation: walk 0.5s infinite alternate ease-in-out; }
-        .anim-groom { animation: groom 1s infinite alternate ease-in-out; }
-        .anim-play { animation: bounce 0.4s infinite alternate ease-in-out; }
-        .anim-cuddle { filter: drop-shadow(0 0 20px #ff6699); transform: scale(1.05); }
-        .anim-eat { animation: bounce 0.2s infinite alternate ease-in-out; }
-        .anim-sleep { filter: brightness(0.4); animation: breathe 4s infinite ease-in-out; }
+        .anim-walk { animation: walk 0.4s infinite alternate ease-in-out; }
+        .anim-groom { animation: groom 0.8s infinite alternate ease-in-out; }
+        .anim-play { animation: bounce 0.3s infinite alternate ease-in-out; }
+        .anim-sleep { filter: brightness(0.35); animation: breathe 4s infinite ease-in-out; }
+        
+        /* Couple Activity Animations */
+        .anim-couple-cuddle { animation: coupleCuddle 1.5s infinite alternate ease-in-out; }
+        @keyframes coupleCuddle {
+            0% { transform: scale(1) rotate(-2deg); }
+            100% { transform: scale(1.06) rotate(2deg); filter: drop-shadow(0 0 8px #ff6699); }
+        }
 
-        @keyframes breathe { 0%, 100% { transform: scale(1, 1); } 50% { transform: scale(1.03, 0.97); } }
-        @keyframes walk { 0% { transform: translateY(0) rotate(-2deg); } 100% { transform: translateY(-10px) rotate(2deg); } }
-        @keyframes bounce { 0% { transform: translateY(0); } 100% { transform: translateY(-30px); } }
-        @keyframes groom { 0% { transform: rotate(0deg) scale(1); } 100% { transform: rotate(-10deg) scaleY(0.9); } }
+        @keyframes breathe { 0%, 100% { transform: scale(1, 1); } 50% { transform: scale(1.04, 0.96); } }
+        @keyframes walk { 0% { transform: translateY(0) rotate(-3deg); } 100% { transform: translateY(-8px) rotate(3deg); } }
+        @keyframes bounce { 0% { transform: translateY(0); } 100% { transform: translateY(-25px); } }
+        @keyframes groom { 0% { transform: rotate(0deg); } 100% { transform: rotate(-12deg) scaleY(0.95); } }
 
-        /* --- TOP HUD --- */
+        /* --- TOP STATS PANEL --- */
         #hud-top {
             position: absolute; top: 10px; left: 2%; width: 96%; display: flex; 
-            justify-content: space-between; align-items: center; z-index: 6; 
-            font-size: 22px; padding: 10px 15px; box-sizing: border-box;
+            justify-content: space-between; align-items: center; z-index: 10; 
+            font-size: 22px; padding: 8px 15px; box-sizing: border-box;
         }
         .btn-small {
             background: rgba(255,255,255,0.1); border: 2px solid #fff; border-radius: 8px; color: #fff;
-            font-family: 'VT323'; font-size: 20px; padding: 5px 15px; cursor: pointer; text-shadow: 1px 1px 0 #000;
+            font-family: 'VT323'; font-size: 20px; padding: 4px 12px; cursor: pointer; text-shadow: 1px 1px 0 #000;
         }
-        .btn-small:hover { background: rgba(255,255,255,0.3); }
-        .btn-danger { border-color: #ff8b94; color: #ff8b94; }
+        .btn-small:hover { background: rgba(255,255,255,0.3); box-shadow: 0 0 8px #fff; }
         
         #hud-stats-right { display: flex; gap: 20px; align-items: center; }
         #coin-display { color: #ffeaa7; font-size: 26px; }
-        
         #age-container { display: flex; flex-direction: column; align-items: flex-end; }
         #age-display { color: #ffb199; margin-bottom: 2px; }
-        #age-bar-bg { width: 100px; height: 8px; background: rgba(0,0,0,0.5); border: 1px solid #fff; border-radius: 4px; overflow: hidden; }
-        #age-bar-fill { height: 100%; background: #ffb199; width: 0%; transition: width 1s linear; }
+        #age-bar-bg { width: 110px; height: 8px; background: rgba(0,0,0,0.6); border: 1px solid #fff; border-radius: 4px; overflow: hidden; }
+        #age-bar-fill { height: 100%; background: #ffb199; width: 0%; transition: width 0.5s linear; }
 
         #reaction-text {
-            position: absolute; top: 70px; right: 2%; padding: 8px 15px; z-index: 6; 
+            position: absolute; top: 68px; right: 2%; padding: 6px 14px; z-index: 10; 
             font-size: 22px; color: #fff; opacity: 0; transition: opacity 0.3s ease; pointer-events: none;
-            background: rgba(0,0,0,0.6); border-radius: 8px; border: 2px solid #555;
+            background: rgba(0,0,0,0.75); border-radius: 8px; border: 2px solid #ff6699;
         }
 
-        /* --- ITEMS & DRAGGING --- */
-        #food-tray {
-            position: absolute; bottom: 80px; left: 50%; transform: translateX(-50%);
-            display: flex; gap: 15px; padding: 10px 15px; z-index: 7; transition: opacity 0.3s;
-        }
+        /* --- DRAGGABLE FOOD HUD --- */
+        #food-tray { position: absolute; bottom: 75px; left: 50%; transform: translateX(-50%); display: flex; gap: 12px; padding: 10px; z-index: 12; }
         .draggable-item {
-            width: 50px; height: 50px; cursor: grab; padding: 5px; position: relative;
-            background: rgba(0, 0, 0, 0.5); border-radius: 12px; border: 2px solid rgba(255,255,255,0.4); 
+            width: 48px; height: 48px; cursor: grab; padding: 4px; position: relative;
+            background: rgba(0, 0, 0, 0.6); border-radius: 10px; border: 2px solid rgba(255,255,255,0.4); 
             display: flex; justify-content: center; align-items: center;
         }
         .draggable-item img { width: 100%; height: 100%; object-fit: contain; pointer-events: none; }
-        .badge {
-            position: absolute; bottom: -8px; right: -8px; font-size: 14px; background: #ff3385; 
-            color: #fff; padding: 2px 6px; border-radius: 10px; border: 2px solid #fff; z-index: 2;
-        }
         .flying-item {
-            position: fixed; width: 60px; height: 60px; z-index: 99999; pointer-events: none; 
-            transform: translate(-50%, -50%); filter: drop-shadow(0 8px 12px rgba(0,0,0,0.6));
-            background-size: contain; background-repeat: no-repeat; background-position: center;
+            position: fixed; width: 55px; height: 55px; z-index: 99999; pointer-events: none; 
+            transform: translate(-50%, -50%); background-size: contain; background-repeat: no-repeat; background-position: center;
         }
 
-        /* --- INTERACTIVE BATH --- */
-        #bath-overlay {
-            display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            z-index: 6; pointer-events: none; flex-direction: column; align-items: center;
-        }
+        /* --- SOAP OVERLAY --- */
+        #bath-overlay { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 6; pointer-events: none; flex-direction: column; align-items: center; }
         #soap-item {
-            width: 80px; height: 80px; background: #a8e6cf; border: 3px solid #fff; border-radius: 20px;
-            position: absolute; bottom: 100px; left: 50%; transform: translateX(-50%); cursor: grab;
-            display: flex; justify-content: center; align-items: center; font-size: 40px;
-            pointer-events: auto; box-shadow: 0 4px 10px rgba(0,0,0,0.5);
-        }
-        #bath-instructions {
-            margin-top: 80px; font-size: 24px; color: #fff; background: rgba(0,0,0,0.6); 
-            padding: 10px 20px; border-radius: 8px; border: 2px solid #fff;
+            width: 70px; height: 70px; background: #a8e6cf; border: 3px solid #fff; border-radius: 16px;
+            position: absolute; bottom: 90px; left: 50%; transform: translateX(-50%); cursor: grab;
+            display: flex; justify-content: center; align-items: center; font-size: 36px; pointer-events: auto;
         }
 
-        /* --- BOTTOM CONTROLS --- */
-        #controls {
-            position: absolute; bottom: 10px; left: 2%; width: 96%; z-index: 7;
-            display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;
-        }
+        /* --- BOTTOM QUICK STAT CONTROLS --- */
+        #controls { position: absolute; bottom: 10px; left: 2%; width: 96%; z-index: 15; display: flex; gap: 10px; justify-content: center; }
         .stat-btn {
-            position: relative; overflow: hidden; width: 130px; height: 45px;
-            background: rgba(20, 20, 30, 0.8); border: 2px solid rgba(255,255,255,0.4); border-radius: 8px;
-            color: #ffffff; cursor: pointer; font-size: 20px; font-family: 'VT323'; box-shadow: 0 4px 0 rgba(0,0,0,0.5);
+            position: relative; overflow: hidden; width: 125px; height: 42px;
+            background: rgba(25, 25, 35, 0.85); border: 2px solid rgba(255,255,255,0.4); border-radius: 8px;
+            color: #ffffff; cursor: pointer; font-size: 19px; font-family: 'VT323'; box-shadow: 0 3px 0 rgba(0,0,0,0.6);
         }
-        .stat-btn:active { transform: translateY(4px); box-shadow: 0 0 0 rgba(0,0,0,0.5); }
-        .stat-fill {
-            position: absolute; bottom: 0; left: 0; height: 100%; width: 100%; z-index: 1; transition: width 0.3s ease;
-        }
-        .stat-text {
-            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 2; width: 100%; text-shadow: 1px 1px 0 #000;
-        }
+        .stat-fill { position: absolute; bottom: 0; left: 0; height: 100%; width: 100%; z-index: 1; transition: width 0.3s; }
+        .stat-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 2; width: 100%; text-shadow: 1px 1px 0 #000; }
+        #fill-food { background: rgba(85, 239, 196, 0.45); }
+        #fill-clean { background: rgba(116, 185, 255, 0.45); }
+        #fill-happy { background: rgba(255, 118, 117, 0.45); }
+        #fill-energy { background: rgba(162, 155, 254, 0.45); }
 
-        #fill-food { background: rgba(85, 239, 196, 0.5); }
-        #fill-clean { background: rgba(116, 185, 255, 0.5); }
-        #fill-happy { background: rgba(255, 118, 117, 0.5); }
-        #fill-energy { background: rgba(162, 155, 254, 0.5); }
-
-        /* --- MODALS --- */
-        .modal {
-            display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.85); z-index: 100; justify-content: center; align-items: center;
-        }
-        .modal-content { padding: 20px; width: 500px; text-align: center; position: relative; max-height: 85vh; overflow-y: auto; }
+        /* --- BEAUTIFIED RESPONSIVE ARCADE MODALS --- */
+        .modal { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.85); z-index: 100; justify-content: center; align-items: center; }
+        .modal-content { padding: 22px; width: 460px; border-radius: 16px; border: 3px solid #ff6699; box-shadow: 0 0 20px rgba(255,102,153,0.5); text-align: center; position: relative; max-height: 88vh; overflow-y: auto; }
         
+        /* Premium Arcade Grid Layout Fixes */
+        .arcade-menu-grid { display: flex; flex-direction: column; gap: 12px; margin: 15px 0; }
+        .arcade-card {
+            background: linear-gradient(135deg, #1e272e, #2f3640); border: 2px solid #ff6699; border-radius: 10px;
+            padding: 12px 16px; display: flex; justify-content: space-between; align-items: center;
+            cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .arcade-card:hover { transform: scale(1.02); box-shadow: 0 0 12px rgba(255,102,153,0.8); }
+        .arcade-info { text-align: left; }
+        .arcade-name { font-size: 24px; color: #fff; font-weight: bold; }
+        .arcade-score-tag { font-size: 18px; color: #ffeaa7; margin-top: 2px; }
+        .arcade-play-icon { font-size: 26px; background: rgba(255,255,255,0.1); border-radius: 50%; width: 44px; height: 44px; display: flex; justify-content: center; align-items: center; border: 1px solid #ff6699; }
+
         .activities-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
-        .act-btn {
-            background: #2d3436; border: 2px solid #636e72; color: #fff; font-size: 20px;
-            font-family: 'VT323'; padding: 10px; border-radius: 8px; cursor: pointer;
-        }
-        .act-btn:hover { background: #636e72; }
+        .act-btn { background: #2f3542; border: 2px solid #57606f; color: #fff; font-size: 20px; font-family: 'VT323'; padding: 10px; border-radius: 8px; cursor: pointer; }
+        .act-btn:hover { background: #57606f; border-color: #ff6699; }
         
-        /* 5x5 Jigsaw Swap Puzzle */
-        #puzzle-grid {
-            display: grid; grid-template-columns: repeat(5, 1fr); gap: 2px;
-            width: 200px; height: 200px; margin: 0 auto; background: #111; padding: 2px; border: 2px solid #555;
+        /* Polished Gaming Canvas UI */
+        #minigame-area {
+            width: 100%; height: 210px; background: #111216; border: 3px solid #ff6699;
+            position: relative; overflow: hidden; border-radius: 10px; margin-bottom: 12px; box-shadow: inset 0 0 15px #000;
         }
-        .puzzle-piece {
-            background-color: #333; background-image: url('cat.png'); background-size: 200px 200px;
-            cursor: pointer; transition: transform 0.1s;
-        }
-        .puzzle-piece.selected { border: 2px solid #ff6699; transform: scale(0.9); z-index: 10; }
+        .target-obj { width: 38px; height: 38px; position: absolute; cursor: pointer; display: flex; justify-content: center; align-items: center; font-size: 28px; }
+        .tower-block { position: absolute; height: 24px; background: #ff7675; border: 2px solid #fff; box-sizing: border-box; box-shadow: 0 2px 5px rgba(0,0,0,0.5); }
+        
+        #puzzle-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 2px; width: 190px; height: 190px; margin: 8px auto; background: #222; padding: 2px; border-radius: 6px; }
+        .puzzle-piece { background-color: #333; background-image: url('cat.png'); background-size: 190px 190px; cursor: pointer; }
+        .puzzle-piece.selected { border: 2px solid #ff6699; box-shadow: 0 0 8px #ff6699; transform: scale(0.92); }
 
-        input {
-            width: 80%; padding: 10px; margin: 10px 0; border-radius: 8px; border: 2px solid rgba(255,255,255,0.3); 
-            background: rgba(0,0,0,0.5); color: #fff; font-family: 'VT323'; font-size: 22px; text-align: center;
-        }
+        input { width: 80%; padding: 8px; margin: 8px 0; border-radius: 8px; border: 2px solid #ff6699; background: rgba(0,0,0,0.6); color: #fff; font-family: 'VT323'; font-size: 22px; text-align: center; }
     </style>
 </head>
 <body>
 
-<div id="landscape-lock"><div>📱 ➔ 🖥️</div><div>Please rotate to landscape mode.</div></div>
+<div id="landscape-lock"><div>📱 ➔ 🖥️</div><div style="font-size:24px; margin-top:10px;">Rotate to landscape mode to play.</div></div>
 
 <audio id="audio-bgm" src="bgm.mp3" loop></audio>
 <audio id="audio-meow" src="meow.mp3"></audio>
@@ -208,11 +193,23 @@
 
 <div id="game-container">
     <div id="bg-layer"></div>
-    <div id="weather-layer"></div> <div id="cat-group" onclick="petCat()">
-        <img id="cat-sprite" class="main-sprite anim-breathe" src="cat.png" onerror="this.src='cat.png'">
-        <img id="kit1-sprite" class="kitten-sprite hidden anim-breathe" src="kitten1.png" onmousedown="startKittenDrag(event, 'kit1-sprite')" ontouchstart="startKittenDrag(event, 'kit1-sprite')" onerror="this.src='cat.png'">
-        <img id="kit2-sprite" class="kitten-sprite hidden anim-breathe" src="kitten2.png" onmousedown="startKittenDrag(event, 'kit2-sprite')" ontouchstart="startKittenDrag(event, 'kit2-sprite')" onerror="this.src='cat.png'">
-        <img id="kit3-sprite" class="kitten-sprite hidden anim-breathe" src="kitten3.png" onmousedown="startKittenDrag(event, 'kit3-sprite')" ontouchstart="startKittenDrag(event, 'kit3-sprite')" onerror="this.src='cat.png'">
+    <div id="weather-layer"></div>
+    
+    <div id="cat-group" onclick="petCat()">
+        <!-- Main Cat wrapper -->
+        <div class="sprite-wrap" id="main-cat-wrap">
+            <img id="cat-sprite" class="main-sprite anim-breathe" src="cat.png" onerror="this.src='cat.png'">
+            
+            <!-- Target-nursing kittens loaded inside mom's layout zone -->
+            <img id="kit1-sprite" class="kitten-sprite hidden anim-breathe" src="kitten1.png" onmousedown="startKittenDrag(event, 'kit1-sprite')" ontouchstart="startKittenDrag(event, 'kit1-sprite')" onerror="this.src='cat.png'">
+            <img id="kit2-sprite" class="kitten-sprite hidden anim-breathe" src="kitten2.png" onmousedown="startKittenDrag(event, 'kit2-sprite')" ontouchstart="startKittenDrag(event, 'kit2-sprite')" onerror="this.src='cat.png'">
+            <img id="kit3-sprite" class="kitten-sprite hidden anim-breathe" src="kitten3.png" onmousedown="startKittenDrag(event, 'kit3-sprite')" ontouchstart="startKittenDrag(event, 'kit3-sprite')" onerror="this.src='cat.png'">
+        </div>
+        
+        <!-- Separate independent Akira wrapper -->
+        <div class="sprite-wrap hidden" id="akira-wrap">
+            <img id="akira-sprite" class="main-sprite anim-breathe" src="akira.png" onerror="this.src='cat.png'">
+        </div>
     </div>
 
     <div id="reaction-text">Waiting...</div>
@@ -246,106 +243,139 @@
         <button class="stat-btn" onclick="action('sleep')"><div class="stat-fill" id="fill-energy"></div><div class="stat-text" id="text-sleep">SLEEP</div></button>
     </div>
 
+    <!-- Modals System -->
     <div id="start-modal" class="modal" style="display: flex;">
         <div class="modal-content glass-panel">
-            <h1 style="color:#a8e6cf; margin-top:0;">RAGDOLL LIFE</h1>
+            <h1 style="color:#ff6699; margin-top:0;">RAGDOLL LIFE</h1>
             <input type="text" id="main-cat-name" placeholder="Name your cat...">
-            <button class="btn-small" style="width: 100%; padding: 10px; margin-top:10px;" onclick="startGame()">START LIFE</button>
+            <button class="btn-small" style="width: 100%; padding: 12px; margin-top:10px; font-size:22px;" onclick="startGame()">START LIFE</button>
         </div>
     </div>
 
     <div id="activities-modal" class="modal">
         <div class="modal-content glass-panel">
-            <h2 style="margin-top:0;">ACTIVITIES</h2>
+            <h2 style="margin-top:0; color:#ff6699;">SELECT ACTIVITY</h2>
             <div id="activities-container" class="activities-grid"></div>
-            <button class="btn-small" style="width: 100%; margin-top:15px;" onclick="closeModal('activities-modal')">CLOSE</button>
+            <button class="btn-small" style="width: 100%; margin-top:15px; background:#444;" onclick="closeModal('activities-modal')">CLOSE</button>
         </div>
     </div>
 
     <div id="kitten-modal" class="modal">
         <div class="modal-content glass-panel">
-            <h2 style="color:#a8e6cf; margin-top:0;">KITTENS BORN!</h2>
-            <input type="text" id="k1" placeholder="First Kitten">
-            <input type="text" id="k2" placeholder="Second Kitten">
-            <input type="text" id="k3" placeholder="Third Kitten">
+            <h2 style="color:#ff6699; margin-top:0;">KITTENS BORN! 🍼</h2>
+            <input type="text" id="k1" placeholder="First Kitten Name">
+            <input type="text" id="k2" placeholder="Second Kitten Name">
+            <input type="text" id="k3" placeholder="Third Kitten Name">
             <button class="btn-small" style="width: 100%; margin-top:10px;" onclick="saveKittens()">SAVE FAMILY</button>
         </div>
     </div>
 
     <div id="death-modal" class="modal">
-        <div class="modal-content glass-panel" style="border-color:#fff; box-shadow: 0 0 30px #fff;">
+        <div class="modal-content glass-panel" style="border-color:#fff;">
             <h1 style="color:#fff; margin-top:0;">A BEAUTIFUL LIFE</h1>
             <p id="tribute-text" style="font-size:22px; line-height:1.5; color:#ccc;"></p>
             <p style="font-size:24px; color:#ffb199;">Thank you for giving her a wonderful home.</p>
-            <button class="btn-small btn-danger" style="width: 100%; margin-top:15px;" onclick="hardReset()">START NEW JOURNEY</button>
+            <button class="btn-small" style="width: 100%; margin-top:15px; background:#ff6699;" onclick="hardReset()">RESTART JOURNEY</button>
         </div>
     </div>
 
     <div id="shop-modal" class="modal">
         <div class="modal-content glass-panel">
-            <h2 style="margin-top:0;">SUPERMARKET</h2>
+            <h2 style="margin-top:0; color:#ff6699;">SUPERMARKET</h2>
             <div style="display:flex; flex-wrap:wrap; justify-content:center; gap:10px;" id="shop-items-container"></div>
-            <button class="btn-small" style="width: 100%; margin-top:15px;" onclick="closeModal('shop-modal')">CLOSE SHOP</button>
+            <button class="btn-small" style="width: 100%; margin-top:25px; background:#444;" onclick="closeModal('shop-modal')">CLOSE SHOP</button>
         </div>
     </div>
 
     <div id="minigame-hub" class="modal">
         <div class="modal-content glass-panel">
-            <h2 style="margin-top:0;">ARCADE</h2>
-            <button class="mg-menu-btn" onclick="launchGame('catch')"><span>🐭 Catch Mouse</span><span style="color:#ffeaa7">Best: <span id="hs-catch">0</span></span></button>
-            <button class="mg-menu-btn" onclick="launchGame('tower')"><span>🧱 Build Tower</span><span style="color:#ffeaa7">Best: <span id="hs-tower">0</span></span></button>
-            <button class="mg-menu-btn" onclick="launchGame('puzzle')"><span>🧩 5x5 Puzzle</span><span style="color:#ffeaa7">Best: <span id="hs-puzzle">--</span>s</span></button>
-            <button class="btn-small" style="width: 100%; margin-top:10px;" onclick="closeModal('minigame-hub')">EXIT ARCADE</button>
+            <h2 style="margin-top:0; color:#ff6699; font-size:28px;">ARCADE SYSTEM</h2>
+            <div class="arcade-menu-grid">
+                <div class="arcade-card" onclick="launchGame('catch')">
+                    <div class="arcade-info">
+                        <div class="arcade-name">🐭 Catch Mouse</div>
+                        <div class="arcade-score-tag">High Score: <span id="hs-catch">0</span></div>
+                    </div>
+                    <div class="arcade-play-icon">▶</div>
+                </div>
+                <div class="arcade-card" onclick="launchGame('tower')">
+                    <div class="arcade-info">
+                        <div class="arcade-name">🧱 Build Tower</div>
+                        <div class="arcade-score-tag">High Score: <span id="hs-tower">0</span></div>
+                    </div>
+                    <div class="arcade-play-icon">▶</div>
+                </div>
+                <div class="arcade-card" onclick="launchGame('puzzle')">
+                    <div class="arcade-info">
+                        <div class="arcade-name">🧩 Cat Jigsaw</div>
+                        <div class="arcade-score-tag">Best Time: <span id="hs-puzzle">--</span>s</div>
+                    </div>
+                    <div class="arcade-play-icon">▶</div>
+                </div>
+            </div>
+            <button class="btn-small" style="width: 100%; padding: 8px; background:#444;" onclick="closeModal('minigame-hub')">EXIT ARCADE</button>
         </div>
     </div>
 
     <div id="active-minigame-modal" class="modal">
         <div class="modal-content glass-panel">
-            <h2 id="mg-title" style="margin-top:0; margin-bottom: 5px;">Game</h2>
-            <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
+            <h2 id="mg-title" style="margin-top:0; margin-bottom: 5px; color:#ff6699;">Game Canvas</h2>
+            <div style="display:flex; justify-content:space-between; margin-bottom:8px; font-size:20px;">
                 <span style="color:#a8e6cf;">Score: <span id="mg-score">0</span></span>
                 <span style="color:#ff8b94;">Time: <span id="mg-time">0</span></span>
             </div>
             <div id="minigame-area"></div>
-            <button id="mg-start-btn" class="btn-small" style="width: 100%; margin-bottom:10px;" onclick="startCurrentGame()">START GAME</button>
+            <button id="mg-start-btn" class="btn-small" style="width: 100%; margin-bottom:10px; background:#ff6699; padding:8px;" onclick="startCurrentGame()">START GAME</button>
             <button class="btn-small" style="width: 100%; background:#444;" onclick="closeActiveGame()">BACK</button>
         </div>
     </div>
 </div>
+<!-- ======================= END OF PART 1 ======================= -->
+<!-- ======================= START OF PART 2 ======================= -->
 <script>
-    // --- SYNTHESIZERS ---
+    // --- AUDIO SYSTEM WITH 1-SEC TIMEOUT LIMIT ---
+    function playMeowSound() {
+        let s = document.getElementById('audio-meow');
+        if (s) {
+            s.currentTime = 0; s.volume = 0.5;
+            s.play().catch(e=>{});
+            // Force code to cut music playback off at exactly 1.0 seconds
+            setTimeout(() => { if(!s.paused) { s.pause(); s.currentTime = 0; } }, 1000);
+        }
+    }
+
     function playCoinSound() {
         try {
             let ctx = new (window.AudioContext || window.webkitAudioContext)();
             let osc1 = ctx.createOscillator(); osc1.type = 'square'; osc1.frequency.setValueAtTime(150, ctx.currentTime);
-            let gain1 = ctx.createGain(); gain1.gain.setValueAtTime(0.3, ctx.currentTime); gain1.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.1);
+            let gain1 = ctx.createGain(); gain1.gain.setValueAtTime(0.2, ctx.currentTime); gain1.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.1);
             osc1.connect(gain1); gain1.connect(ctx.destination); osc1.start(); osc1.stop(ctx.currentTime + 0.1);
             setTimeout(() => {
-                let osc2 = ctx.createOscillator(); osc2.type = 'sine'; osc2.frequency.setValueAtTime(1400, ctx.currentTime);
-                let gain2 = ctx.createGain(); gain2.gain.setValueAtTime(0.2, ctx.currentTime); gain2.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.4);
-                osc2.connect(gain2); gain2.connect(ctx.destination); osc2.start(); osc2.stop(ctx.currentTime + 0.4);
-            }, 100);
+                let osc2 = ctx.createOscillator(); osc2.type = 'sine'; osc2.frequency.setValueAtTime(1300, ctx.currentTime);
+                let gain2 = ctx.createGain(); gain2.gain.setValueAtTime(0.15, ctx.currentTime); gain2.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
+                osc2.connect(gain2); gain2.connect(ctx.destination); osc2.start(); osc2.stop(ctx.currentTime + 0.3);
+            }, 800);
         } catch(e) {}
     }
     
     function playSadTune() {
         try {
             let ctx = new (window.AudioContext || window.webkitAudioContext)();
-            let notes = [200, 180, 150]; let time = ctx.currentTime;
+            let notes = [190, 170, 140]; let time = ctx.currentTime;
             notes.forEach((freq, i) => {
-                let osc = ctx.createOscillator(); osc.type = 'sine'; osc.frequency.setValueAtTime(freq, time + (i*1.5));
-                let gain = ctx.createGain(); gain.gain.setValueAtTime(0.3, time + (i*1.5)); gain.gain.exponentialRampToValueAtTime(0.01, time + (i*1.5) + 2);
-                osc.connect(gain); gain.connect(ctx.destination); osc.start(time + (i*1.5)); osc.stop(time + (i*1.5) + 2);
+                let osc = ctx.createOscillator(); osc.type = 'sine'; osc.frequency.setValueAtTime(freq, time + (i*1.2));
+                let gain = ctx.createGain(); gain.gain.setValueAtTime(0.25, time + (i*1.2)); gain.gain.exponentialRampToValueAtTime(0.01, time + (i*1.2) + 1.8);
+                osc.connect(gain); gain.connect(ctx.destination); osc.start(time + (i*1.2)); osc.stop(time + (i*1.2) + 1.8);
             });
         } catch(e) {}
     }
 
-    // --- GAME STATE ---
+    // --- SYSTEM STATE DATA ---
     let gameState = {
         name: "Kitty", phase: 1, age: 1, 
         hunger: 100, energy: 100, happy: 100, clean: 100, coins: 50,
         isSleeping: false, startDate: null, lastPlayed: null,
-        interactionBonusMs: 0, kittenHunger: 100, // New variables!
+        interactionBonusMs: 0, kittenHunger: 100,
         inventory: { fish: 2, croissant: 1, can: 1, milk: 0, mash: 0 },
         kittens: { k1: "Kit1", k2: "Kit2", k3: "Kit3" },
         highScores: { catch: 0, tower: 0, puzzle: 999 }
@@ -354,7 +384,9 @@
     let behaviorInterval, animationTimeout, kittenHungerInterval;
     const catGroup = document.getElementById('cat-group');
     const catSprite = document.getElementById('cat-sprite');
-    const allSprites = [catSprite, document.getElementById('kit1-sprite'), document.getElementById('kit2-sprite'), document.getElementById('kit3-sprite')];
+    const akiraSprite = document.getElementById('akira-sprite');
+    const akiraWrap = document.getElementById('akira-wrap');
+    const allSprites = [catSprite, akiraSprite, document.getElementById('kit1-sprite'), document.getElementById('kit2-sprite'), document.getElementById('kit3-sprite')];
 
     const itemsDB = {
         fish: { name: "Fresh Fish", img: "icon_fish.png", price: 10, hunger: 30 },
@@ -365,10 +397,9 @@
     };
 
     function init() {
-        let saved = localStorage.getItem('ragdoll_save_v10');
+        let saved = localStorage.getItem('ragdoll_save_v11');
         if (saved) {
             gameState = Object.assign(gameState, JSON.parse(saved)); 
-            document.querySelector('.opening-title').innerText = "WELCOME BACK";
             document.getElementById('main-cat-name').style.display = 'none'; 
             calculateTimeDrain();
         }
@@ -376,25 +407,22 @@
         
         kittenHungerInterval = setInterval(() => {
             if(gameState.phase >= 4 && !gameState.isSleeping) {
-                gameState.kittenHunger = Math.max(0, gameState.kittenHunger - 5);
+                gameState.kittenHunger = Math.max(0, gameState.kittenHunger - 8);
                 if(gameState.kittenHunger < 30) showReaction("Kittens are hungry! Drag them to mom. 🍼");
             }
-        }, 60000); // Kittens get hungry every minute
+        }, 60000);
     }
 
     function startGame() {
         let nameInput = document.getElementById('main-cat-name');
         if (nameInput.style.display !== 'none' && nameInput.value.trim() !== "") {
-            gameState.name = nameInput.value;
-            gameState.startDate = Date.now();
+            gameState.name = nameInput.value; gameState.startDate = Date.now();
         }
-        gameState.lastPlayed = Date.now();
-        document.getElementById('start-modal').style.display = 'none';
-        let bgm = document.getElementById('audio-bgm'); if(bgm) { bgm.volume = 0.2; bgm.play().catch(e=>{}); }
+        gameState.lastPlayed = Date.now(); document.getElementById('start-modal').style.display = 'none';
+        let bgm = document.getElementById('audio-bgm'); if(bgm) { bgm.volume = 0.15; bgm.play().catch(e=>{}); }
         updateMeters(); startFelineBrain(); showReaction(`${gameState.name} entered the room.`);
     }
 
-    // --- TIME & AGE ENGINE ---
     function calculateTimeDrain() {
         if (!gameState.lastPlayed || !gameState.startDate || gameState.phase === 5) return;
         let hoursPassed = (Date.now() - gameState.lastPlayed) / (1000 * 60 * 60);
@@ -406,7 +434,6 @@
             if (!gameState.isSleeping) gameState.energy = Math.max(0, Math.floor(gameState.energy - (hoursPassed * 3)));
         }
         
-        // 1 Year = 6 Hours Real Time. We add the interaction bonus to speed it up!
         let oneYearMs = 1000 * 60 * 60 * 6;
         let totalMs = (Date.now() - gameState.startDate) + gameState.interactionBonusMs;
         gameState.age = 1 + Math.floor(totalMs / oneYearMs);
@@ -415,18 +442,12 @@
 
     function addInteractionBonus() {
         if(gameState.phase === 5) return;
-        gameState.interactionBonusMs += (1000 * 60 * 20); // Adds 20 mins to age instantly!
+        gameState.interactionBonusMs += (1000 * 60 * 20); // Adds 20 interaction bonus aging minutes
         calculateTimeDrain();
     }
 
-    function saveData() {
-        if(gameState.phase !== 5) {
-            gameState.lastPlayed = Date.now();
-            localStorage.setItem('ragdoll_save_v10', JSON.stringify(gameState));
-        }
-    }
+    function saveData() { if(gameState.phase !== 5) { gameState.lastPlayed = Date.now(); localStorage.setItem('ragdoll_save_v11', JSON.stringify(gameState)); } }
 
-    // --- UI METERS ---
     function updateMeters() {
         document.getElementById('coin-display').innerText = `Coins: ${gameState.coins}`;
         document.getElementById('age-display').innerText = `Age: ${gameState.age} Yr`;
@@ -434,33 +455,29 @@
         if(gameState.startDate && gameState.phase < 5) {
             let oneYearMs = 1000 * 60 * 60 * 6;
             let timeIntoCurrentYear = ((Date.now() - gameState.startDate) + gameState.interactionBonusMs) % oneYearMs;
-            let percentToNextYear = (timeIntoCurrentYear / oneYearMs) * 100;
-            document.getElementById('age-bar-fill').style.width = percentToNextYear + '%';
+            document.getElementById('age-bar-fill').style.width = ((timeIntoCurrentYear / oneYearMs) * 100) + '%';
         }
         
-        let mFood = document.getElementById('fill-food'); let mClean = document.getElementById('fill-clean');
-        let mHappy = document.getElementById('fill-happy'); let mEnergy = document.getElementById('fill-energy');
-
-        mFood.style.width = gameState.hunger + '%'; mFood.style.background = gameState.hunger < 30 ? 'rgba(255,0,0,0.6)' : 'rgba(85,239,196,0.5)';
-        mClean.style.width = gameState.clean + '%'; mClean.style.background = gameState.clean < 30 ? 'rgba(255,0,0,0.6)' : 'rgba(116,185,255,0.5)';
-        mHappy.style.width = gameState.happy + '%'; mEnergy.style.width = gameState.energy + '%';
+        document.getElementById('fill-food').style.width = gameState.hunger + '%';
+        document.getElementById('fill-clean').style.width = gameState.clean + '%';
+        document.getElementById('fill-happy').style.width = gameState.happy + '%';
+        document.getElementById('fill-energy').style.width = gameState.energy + '%';
     }
 
-    function showReaction(text) { 
-        let box = document.getElementById('reaction-text');
-        box.innerText = text; box.style.opacity = '1';
-        setTimeout(() => box.style.opacity = '0', 3000);
-    }
+    function showReaction(text) { let box = document.getElementById('reaction-text'); box.innerText = text; box.style.opacity = '1'; setTimeout(() => box.style.opacity = '0', 3000); }
     function playAudio(id) { let s = document.getElementById(id); if (s) { s.currentTime = 0; s.play().catch(e=>{}); } }
+
     function triggerAnimation(animClass) {
         allSprites.forEach(sprite => {
-            if (!sprite.classList.contains('hidden')) sprite.className = `${sprite.id === 'cat-sprite' ? 'main-sprite' : 'kitten-sprite'} ${animClass}`;
+            if (sprite && !sprite.classList.contains('hidden') && !sprite.parentNode.classList.contains('hidden')) {
+                sprite.className = (sprite.id === 'cat-sprite' || sprite.id === 'akira-sprite') ? `main-sprite ${animClass}` : `kitten-sprite ${animClass}`;
+            }
         });
         clearTimeout(animationTimeout);
         animationTimeout = setTimeout(() => { if (!gameState.isSleeping) setIdleState(); }, 2000);
     }
 
-    // --- CORE ACTIONS ---
+    // --- PHYSICAL INTERACTION PROCESSORS ---
     function petCat() {
         if (gameState.isSleeping || activeDrag || isBathing || gameState.phase === 5) return;
         gameState.happy = Math.min(100, gameState.happy + 5); addInteractionBonus();
@@ -469,56 +486,80 @@
     }
 
     function action(type) {
-        calculateTimeDrain();
-        if (gameState.phase === 5) return;
+        calculateTimeDrain(); if (gameState.phase === 5) return;
         if (type === 'sleep') {
             gameState.isSleeping = !gameState.isSleeping;
             if (gameState.isSleeping) {
-                showReaction("Falling asleep..."); document.getElementById('text-sleep').innerHTML = "WAKE UP";
-                document.getElementById('bg-layer').style.filter = "brightness(0.2)"; document.getElementById('food-tray').classList.add('hidden');
+                showReaction("Sleeping..."); document.getElementById('text-sleep').innerHTML = "WAKE UP";
+                document.getElementById('bg-layer').style.filter = "brightness(0.25)"; document.getElementById('food-tray').classList.add('hidden');
                 triggerAnimation('anim-sleep');
             } else {
-                gameState.energy = Math.min(100, gameState.energy + 50); showReaction("Waking up!"); 
+                gameState.energy = Math.min(100, gameState.energy + 50); showReaction("Awake!"); 
                 document.getElementById('text-sleep').innerHTML = "SLEEP"; document.getElementById('bg-layer').style.filter = "brightness(1)";
                 setIdleState();
             }
         } else if (type === 'play') {
-            if (gameState.energy < 15) { showReaction("Too tired to play."); return; }
+            if (gameState.energy < 15) { showReaction("Too tired."); return; }
             gameState.energy -= 15; gameState.happy = Math.min(100, gameState.happy + 20); gameState.clean = Math.max(0, gameState.clean - 10);
-            showReaction("Playing! 🧶"); playAudio('audio-meow'); triggerAnimation('anim-play'); addInteractionBonus();
+            showReaction("Playing! 🧶"); playMeowSound(); triggerAnimation('anim-play'); addInteractionBonus();
         }
         saveData(); updateMeters();
+    }
+
+    // --- COMPANION ACTIVITIES ENGINE & ANIMATION ---
+    function spawnHearts() {
+        for(let i=0; i<4; i++) {
+            let h = document.createElement('div'); h.className = 'heart-particle'; h.innerText = '❤';
+            h.style.left = (40 + Math.random() * 20) + '%'; h.style.top = (45 + Math.random() * 10) + '%';
+            document.getElementById('game-container').appendChild(h);
+            setTimeout(() => h.remove(), 1500);
+        }
+    }
+
+    function runCoupleAnimation(label, baseType) {
+        showReaction(label); spawnHearts();
+        triggerAnimation('anim-couple-cuddle');
+        setTimeout(() => { action(baseType); }, 500);
     }
 
     function openActivities() {
         if (gameState.isSleeping || gameState.phase === 5) return;
         let cont = document.getElementById('activities-container'); cont.innerHTML = "";
         
-        let actions = [{n: "Scratch Post", v: "play"}, {n: "Watch Bird", v: "play"}];
-        if (gameState.phase >= 2) {
-            actions.push({n: "Date Night 💖", v: "cuddle"}, {n: "Groom Akira", v: "bath"}, {n: "Hunt Together", v: "play"}, {n: "Share Food", v: "feed"});
+        let acts = [{n: "Scratch Post", f:()=>action('play')}, {n: "Watch Bird Window", f:()=>action('play')}];
+        
+        if (gameState.phase >= 2) { // Couples Actions Allowed
+            acts.push(
+                {n: "Date Night 💖", f:()=>runCoupleAnimation("Snuggling on sofa!", 'play')},
+                {n: "Groom Akira 👅", f:()=>runCoupleAnimation("Grooming session!", 'play')},
+                {n: "Backyard Hunt 🐭", f:()=>runCoupleAnimation("Hunting mice together!", 'play')},
+                {n: "Share Fish Bowl 🐟", f:()=>runCoupleAnimation("Sharing premium snack!", 'play')}
+            );
         }
-        if (gameState.phase >= 4) {
-            actions.push({n: "Teach Hunt", v: "play"}, {n: "Clean Kittens", v: "bath"}, {n: "Kitten Play", v: "play"}, {n: "Family Nap", v: "sleep"});
+        if (gameState.phase >= 4) { // Family Actions Allowed
+            acts.push(
+                {n: "Teach Pounce 🐾", f:()=>runCoupleAnimation("Teaching the kids to hunt!", 'play')},
+                {n: "Clean Kittens 🧼", f:()=>runCoupleAnimation("Bath time for the babies!", 'play')},
+                {n: "Yarn Ball Chaos 🧶", f:()=>runCoupleAnimation("Kittens playing with yarn!", 'play')},
+                {n: "Group Blanket Nap 💤", f:()=>runCoupleAnimation("Cozy family sleeping!", 'play')}
+            );
         }
         
-        actions.forEach(a => {
+        acts.forEach(a => {
             let btn = document.createElement('button'); btn.className = 'act-btn'; btn.innerText = a.n;
-            btn.onclick = () => { closeModal('activities-modal'); action(a.v); showReaction(`Did activity: ${a.n}!`); };
-            cont.appendChild(btn);
+            btn.onclick = () => { closeModal('activities-modal'); a.f(); }; cont.appendChild(btn);
         });
         document.getElementById('activities-modal').style.display = 'flex';
     }
 
-    // --- INTERACTIVE BATH LOGIC ---
+    // --- SHOWER SOAP METER ENGINE ---
     let isBathing = false; let soapDrag = null;
     function startBathMode() {
         if (gameState.isSleeping || gameState.phase === 5) return;
-        if (gameState.clean >= 100) { showReaction("Already perfectly clean!"); return; }
-        
+        if (gameState.clean >= 100) { showReaction("Perfectly clean!"); return; }
         isBathing = true; document.getElementById('food-tray').classList.add('hidden');
         document.getElementById('bath-overlay').style.display = 'flex';
-        let soap = document.getElementById('soap-item'); soap.style.left = '50%'; soap.style.top = 'auto'; soap.style.bottom = '100px';
+        let soap = document.getElementById('soap-item'); soap.style.left = '50%'; soap.style.top = 'auto'; soap.style.bottom = '90px';
         soap.onmousedown = startSoapDrag; soap.ontouchstart = startSoapDrag;
     }
     function startSoapDrag(e) {
@@ -532,12 +573,11 @@
         soapDrag.style.left = cx + 'px'; soapDrag.style.top = cy + 'px'; soapDrag.style.bottom = 'auto';
         let rect = catGroup.getBoundingClientRect();
         if (cx >= rect.left && cx <= rect.right && cy >= rect.top && cy <= rect.bottom) {
-            gameState.clean = Math.min(100, gameState.clean + 1.5); updateMeters();
+            gameState.clean = Math.min(100, gameState.clean + 2); updateMeters();
             if(Math.random() < 0.1) triggerAnimation('anim-groom');
             if (gameState.clean >= 100) {
                 endSoapDrag(); document.getElementById('bath-overlay').style.display = 'none';
-                isBathing = false; showReaction("Sparkling clean! ✨"); playAudio('audio-meow');
-                addInteractionBonus(); saveData();
+                isBathing = false; showReaction("Clean! ✨"); playMeowSound(); addInteractionBonus(); saveData();
             }
         }
     }
@@ -546,95 +586,72 @@
         document.removeEventListener('mouseup', endSoapDrag); document.removeEventListener('touchend', endSoapDrag);
     }
 
-    // --- DRAG TO NURSE KITTENS ---
+    // --- DRAG NURSE TARGET SYSTEMS ---
     let activeKittenDrag = null; let activeKittenImg = null;
     function startKittenDrag(e, kitId) {
         if (gameState.isSleeping || gameState.phase === 5) return;
         e.preventDefault(); e.stopPropagation();
-        
         let srcEl = document.getElementById(kitId);
         activeKittenDrag = document.createElement('div'); activeKittenDrag.className = 'flying-item';
-        activeKittenDrag.style.backgroundImage = `url('${srcEl.src}')`;
-        activeKittenDrag.dataset.id = kitId;
+        activeKittenDrag.style.backgroundImage = `url('${srcEl.src}')`; activeKittenDrag.dataset.id = kitId;
         document.body.appendChild(activeKittenDrag);
-        
-        activeKittenImg = srcEl; activeKittenImg.style.opacity = '0.2'; // Dim real one
+        activeKittenImg = srcEl; activeKittenImg.style.opacity = '0.3';
         moveKittenDrag(e);
         document.addEventListener('mousemove', moveKittenDrag); document.addEventListener('touchmove', moveKittenDrag, {passive: false});
         document.addEventListener('mouseup', endKittenDrag); document.addEventListener('touchend', endKittenDrag);
     }
-    function moveKittenDrag(e) {
-        if(!activeKittenDrag) return; e.preventDefault();
-        activeKittenDrag.style.left = (e.clientX || (e.touches && e.touches[0].clientX)) + 'px';
-        activeKittenDrag.style.top = (e.clientY || (e.touches && e.touches[0].clientY)) + 'px';
-    }
+    function moveKittenDrag(e) { if(!activeKittenDrag) return; e.preventDefault(); activeKittenDrag.style.left = (e.clientX || (e.touches && e.touches[0].clientX)) + 'px'; activeKittenDrag.style.top = (e.clientY || (e.touches && e.touches[0].clientY)) + 'px'; }
     function endKittenDrag(e) {
         if(!activeKittenDrag) return;
-        let cx = e.clientX || (e.changedTouches && e.changedTouches[0].clientX);
-        let cy = e.clientY || (e.changedTouches && e.changedTouches[0].clientY);
+        let cx = e.clientX || (e.changedTouches && e.changedTouches[0].clientX); let cy = e.clientY || (e.changedTouches && e.changedTouches[0].clientY);
         let momRect = catSprite.getBoundingClientRect();
-        
         if (cx >= momRect.left && cx <= momRect.right && cy >= momRect.top && cy <= momRect.bottom) {
-            gameState.kittenHunger = 100; gameState.happy = Math.min(100, gameState.happy + 20);
-            gameState.coins += 10;
-            showReaction("Kitten is nursing! 🍼 (+10 Coins)");
-            playAudio('audio-purr'); triggerAnimation('anim-cuddle'); addInteractionBonus();
+            gameState.kittenHunger = 100; gameState.happy = Math.min(100, gameState.happy + 15); gameState.coins += 12;
+            showReaction("Nursing milk! 🍼 (+12c)"); playAudio('audio-purr'); triggerAnimation('anim-cuddle'); addInteractionBonus();
         }
-        
-        activeKittenImg.style.opacity = '1';
-        activeKittenDrag.remove(); activeKittenDrag = null; activeKittenImg = null;
+        activeKittenImg.style.opacity = '1'; activeKittenDrag.remove(); activeKittenDrag = null; activeKittenImg = null;
         document.removeEventListener('mousemove', moveKittenDrag); document.removeEventListener('touchmove', moveKittenDrag);
         document.removeEventListener('mouseup', endKittenDrag); document.removeEventListener('touchend', endKittenDrag);
         updateMeters(); saveData();
     }
 
-    // --- FOOD DRAGGING ---
+    // --- FOOD HANDLING ---
     let activeDrag = null;
     function toggleFoodTray() {
         if (gameState.isSleeping || isBathing || gameState.phase === 5) return;
         let tray = document.getElementById('food-tray');
-        if (tray.classList.contains('hidden')) { tray.classList.remove('hidden'); updateTrayUI(); }
-        else tray.classList.add('hidden');
+        if (tray.classList.contains('hidden')) { tray.classList.remove('hidden'); updateTrayUI(); } else tray.classList.add('hidden');
     }
     function updateTrayUI() {
         let tray = document.getElementById('food-tray'); tray.innerHTML = ""; let hasFood = false;
         Object.keys(gameState.inventory).forEach(key => {
             if (gameState.inventory[key] > 0) {
                 hasFood = true; let div = document.createElement('div'); div.className = 'draggable-item';
-                div.innerHTML = `<img src="${itemsDB[key].img}" onerror="this.style.display='none'"> <span class="badge">${gameState.inventory[key]}</span>`;
+                div.innerHTML = `<img src="${itemsDB[key].img}" onerror="this.style.display='none'"> <span class="badge" style="position:absolute; bottom:-6px; right:-6px; background:#ff6699; padding:2px 5px; border-radius:50%; font-size:12px;">${gameState.inventory[key]}</span>`;
                 div.onmousedown = (e) => startFoodDrag(e, key); div.ontouchstart = (e) => startFoodDrag(e, key);
                 tray.appendChild(div);
             }
         });
-        if (!hasFood) tray.innerHTML = "<div style='padding:10px; color:#fff;'>Empty! Buy food in Shop.</div>";
+        if (!hasFood) tray.innerHTML = "<div style='padding:5px; color:#fff;'>No food! Use the shop.</div>";
     }
     function startFoodDrag(e, key) {
-        e.preventDefault(); 
-        activeDrag = document.createElement('div'); activeDrag.className = 'flying-item';
+        e.preventDefault(); activeDrag = document.createElement('div'); activeDrag.className = 'flying-item';
         activeDrag.style.backgroundImage = `url('${itemsDB[key].img}')`; activeDrag.dataset.key = key;
-        document.body.appendChild(activeDrag);
-        moveFoodDrag(e); 
+        document.body.appendChild(activeDrag); moveFoodDrag(e);
         document.addEventListener('mousemove', moveFoodDrag); document.addEventListener('touchmove', moveFoodDrag, {passive: false});
         document.addEventListener('mouseup', endFoodDrag); document.addEventListener('touchend', endFoodDrag);
     }
-    function moveFoodDrag(e) {
-        if(!activeDrag) return; e.preventDefault(); 
-        activeDrag.style.left = (e.clientX || (e.touches && e.touches[0].clientX)) + 'px';
-        activeDrag.style.top = (e.clientY || (e.touches && e.touches[0].clientY)) + 'px';
-    }
+    function moveFoodDrag(e) { if(!activeDrag) return; e.preventDefault(); activeDrag.style.left = (e.clientX || (e.touches && e.touches[0].clientX)) + 'px'; activeDrag.style.top = (e.clientY || (e.touches && e.touches[0].clientY)) + 'px'; }
     function endFoodDrag(e) {
         if(!activeDrag) return;
         let cx = e.clientX || (e.changedTouches && e.changedTouches[0].clientX); let cy = e.clientY || (e.changedTouches && e.changedTouches[0].clientY);
         let rect = catGroup.getBoundingClientRect();
-        
         if (cx >= rect.left && cx <= rect.right && cy >= rect.top && cy <= rect.bottom) {
             let key = activeDrag.dataset.key;
             if (gameState.inventory[key] > 0) {
                 gameState.inventory[key]--; gameState.hunger = Math.min(100, gameState.hunger + itemsDB[key].hunger);
-                gameState.clean = Math.max(0, gameState.clean - 5); 
-                showReaction(`Eating ${itemsDB[key].name}...`);
-                playAudio('audio-eat'); triggerAnimation('anim-eat'); addInteractionBonus();
-                updateTrayUI(); saveData(); updateMeters();
+                gameState.clean = Math.max(0, gameState.clean - 5); showReaction(`Ate ${itemsDB[key].name}!`);
+                playAudio('audio-eat'); triggerAnimation('anim-eat'); addInteractionBonus(); updateTrayUI(); saveData(); updateMeters();
             }
         }
         activeDrag.remove(); activeDrag = null;
@@ -642,123 +659,95 @@
         document.removeEventListener('mouseup', endFoodDrag); document.removeEventListener('touchend', endFoodDrag);
     }
 
-    // --- ROAMING BEHAVIOR ---
+    // --- INTELLECTUAL ROAMING ENGINE ---
     function startFelineBrain() {
         clearInterval(behaviorInterval);
         behaviorInterval = setInterval(() => {
-            if (gameState.isSleeping || activeDrag || isBathing || gameState.phase === 5 || document.getElementById('food-tray').classList.contains('hidden') === false) return;
-            if (Math.random() < 0.3) {
-                let newX = 20 + Math.random() * 60; let currentX = parseFloat(catGroup.style.left || 50);
-                catGroup.style.transform = `translate(-50%, -50%) scaleX(${newX < currentX ? -1 : 1})`;
+            if (gameState.isSleeping || activeDrag || isBathing || gameState.phase === 5 || !document.getElementById('food-tray').classList.contains('hidden')) return;
+            if (Math.random() < 0.35) {
+                let newX = 20 + Math.random() * 55; let currentX = parseFloat(catGroup.style.left || 50);
                 catGroup.style.left = newX + '%'; triggerAnimation('anim-walk');
             } else if (Math.random() < 0.5) triggerAnimation('anim-groom');
         }, 5000);
     }
 
-    // --- SHOP ---
+    // --- SYSTEM MARKETPLACE ---
     function openShop() {
         if (gameState.isSleeping || gameState.phase === 5) return;
         let container = document.getElementById('shop-items-container'); container.innerHTML = "";
         Object.keys(itemsDB).forEach(key => {
-            let i = itemsDB[key]; let div = document.createElement('div'); div.className = 'draggable-item'; div.style.width="70px"; div.style.height="70px"; div.style.cursor="pointer";
-            div.innerHTML = `<img src="${i.img}" onerror="this.style.display='none'"><div style="position:absolute; bottom:-25px; color:#fff; width:100%; text-align:center;">${i.price}c</div>`;
+            let i = itemsDB[key]; let div = document.createElement('div'); div.className = 'draggable-item'; div.style.width="65px"; div.style.height="65px"; div.style.cursor="pointer";
+            div.innerHTML = `<img src="${i.img}" onerror="this.style.display='none'"><div style="position:absolute; bottom:-22px; color:#ffeaa7; width:100%; text-align:center; font-size:18px;">${i.price}c</div>`;
             div.onclick = () => {
                 if (gameState.coins >= i.price) {
                     gameState.coins -= i.price; gameState.inventory[key]++;
                     playCoinSound(); saveData(); updateMeters(); updateTrayUI();
-                } else showReaction("Not enough coins!");
+                } else showReaction("Need more coins!");
             };
             container.appendChild(div);
         });
         document.getElementById('shop-modal').style.display = 'flex';
     }
 
-    // --- ARCADE HUB & MINIGAMES ---
+    // --- ARCADE STORAGE ENGINE & RUNTIME ---
     let currentGame = ""; let mgTimer, mgInterval; let mgTime = 0, mgScore = 0;
-    
-    function openMiniGameHub() {
-        if (gameState.isSleeping || gameState.phase === 5) return;
-        document.getElementById('hs-catch').innerText = gameState.highScores.catch;
-        document.getElementById('hs-tower').innerText = gameState.highScores.tower;
-        document.getElementById('hs-puzzle').innerText = gameState.highScores.puzzle === 999 ? "--" : gameState.highScores.puzzle;
-        document.getElementById('minigame-hub').style.display = 'flex';
-    }
-    
+    function openMiniGameHub() { if (gameState.isSleeping || gameState.phase === 5) return; document.getElementById('minigame-hub').style.display = 'flex'; }
     function launchGame(id) {
         document.getElementById('minigame-hub').style.display = 'none'; currentGame = id;
         document.getElementById('mg-title').innerText = id === 'catch' ? 'CATCH MOUSE' : id === 'tower' ? 'BUILD TOWER' : '5x5 CAT PUZZLE';
         document.getElementById('active-minigame-modal').style.display = 'flex';
         document.getElementById('mg-start-btn').style.display = 'block'; document.getElementById('minigame-area').innerHTML = "";
-        document.getElementById('mg-time').innerText = "0"; document.getElementById('mg-score').innerText = "0";
     }
-
     function startCurrentGame() {
         document.getElementById('mg-start-btn').style.display = 'none'; document.getElementById('minigame-area').innerHTML = "";
         mgScore = 0; clearInterval(mgTimer); clearTimeout(mgInterval);
-        
         if (currentGame === 'catch') {
             mgTime = 15; document.getElementById('mg-time').innerText = mgTime + "s";
             mgTimer = setInterval(() => { mgTime--; document.getElementById('mg-time').innerText = mgTime + "s"; if (mgTime <= 0) finishMiniGame(); }, 1000);
             spawnTarget();
         } else if (currentGame === 'tower') {
-            mgTime = 0; tBlocks = []; tWidth = 100; tSpeed = 3; document.getElementById('mg-time').innerText = "Stacking...";
+            tBlocks = []; tWidth = 100; tSpeed = 3.5; document.getElementById('mg-time').innerText = "Stacking...";
             document.getElementById('minigame-area').onclick = placeBlock; spawnBaseBlock(); spawnMovingBlock();
             mgTimer = setInterval(moveBlock, 20);
         } else if (currentGame === 'puzzle') {
-            mgTime = 0; document.getElementById('mg-time').innerText = mgTime + "s"; document.getElementById('mg-score').innerText = "Time Base";
+            mgTime = 0; document.getElementById('mg-time').innerText = mgTime + "s";
             mgTimer = setInterval(() => { mgTime++; document.getElementById('mg-time').innerText = mgTime + "s"; }, 1000);
             initJigsawPuzzle();
         }
     }
-
     function finishMiniGame(wonPuzzle = false) {
         clearInterval(mgTimer); clearTimeout(mgInterval); document.getElementById('minigame-area').onclick = null;
         let reward = mgScore;
         if (currentGame === 'puzzle') {
-            reward = wonPuzzle ? Math.max(10, 60 - mgTime) : 0;
+            reward = wonPuzzle ? Math.max(10, 65 - mgTime) : 0;
             if(wonPuzzle && mgTime < gameState.highScores.puzzle) gameState.highScores.puzzle = mgTime;
-        } else {
-            if(mgScore > gameState.highScores[currentGame]) gameState.highScores[currentGame] = mgScore;
-        }
-
-        document.getElementById('minigame-area').innerHTML = `<div style="color:#a8e6cf; margin-top:80px; font-size:26px;">Game Over!<br>Earned: ${reward} Coins</div>`;
+        } else { if(mgScore > gameState.highScores[currentGame]) gameState.highScores[currentGame] = mgScore; }
+        document.getElementById('minigame-area').innerHTML = `<div style="color:#a8e6cf; margin-top:70px; font-size:26px;">Game Over!<br>Earned: ${reward} Coins</div>`;
         document.getElementById('mg-start-btn').innerText = "PLAY AGAIN"; document.getElementById('mg-start-btn').style.display = 'block';
-        gameState.coins += reward; gameState.energy = Math.max(0, gameState.energy - 10);
-        saveData(); updateMeters();
+        gameState.coins += reward; gameState.energy = Math.max(0, gameState.energy - 8); saveData(); updateMeters();
     }
-
-    function closeActiveGame() {
-        clearInterval(mgTimer); clearTimeout(mgInterval); document.getElementById('active-minigame-modal').style.display = 'none';
-        document.getElementById('hs-catch').innerText = gameState.highScores.catch;
-        document.getElementById('hs-tower').innerText = gameState.highScores.tower;
-        document.getElementById('hs-puzzle').innerText = gameState.highScores.puzzle === 999 ? "--" : gameState.highScores.puzzle;
-        document.getElementById('minigame-hub').style.display = 'flex';
-    }
+    function closeActiveGame() { clearInterval(mgTimer); clearTimeout(mgInterval); document.getElementById('active-minigame-modal').style.display = 'none'; openMiniGameHub(); }
     function closeModal(id) { document.getElementById(id).style.display = 'none'; }
 
     // Catch Mouse
     function spawnTarget() {
-        if (mgTime <= 0) return;
-        let area = document.getElementById('minigame-area'); area.innerHTML = "";
+        if (mgTime <= 0) return; let area = document.getElementById('minigame-area'); area.innerHTML = "";
         let t = document.createElement('div'); t.className = 'target-obj'; t.innerText = "🐭";
-        t.style.left = Math.random() * (area.clientWidth - 40) + 'px'; t.style.top = Math.random() * (area.clientHeight - 40) + 'px';
+        t.style.left = Math.random() * (area.clientWidth - 45) + 'px'; t.style.top = Math.random() * (area.clientHeight - 45) + 'px';
         t.onmousedown = (e) => { e.preventDefault(); mgScore+=2; document.getElementById('mg-score').innerText = mgScore; clearTimeout(mgInterval); spawnTarget(); };
-        t.ontouchstart = t.onmousedown; area.appendChild(t);
-        mgInterval = setTimeout(spawnTarget, 700 + Math.random() * 400);
+        t.ontouchstart = t.onmousedown; area.appendChild(t); mgInterval = setTimeout(spawnTarget, 750);
     }
 
-    // Tower Logic
-    let tBlocks = []; let tCurrent; let tDir = 1; let tWidth = 100; let tSpeed = 5;
+    // Tower Stacking
+    let tBlocks = []; let tCurrent; let tDir = 1; let tWidth = 100; let tSpeed = 4;
     function spawnBaseBlock() {
         let area = document.getElementById('minigame-area'); let b = document.createElement('div'); b.className = 'tower-block';
-        b.style.width = '100px'; b.style.bottom = '0px'; b.style.left = (area.clientWidth/2 - 50) + 'px';
-        area.appendChild(b); tBlocks.push({left: area.clientWidth/2 - 50, width: 100});
+        b.style.width = '100px'; b.style.bottom = '0px'; b.style.left = (area.clientWidth/2 - 50) + 'px'; area.appendChild(b); tBlocks.push({left: area.clientWidth/2 - 50, width: 100});
     }
     function spawnMovingBlock() {
         let area = document.getElementById('minigame-area'); tCurrent = document.createElement('div'); tCurrent.className = 'tower-block';
-        tCurrent.style.width = tWidth + 'px'; tCurrent.style.bottom = (tBlocks.length * 25) + 'px';
-        tCurrent.style.left = '0px'; tDir = 1; area.appendChild(tCurrent);
-        if(tBlocks.length > 6) area.style.transform = `translateY(${ (tBlocks.length - 6) * 25 }px)`;
+        tCurrent.style.width = tWidth + 'px'; tCurrent.style.bottom = (tBlocks.length * 24) + 'px'; tCurrent.style.left = '0px'; tDir = 1; area.appendChild(tCurrent);
+        if(tBlocks.length > 5) area.style.transform = `translateY(${ (tBlocks.length - 5) * 24 }px)`;
     }
     function moveBlock() {
         let area = document.getElementById('minigame-area'); let currentLeft = parseFloat(tCurrent.style.left);
@@ -770,23 +759,20 @@
         let diff = currentLeft - last.left; let overlap = tWidth - Math.abs(diff);
         if (overlap <= 0) { finishMiniGame(); return; } 
         tWidth = overlap; let newLeft = diff > 0 ? currentLeft : last.left;
-        tCurrent.style.width = tWidth + 'px'; tCurrent.style.left = newLeft + 'px';
-        tBlocks.push({left: newLeft, width: tWidth}); mgScore += 3; document.getElementById('mg-score').innerText = mgScore;
-        tSpeed += 0.5; spawnMovingBlock();
+        tCurrent.style.width = tWidth + 'px'; tCurrent.style.left = newLeft + 'px'; tBlocks.push({left: newLeft, width: tWidth});
+        mgScore += 4; document.getElementById('mg-score').innerText = mgScore; tSpeed += 0.4; spawnMovingBlock();
     }
 
-    // 5x5 Jigsaw Puzzle
+    // Puzzle Mode Fixes
     let pPieces = []; let pSelected = null;
     function initJigsawPuzzle() {
         let area = document.getElementById('minigame-area'); area.innerHTML = '<div id="puzzle-grid"></div>';
         let grid = document.getElementById('puzzle-grid');
-        let order = Array.from({length: 25}, (_, i) => i); order.sort(() => Math.random() - 0.5); 
-        pPieces = [];
+        let order = Array.from({length: 25}, (_, i) => i); order.sort(() => Math.random() - 0.5); pPieces = [];
         for(let i=0; i<25; i++) {
             let div = document.createElement('div'); div.className = 'puzzle-piece'; div.dataset.correct = order[i];
             let row = Math.floor(order[i] / 5); let col = order[i] % 5;
-            div.style.backgroundPosition = `-${col * 40}px -${row * 40}px`;
-            div.onclick = () => selectPuzzlePiece(div); grid.appendChild(div); pPieces.push(div);
+            div.style.backgroundPosition = `-${col * 38}px -${row * 38}px`; div.onclick = () => selectPuzzlePiece(div); grid.appendChild(div); pPieces.push(div);
         }
     }
     function selectPuzzlePiece(div) {
@@ -794,22 +780,19 @@
         else {
             let tempC = pSelected.dataset.correct; let tempBg = pSelected.style.backgroundPosition;
             pSelected.dataset.correct = div.dataset.correct; pSelected.style.backgroundPosition = div.style.backgroundPosition;
-            div.dataset.correct = tempC; div.style.backgroundPosition = tempBg;
-            pSelected.classList.remove('selected'); pSelected = null; checkPuzzleWin();
+            div.dataset.correct = tempC; div.style.backgroundPosition = tempBg; pSelected.classList.remove('selected'); pSelected = null; checkPuzzleWin();
         }
     }
     function checkPuzzleWin() {
-        let won = true;
-        for(let i=0; i<25; i++) { if (parseInt(pPieces[i].dataset.correct) !== i) { won = false; break; } }
+        let won = true; for(let i=0; i<25; i++) { if (parseInt(pPieces[i].dataset.correct) !== i) { won = false; break; } }
         if (won) {
             clearInterval(mgTimer);
-            // PUZZLE WIN SCREEN
-            document.getElementById('minigame-area').innerHTML = `<div style="color:#ffb199; margin-top:80px; font-size:36px; text-shadow:2px 2px #000; animation:bounce 0.5s infinite alternate;">PUZZLE SOLVED!</div>`;
-            setTimeout(() => finishMiniGame(true), 2000); // Wait 2 seconds then show stats
+            document.getElementById('minigame-area').innerHTML = `<div style="color:#ff6699; margin-top:75px; font-size:32px; font-weight:bold;">PUZZLE SOLVED!</div>`;
+            setTimeout(() => finishMiniGame(true), 1800);
         }
     }
 
-    // --- LIFE EVENTS & EMOTIONAL DEATH ---
+    // --- DEVELOPMENT LIFECYCLE & KITTEN MATURATION SYSTEM ---
     function checkLifeEvents() {
         if (gameState.phase === 5) return;
         
@@ -818,72 +801,59 @@
         } else if (gameState.age >= 14 && gameState.phase < 4) {
             document.getElementById('kitten-modal').style.display = 'flex';
         } else if (gameState.age >= 9 && gameState.phase < 3) {
-            gameState.phase = 3; showReaction(`Married Akira! 💍`);
-            setIdleState();
-        } else if (gameState.age >= 5 && gameState.phase < 2) {
-            gameState.phase = 2; showReaction(`Met Akira! 🧡`);
-            setIdleState();
+            gameState.phase = 3; showReaction(`Married Akira! 💍`); setIdleState();
+        } else if (gameState.age >= 5 && gameState.phase < 2) { // Akira Appears Next to Cat
+            gameState.phase = 2; showReaction(`Akira Joined the Room! 🧡`); setIdleState();
         }
     }
 
     function createRain() {
         let layer = document.getElementById('weather-layer'); layer.style.display = 'block';
-        for(let i=0; i<50; i++) {
-            let drop = document.createElement('div'); drop.className = 'rain-drop';
-            drop.style.left = Math.random() * 100 + 'vw';
-            drop.style.animationDuration = (0.5 + Math.random() * 0.5) + 's';
-            drop.style.animationDelay = Math.random() * 2 + 's';
-            layer.appendChild(drop);
+        for(let i=0; i<45; i++) {
+            let d = document.createElement('div'); d.className = 'rain-drop'; d.style.left = Math.random() * 100 + 'vw';
+            d.style.animationDuration = (0.6 + Math.random() * 0.4) + 's'; d.style.animationDelay = Math.random() * 1.5 + 's';
+            layer.appendChild(d);
         }
     }
 
     function triggerDeathSequence() {
         gameState.phase = 5; clearInterval(behaviorInterval);
-        document.getElementById('controls').style.display = 'none';
-        document.getElementById('hud-top').style.display = 'none';
-        document.getElementById('reaction-text').style.display = 'none';
-        document.getElementById('food-tray').style.display = 'none';
-        
-        // Emotional visual changes
-        document.getElementById('bg-layer').style.filter = "grayscale(60%) brightness(0.3)";
+        document.getElementById('controls').style.display = 'none'; document.getElementById('hud-top').style.display = 'none';
+        document.getElementById('reaction-text').style.display = 'none'; document.getElementById('food-tray').style.display = 'none';
+        document.getElementById('bg-layer').style.filter = "grayscale(70%) brightness(0.25)";
         createRain(); playSadTune();
-        
-        // Fade out sprites
-        allSprites.forEach(sprite => { sprite.style.opacity = '0'; });
-
-        // Build Tribute text
-        let tribute = `Across ${gameState.age} beautiful years, ${gameState.name} lived a full and loving life.<br><br>`;
-        tribute += `Coins Earned: ${gameState.coins}<br>`;
-        tribute += `Family: Akira and 3 beautiful Kittens<br>`;
-        document.getElementById('tribute-text').innerHTML = tribute;
-        
-        setTimeout(() => { document.getElementById('death-modal').style.display = 'flex'; }, 6000);
-        localStorage.removeItem('ragdoll_save_v10'); // Clear save so they must restart
+        allSprites.forEach(sprite => { if(sprite) sprite.style.opacity = '0'; });
+        let txt = `Across ${gameState.age} legendary years, ${gameState.name} lived a gorgeous, full life.<br><br>Final Gold Reserve: ${gameState.coins}c<br>Legacy: Raised a beautiful family with Akira.<br>`;
+        document.getElementById('tribute-text').innerHTML = txt;
+        setTimeout(() => { document.getElementById('death-modal').style.display = 'flex'; }, 5500);
+        localStorage.removeItem('ragdoll_save_v11');
     }
 
     function saveKittens() {
         gameState.phase = 4; document.getElementById('kitten-modal').style.display = 'none';
-        showReaction("Welcome to the family!"); saveData(); setIdleState(); updateMeters();
+        showReaction("Kittens have arrived!"); saveData(); setIdleState(); updateMeters();
     }
 
     function setIdleState() {
         if (gameState.phase === 5) return;
-        if (gameState.phase >= 2) catSprite.src = 'akira.png';
-        else catSprite.src = 'cat.png';
         
+        // Render both side-by-side
+        if (gameState.phase >= 2) { akiraWrap.classList.remove('hidden'); } else { akiraWrap.classList.add('hidden'); }
         if (gameState.phase === 4) {
-            allSprites[1].classList.remove('hidden'); allSprites[2].classList.remove('hidden'); allSprites[3].classList.remove('hidden');
+            document.getElementById('kit1-sprite').classList.remove('hidden');
+            document.getElementById('kit2-sprite').classList.remove('hidden');
+            document.getElementById('kit3-sprite').classList.remove('hidden');
         }
+        
         let anim = gameState.isSleeping ? 'anim-sleep' : 'anim-breathe';
         allSprites.forEach(sprite => {
-            if (!sprite.classList.contains('hidden')) sprite.className = `${sprite.id === 'cat-sprite' ? 'main-sprite' : 'kitten-sprite'} ${anim}`;
+            if (sprite && !sprite.classList.contains('hidden') && !sprite.parentNode.classList.contains('hidden')) {
+                sprite.className = (sprite.id === 'cat-sprite' || sprite.id === 'akira-sprite') ? `main-sprite ${anim}` : `kitten-sprite ${anim}`;
+            }
         });
     }
 
-    function hardReset() {
-        localStorage.removeItem('ragdoll_save_v10'); location.reload();
-    }
-
+    function hardReset() { localStorage.removeItem('ragdoll_save_v11'); location.reload(); }
     window.onload = init;
 </script>
-
+<!-- ======================= END OF PART 2 ======================= -->
